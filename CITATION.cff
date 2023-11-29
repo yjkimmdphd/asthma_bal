@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Young Jin Kim - Bunyavanich lab
+    orcid: https://orcid.org/0000-0003-1876-3359
+title: asthma_bal
+version: 0.1.0
+date-released: 2023-20-11/29/23

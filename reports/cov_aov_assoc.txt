@@ -1,0 +1,61 @@
+[[1]]
+            Df Sum Sq Mean Sq F value Pr(>F)
+Batch        3   74.2   24.74   1.092  0.363
+Residuals   41  928.6   22.65               
+
+[[2]]
+            Df Sum Sq Mean Sq F value Pr(>F)
+Batch        3   51.5   17.15   0.909  0.445
+Residuals   41  773.6   18.87               
+
+[[3]]
+            Df Sum Sq Mean Sq F value Pr(>F)  
+Batch        3  28.16   9.387   3.079 0.0385 *
+Residuals   39 118.89   3.049                 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+2 observations deleted due to missingness
+
+[[4]]
+            Df Sum Sq Mean Sq F value Pr(>F)
+Batch        3   38.1  12.700   1.925  0.141
+Residuals   39  257.3   6.597               
+2 observations deleted due to missingness
+
+[[5]]
+            Df Sum Sq Mean Sq F value Pr(>F)  
+Batch        3   7.58   2.527   2.523  0.071 .
+Residuals   41  41.08   1.002                 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[6]]
+            Df Sum Sq Mean Sq F value Pr(>F)
+Batch        3   4.81   1.604   0.332  0.802
+Residuals   36 173.73   4.826               
+5 observations deleted due to missingness
+
+[[7]]
+            Df Sum Sq Mean Sq F value Pr(>F)
+Batch        3  18.47   6.156   0.829  0.487
+Residuals   36 267.27   7.424               
+5 observations deleted due to missingness
+
+[[8]]
+            Df Sum Sq Mean Sq F value Pr(>F)
+Batch        3 0.0959 0.03196   0.499  0.686
+Residuals   36 2.3077 0.06410               
+5 observations deleted due to missingness
+
+[[9]]
+            Df Sum Sq Mean Sq F value Pr(>F)
+Batch        3  0.115 0.03825   0.387  0.763
+Residuals   36  3.562 0.09895               
+5 observations deleted due to missingness
+
+[[10]]
+            Df Sum Sq  Mean Sq F value Pr(>F)
+Batch        3 0.0294 0.009794   0.449  0.719
+Residuals   36 0.7847 0.021798               
+5 observations deleted due to missingness
+

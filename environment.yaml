@@ -1,0 +1,8 @@
+name: asthma_bal 
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3
+  - snakemake
