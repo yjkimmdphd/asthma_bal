@@ -8,6 +8,7 @@ Project Organization
 
 ├── CITATION.cff       <- Contains metadata on how the project might eventually be published. 
 ├── LICENSE
+├── DEG_raw_output     <- contains raw DEG results that are excluded from git respository
 ├── Makefile           <- Makefile with commands like `make data` or `make train`
 ├── README.md          <- The top-level README for developers using this project.
 ├── config             <- Configuration options for the analysis. 
@@ -33,6 +34,8 @@ Project Organization
 │
 ├── resources          <- Place for data. By default excluded from the git repository. 
 │   ├── external       <- Data from third party sources.
+│   ├── processed_data <- Processed data used for further analysis.
+│   ├── working_data   <- copy of raw data used for work. 
 │   └── raw_data       <- The original, immutable data dump.
 │
 ├── results            <- Final output of the data processing pipeline. By default excluded from the git repository.
