@@ -1,0 +1,4 @@
+## asthma-phenotype-Rnaseq-2023-12-01.csv used as phenotype data for RNAseq analysis from 12/1/23 and forward
+## asthma-phenotype-Rnaseq.csv used as phenotype data for RNASeq analylsis prior to Nov 2023. 
+## The difference between them is that the BAL_neut_ct_log and BAL_WBC_ct_log had pseudo count added 0.001 vs 0.00001 to account for 0 neut or WBC
+## all other log transformation of cell counts had pseudocount of 0.001 

@@ -103,39 +103,29 @@ rownames(bcounts)<-genes
 
 # Filter bcounts (readcount table for bronchial sample
 ## filter method 1:
-### Remove genes with ≤ 2 counts per million in >10% of samples (>4 samples) were removed to reduce noise on low counts and low abundance genes (PMID: 37730635)
-lowReadFilter1<-function(readcounts, cutoff, n_sample){
-  x<-readcounts
-  cpm0 <-cpm(readcounts)
-  drop.genes<-which(rowSums(cpm0<=cutoff)>n_sample)
-  x<-x[-drop.genes,]
-  print(paste("# of dropped genes:",length(drop.genes)))
-  return(x)
-}
-bc1<-lowReadFilter1(bcounts, 2, 4)
+### Remove genes with ≤ 5 counts per million in >10% of samples (>4 samples) were removed to reduce noise on low counts and low abundance genes (PMID: 37730635)
+cpm0 <-cpm(bcounts)
+drop.genes<-which(rowSums(cpm0<=2)>4)
+bcounts<-bcounts[-drop.genes,]
 
-## filter method 2: use TMM normalized lcpm as a cutoff point
-### x will be the TMM normalized count
-lowReadFilter2<-function(readcounts, n_sample){
-  x<-readcounts
-  L<-mean(colSums(x))*1e-6 # mean library size
-  M<-median(colSums(x))*1e-6 # median library size
-  lcpm.cutoff <- log2(10/M + 2/L) # lcpm cutoff for filtering genes with very low counts
+## filter method 2:
+### 
+cpm0 <-cpm(bcounts)
+lcpm0<-cpm(bcounts,log=TRUE)
+L<-mean(colSums(x))*1e-6 # mean library size
+M<-median(colSums(x))*1e-6 # median library size
 
-  ### normalize counts with TMM
-  norm.factor<-calcNormFactors(x, method = "TMM")
-  sample.size<-length(colnames(x))
-  for(i in 1:sample.size){
-    x[,i]<-x[,i]/norm.factor[i]
-  }
-  ### calculate lcpm based on TMM normalized counts 
-  lcpm.x<-cpm(x,log=TRUE)
-  drop.genes<-which(rowSums(lcpm.x<lcpm.cutoff)>n_sample) # which genes have normalized lcpm less than the cutoff in >10% of the samples
-  x<-x[-drop.genes,] # readcounts retained 
-  print(paste("# of dropped genes:",length(drop.genes))) # number of dropped genes
-  return(x)
+# setting a lcpm cutoff for filtering genes with very low counts
+lcpm.cutoff <- log2(10/M + 2/L)
+dropCutoff<-function(cutoff){
+  which(apply(lcpm.x3, 1, max) < cutoff)
 }
-bc2<-lowReadFilter2(bcounts,4)
+drop <-dropCutoff(lcpm.cutoff) 
+drop2<-dropCutoff(0)
+dim(x3[-drop,])
+dim(x3[-drop2,])
+
+# since DEseq2 will be used for analysis, no need for lcpm and TMM normalization. but if using edgeR and voom limma, need those steps. 
 
 #######################################
 # run the DEG for continuous predictors
