@@ -46,7 +46,7 @@ source.cell<-c("BAL_Eos_ct",
                "serum_Neut",
                "serum_Neut_perc",
                "serum_WBC")
-
+deg.design<-paste("~",source.cell.log,"+ Batch")
 # samples to exclude in certain analysis due to absent cell count values
 # used for filtering phenotype df and readcount matrix in DEseq
 exclude.bronch<-read.csv("./resources/processed_data/bronch_samples_excluded.csv")
@@ -159,6 +159,8 @@ degRes<-function(dds,resultname){
   res <- res[order(res$padj),]
   return(res)
 }
+
+bcounts<-bc1 # bcounts will be using readcount method 1: cpm <=2 in 10% of samples filtered
 
 # DEG with design "~  BAL_Eos_ct_log  + Batch"
 # no excluded samples
