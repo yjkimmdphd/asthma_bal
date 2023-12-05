@@ -229,16 +229,14 @@ res10.sig<-res10[which(res10$padj<=0.05),]
 
 
 ## writing the results *** in the future
-# for(i in c(cont.var,zero.var)){
-#  a<-get(paste0("res",i))
-#  write.csv(a[[1]],row.names=TRUE,file.path(getwd(),"output",paste0("DEG_","res",i,"_",res.table[i,"fluid_cell"],"_",Sys.Date(),".csv")))
-#  res.table[i,"output"]<-paste0("DEG_","res",i,"_",res.table[i,"fluid_cell"],"_",Sys.Date(),".csv")
-# }
+for(i in 1:10){
+  a<-get(paste0("res",i,".sig"))
+  write.csv(a,row.names=TRUE,file.path("./reports/deg/",paste0("deg_","res",i,"_","design_",Sys.Date(),".csv"))) }
 
 
 
-for(i in cont.var){
-  print(df.deseq2input[i,4])
-  assign(paste0("res",i),deseq2DEG(df.deseq2input[i,1],df.deseq2input[i,2],df.deseq2input[i,3],df.deseq2input[i,4]))
-}
+#for(i in cont.var){
+#  print(df.deseq2input[i,4])
+#  assign(paste0("res",i),deseq2DEG(df.deseq2input[i,1],df.deseq2input[i,2],df.deseq2input[i,3],df.deseq2input[i,4]))
+#}
 
