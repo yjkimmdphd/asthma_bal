@@ -36,6 +36,9 @@ source.cell<-c("BAL_Eos_ct",
                "serum_Neut",
                "serum_Neut_perc",
                "serum_WBC")
+
+deg.design<-paste("~",source.cell.log,"+ Batch")
+
 # following samples have no value in BAL-neut, serum-eos, or serum-Neut
 bphen.na<-bphen[is.na(bphen)%>%rowSums()>0,]
 
