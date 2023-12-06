@@ -121,7 +121,7 @@ lowReadFilter2<-function(readcounts, n_sample){
   L<-mean(colSums(x))*1e-6 # mean library size
   M<-median(colSums(x))*1e-6 # median library size
   lcpm.cutoff <- log2(10/M + 2/L) # lcpm cutoff for filtering genes with very low counts
-
+  
   ### normalize counts with TMM
   norm.factor<-calcNormFactors(x, method = "TMM")
   sample.size<-length(colnames(x))
@@ -146,7 +146,7 @@ bc2<-lowReadFilter2(bcounts,4)
 # design = statistical design eq
 
 deseq2DEG<-function(countdata,coldata,design,resultname){
-  print(paste("design",resultname, collapse = ":"))
+  print(paste("design",resultname, sep = ": "))
   dds<-DESeqDataSetFromMatrix(countData = countdata,colData=coldata, design=as.formula(design))
   dds<-DESeq(dds)
   print("resultnames")
@@ -160,7 +160,15 @@ degRes<-function(dds,resultname){
   return(res)
 }
 
-bcounts<-bc1 # bcounts will be using readcount method 1: cpm <=2 in 10% of samples filtered
+bcFiltered<-function(bc,bcf){
+  b<-bc
+  gn<-rownames(bc)
+  gnf<-rownames(bcf)
+  c<-b[gn%in%gnf,]
+  return(c)
+}
+
+bcounts<-bcFiltered(bcounts,bc2) # bcounts will be using readcount method 2: use TMM normalized lcpm as a cutoff point
 
 # DEG with design "~  BAL_Eos_ct_log  + Batch"
 # no excluded samples
@@ -229,16 +237,58 @@ res10.sig<-res10[which(res10$padj<=0.05),]
 
 
 ## writing the results *** in the future
-for(i in 1:10){
-  a<-get(paste0("res",i,".sig"))
-  write.csv(a,row.names=TRUE,file.path("./reports/deg/",paste0("deg_","res",i,"_","design_",Sys.Date(),".csv"))) }
-
-# work in progress: summarize the data input 
-degresTable<-function(){
-  samples<-colnames(bcounts)
-  
+deg.folder<-paste("deg",Sys.Date(),sep="_")
+deg.dir<-file.path("./reports",deg.folder)
+dir.create(deg.dir)
+if(dir.exists(deg.dir)){
+  for(i in 1:10){
+    a<-get(paste0("res",i,".sig"))
+    write.csv(a,row.names=TRUE,file.path(deg.dir,paste0("deg_","res",i,"_","design_",Sys.Date(),".csv"))) }
 }
 
+# summarize the data input 
+degresTable<-function(){
+  esc<-filter(exclude.bronch,source_cell=="serum_Eos")%>%select(SampleID)%>%unlist%>%as.character # samples to exclude due to absent serum cell info 
+  k<-!(bphen$SampleID%in%esc) 
+  filter_method<-"TMM normalized LCPM cutoff"
+  n_filtered_genes<-paste("analyzed n_genes:", nrow(bcounts),",","filtered n_genes:",nrow(counts)-nrow(bcounts))
+  samples<-c(colnames(bcounts)%>%paste(collapse = ","),
+             colnames(bcounts)%>%paste(collapse = ","),
+             colnames(select(bcounts,-"B332"))%>%paste(collapse = ","),
+             colnames(select(bcounts,-"B332"))%>%paste(collapse = ","),
+             colnames(bcounts)%>%paste(collapse = ","),
+             colnames(bcounts[,k])%>%paste(collapse = ","),
+             colnames(bcounts[,k])%>%paste(collapse = ","),
+             colnames(bcounts[,k])%>%paste(collapse = ","),
+             colnames(bcounts[,k])%>%paste(collapse = ","),
+             colnames(bcounts[,k])%>%paste(collapse = ","))
+  dds<-paste("dds",1:10,sep="")
+  results<-paste("res",1:10,sep="")
+  design<-deg.design
+  source_cell<-source.cell
+  df<-data.frame(dds=dds,results=results,design=design,source_cell=source_cell,samples=samples,filter_method=filter_method,n_filtered_genes=n_filtered_genes)
+  return(df)
+}
+  
+if(dir.exists(deg.dir)){
+  a<-degresTable()
+  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg_analysis_input_",Sys.Date(),".csv",sep="")))
+}
+
+# summary table of the DEG analysis
+resSummary<-function(){
+  reslist<-paste("res",1:10,".sig",sep="")
+  n_sig_deg<-sapply(reslist,function(a){nrow(get(a))})
+  design<-deg.design
+  source_cell<-source.cell
+  df<-data.frame(results=reslist,n_sig_deg,design=design,source_cell=source_cell,row.names = NULL)
+  return(df)
+}
+
+if(dir.exists(deg.dir)){
+  a<-resSummary()
+  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds_res_summary_",Sys.Date(),".csv",sep="")))
+}
 
 #for(i in cont.var){
 #  print(df.deseq2input[i,4])
