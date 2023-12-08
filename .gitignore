@@ -93,5 +93,5 @@ workspace/
 resources/
 results/
 sandbox/
-DEG_raw_output/
+DEG_results/
 .Rproj.user
