@@ -93,5 +93,6 @@ workspace/
 resources/
 results/
 sandbox/
-DEG_results/
+reports/local_only
+DEG_results_local/
 .Rproj.user
