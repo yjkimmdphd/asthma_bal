@@ -52,10 +52,10 @@ deg.design<-paste("~",source.cell.log,"+ Batch")
 #######################################################################
 nID<-paste0("N",phenotype$ID) # N*** indicates nasal sample ID, sequence data is not available for all as of 2023-10-04
 bID<-paste0("B",phenotype$ID) # B*** indicates bronchial sample ID, sequence data is not available for all as of 2023-10-04
-nexist<-counts.ID%in%nID # find which subjects s/p nasal and had bronchial sample RNAseq completed. Nasal samples in batch 1-4 only sequenced to ID 337
-bexist<-counts.ID%in%bID # find which subjects s/p BAL and had bronchial sample RNAseq completed 
-nsample<-counts.ID[nexist] # nasal sample ID in the readcount matrix (batch 1-4) that has BAL phenotype data
-bsample<-counts.ID[bexist] # bronchial sample ID in the readcount matrix (batch 1-4) that has BAL phenotype data
+nexist<-nID%in%counts.ID # find which subjects s/p nasal and had bronchial sample RNAseq completed. Nasal samples in batch 1-4 only sequenced to ID 337
+bexist<-bID%in%counts.ID # find which subjects s/p BAL and had bronchial sample RNAseq completed 
+nsample<-nID[nexist] # nasal sample ID in the readcount matrix (batch 1-4) that has BAL phenotype data
+bsample<-bID[bexist] # bronchial sample ID in the readcount matrix (batch 1-4) that has BAL phenotype data
 
 nphen<-phenotype[phenotype$ID%in%substring(nsample,2),] # phenotype table with nsample
 bphen<-phenotype[phenotype$ID%in%substring(bsample,2),] # phenotype table with bsample
@@ -84,6 +84,10 @@ bphen<-join_phenotype_batch_info(bphen,batch.info)
 nphen<-mutate_at(nphen,vars(all_of(source.cell.log)),scale) # scales and mutates all log-transformed cell counts 
 bphen<-mutate_at(bphen,vars(all_of(source.cell.log)),scale) # scales and mutates all log-transformed cell counts 
 
+# decide which analysis to perform, then set the phenotype data as phen
+# will perform rnaseq on nasal samples so 'nphen' should be 'phen'
+phen<-nphen
+
 # make a list in which each element is a numeric vector of row numbers corresponding to rows of interests in phenotype data matching the following condition: 
 ## nasal RNAseq samples with cell counts > 0
 source.cell.pos<-sapply(nphen[,source.cell],function(p){a<-p; b<-which(a>0); return(b)})
@@ -102,22 +106,22 @@ subset_phenotype<-function(phenotype_data, source_cell_list, source_cell, sample
 }
 
 ##df with bal eos>0
-bal.pos.e.c<-subset_phenotype(nphen,source.cell.pos,"BAL_eos_ct","SampleID","BAL_eos_ct_log", "Batch")
-bal.pos.e.p<-subset_phenotype(nphen,source.cell.pos,"BAL_eos_p","SampleID","BAL_eos_p_log", "Batch")
+bal.pos.e.c<-subset_phenotype(phen,source.cell.pos,"BAL_eos_ct","SampleID","BAL_eos_ct_log", "Batch")
+bal.pos.e.p<-subset_phenotype(phen,source.cell.pos,"BAL_eos_p","SampleID","BAL_eos_p_log", "Batch")
 ##df with bal neut>0
-bal.pos.n.c<-subset_phenotype(nphen,source.cell.pos,"BAL_neut_ct","SampleID","BAL_neut_ct_log","Batch")
-bal.pos.n.p<-subset_phenotype(nphen,source.cell.pos,"BAL_neut_p","SampleID","BAL_neut_p_log","Batch")
+bal.pos.n.c<-subset_phenotype(phen,source.cell.pos,"BAL_neut_ct","SampleID","BAL_neut_ct_log","Batch")
+bal.pos.n.p<-subset_phenotype(phen,source.cell.pos,"BAL_neut_p","SampleID","BAL_neut_p_log","Batch")
 ##df with bal WBC>0
-bal.pos.w.c<-subset_phenotype(nphen,source.cell.pos,"BAL_wbc","SampleID","BAL_wbc_log","Batch")
+bal.pos.w.c<-subset_phenotype(phen,source.cell.pos,"BAL_wbc","SampleID","BAL_wbc_log","Batch")
 
 ##df with serum_Eos>0
-ser.pos.e.c<-subset_phenotype(nphen,source.cell.pos,"blood_eos","SampleID","blood_eos_log", "Batch")
-ser.pos.e.p<-subset_phenotype(nphen,source.cell.pos,"blood_eos_p","SampleID","blood_eos_p_log","Batch")
+ser.pos.e.c<-subset_phenotype(phen,source.cell.pos,"blood_eos","SampleID","blood_eos_log", "Batch")
+ser.pos.e.p<-subset_phenotype(phen,source.cell.pos,"blood_eos_p","SampleID","blood_eos_p_log","Batch")
 ##df with serum_Neut>0
-ser.pos.n.c<-subset_phenotype(nphen,source.cell.pos,"blood_neut","SampleID","blood_neut_log","Batch")
-ser.pos.n.p<-subset_phenotype(nphen,source.cell.pos,"blood_neut_p","SampleID","blood_neut_p_log","Batch")
+ser.pos.n.c<-subset_phenotype(phen,source.cell.pos,"blood_neut","SampleID","blood_neut_log","Batch")
+ser.pos.n.p<-subset_phenotype(phen,source.cell.pos,"blood_neut_p","SampleID","blood_neut_p_log","Batch")
 ##df with serum WBC>0
-ser.pos.w.c<-subset_phenotype(nphen,source.cell.pos,"blood_wbc","SampleID","blood_wbc_log","Batch")
+ser.pos.w.c<-subset_phenotype(phen,source.cell.pos,"blood_wbc","SampleID","blood_wbc_log","Batch")
 
 #-----------------------
 
