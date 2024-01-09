@@ -159,7 +159,6 @@ genes<-counts$SampleID
 rownames(ncounts)<-genes
 
 
-
 # Filter bcounts (readcount table for nasal sample
 ## filter method 1:
 ### Remove genes with ≤ 2 counts per million in >10% of samples (>4 samples) were removed to reduce noise on low counts and low abundance genes (PMID: 37730635)

@@ -152,13 +152,12 @@ df.pos.cell<-cbind(df.pos.cell,n_sample_pos)
 ## filtering counts table to remove low expressed genes
 ###########################################
 
-# select just the nasal RNAseq counts
+# select just the bronchial RNAseq counts
 id<-counts.ID%in%bID
 cols<-colnames(counts)[id]
 ct<-counts[,cols] # First column is actually gene name 
 genes<-counts$SampleID
 rownames(ct)<-genes
-
 
 
 # Filter bcounts (readcount table for nasal sample
