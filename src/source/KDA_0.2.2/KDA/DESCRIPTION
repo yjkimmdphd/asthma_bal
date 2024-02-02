@@ -1,0 +1,13 @@
+Package: KDA
+Type: Package
+Title: Performs Key Driver Analysis
+Version: 0.2.2
+Depends:
+Date: 2019-02-11
+Author: Bin Zhang
+Maintainer: Minghui Wang <minghui.wang@mssm.edu>
+Description: More about what it does (maybe more than one line). Modified script files keyDriverAnalysis.R and makeSNP.R and added getFileFullNameNopath.R by Minghui Wang.
+License: Artistic-2.0
+LazyLoad: yes
+NeedsCompilation: no
+Packaged: 2019-02-11 16:10:07 UTC; Minghui
