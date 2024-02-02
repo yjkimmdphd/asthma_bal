@@ -1,0 +1,4220 @@
+Legend 6
+label	shape	color	border	node_size	font_size
+SIG_GKD	square	red	red	120	36
+SIG_LKD	square	blue	blue	80	24
+SIG_NKD	circle	lightgreen	lightgreen	40	12
+NSIG_GKD	circle	red	red	120	36
+NSIG_LKD	circle	blue	blue	80	24
+NSIG_NKD	circle	grey	grey	40	12
+*vertices 1852
+nodename	color	shape	size	font_size
+10-Sep	grey	circle	40	12
+11-Sep	grey	circle	40	12
+4-Sep	lightgreen	circle	40	12
+6-Mar	grey	circle	40	12
+7-Sep	lightgreen	circle	40	12
+A1CF	grey	circle	40	12
+A2M	lightgreen	circle	40	12
+AA045174	grey	circle	40	12
+AA053967	grey	circle	40	12
+AADAC	grey	circle	40	12
+AASS	grey	circle	40	12
+AB011146	grey	circle	40	12
+AB051446	grey	circle	40	12
+AB051447	grey	circle	40	12
+ABAT	grey	circle	40	12
+ABCA5	grey	circle	40	12
+ABCA6	lightgreen	circle	40	12
+ABCA8	red	square	120	36
+ABCB1	red	square	120	36
+ABCB4	grey	circle	40	12
+ABCB6	grey	circle	40	12
+ABCB9	lightgreen	circle	40	12
+ABCC2	grey	circle	40	12
+ABCC3	grey	circle	40	12
+ABCC5	grey	circle	40	12
+ABCD1	lightgreen	circle	40	12
+ABCG2	lightgreen	circle	40	12
+ABHD2	lightgreen	circle	40	12
+ABLIM3	grey	circle	40	12
+ACACB	lightgreen	circle	40	12
+ACADL	grey	circle	40	12
+ACADSB	grey	circle	40	12
+ACCN1	grey	circle	40	12
+ACE2	grey	circle	40	12
+ACLY	grey	circle	40	12
+ACN9	grey	circle	40	12
+ACO2	grey	circle	40	12
+ACOX2	grey	circle	40	12
+ACSBG1	grey	circle	40	12
+ACSL1	grey	circle	40	12
+ACSL4	lightgreen	circle	40	12
+ACSM5	grey	circle	40	12
+ACTA2	red	circle	120	36
+ACTL8	grey	circle	40	12
+ACTN1	lightgreen	circle	40	12
+ACTN2	grey	circle	40	12
+ACTR10	grey	circle	40	12
+ACTR5	grey	circle	40	12
+ACTR8	grey	circle	40	12
+ACVR1	lightgreen	circle	40	12
+ACVR1B	grey	circle	40	12
+ACVRL1	grey	circle	40	12
+ADAM12	grey	circle	40	12
+ADAM28	grey	circle	40	12
+ADAM9	grey	circle	40	12
+ADAMTS1	lightgreen	circle	40	12
+ADAMTS2	grey	circle	40	12
+ADAMTS20	grey	circle	40	12
+ADAMTS5	grey	circle	40	12
+ADAMTS8	grey	circle	40	12
+ADARB1	lightgreen	circle	40	12
+ADD2	grey	circle	40	12
+ADFP	lightgreen	circle	40	12
+ADH1A	red	circle	120	36
+ADH1B	red	square	120	36
+ADH1C	lightgreen	circle	40	12
+ADIPOQ	red	square	120	36
+ADM	lightgreen	circle	40	12
+ADRA1A	grey	circle	40	12
+ADRA2A	lightgreen	circle	40	12
+AEBP1	grey	circle	40	12
+AF055011	grey	circle	40	12
+AF113018	grey	circle	40	12
+AF116689	grey	circle	40	12
+AF130053	grey	circle	40	12
+AF308291	grey	circle	40	12
+AF339787	grey	circle	40	12
+AFF1	grey	circle	40	12
+AGPAT4	lightgreen	circle	40	12
+AGR3	grey	circle	40	12
+AHNAK	lightgreen	circle	40	12
+AHR	lightgreen	circle	40	12
+AICDA	grey	circle	40	12
+AK021495	grey	circle	40	12
+AK022421	grey	circle	40	12
+AK023121	grey	circle	40	12
+AK024561	grey	circle	40	12
+AK025194	grey	circle	40	12
+AK025363	grey	circle	40	12
+AK2	lightgreen	circle	40	12
+AK5	grey	circle	40	12
+AKAP12	lightgreen	circle	40	12
+AKAP4	grey	circle	40	12
+AKAP6	grey	circle	40	12
+AKR1C1	lightgreen	circle	40	12
+AKR1C2	lightgreen	circle	40	12
+AKR1C3	lightgreen	circle	40	12
+AKT3	lightgreen	circle	40	12
+AL080152	grey	circle	40	12
+AL109706	grey	circle	40	12
+AL136715	grey	circle	40	12
+ALB	grey	circle	40	12
+ALDH1A1	red	circle	120	36
+ALDH1A2	lightgreen	circle	40	12
+ALDH1A3	grey	circle	40	12
+ALDH1L1	grey	circle	40	12
+ALG3	grey	circle	40	12
+AMELY	grey	circle	40	12
+AMHR2	grey	circle	40	12
+AMPH	lightgreen	circle	40	12
+ANAPC10	grey	circle	40	12
+ANGPT1	lightgreen	circle	40	12
+ANGPTL1	grey	circle	40	12
+ANGPTL2	grey	circle	40	12
+ANGPTL4	lightgreen	circle	40	12
+ANK2	lightgreen	circle	40	12
+ANKH	lightgreen	circle	40	12
+ANKRD5	grey	circle	40	12
+ANO1	grey	circle	40	12
+ANPEP	grey	circle	40	12
+ANXA1	grey	circle	40	12
+ANXA2	grey	circle	40	12
+ANXA3	lightgreen	circle	40	12
+ANXA4	grey	circle	40	12
+ANXA9	grey	circle	40	12
+AOC3	red	square	120	36
+AOX1	lightgreen	circle	40	12
+AP1G1	grey	circle	40	12
+AP1S1	grey	circle	40	12
+AP1S2	grey	circle	40	12
+APLNR	lightgreen	circle	40	12
+APLP1	lightgreen	circle	40	12
+APOBEC3B	grey	circle	40	12
+APOBEC3F	grey	circle	40	12
+APOBEC3G	grey	circle	40	12
+APOD	lightgreen	circle	40	12
+APOLD1	lightgreen	circle	40	12
+AQP1	red	square	120	36
+AQP7	lightgreen	circle	40	12
+AQP9	grey	circle	40	12
+ARD1A	grey	circle	40	12
+AREG	lightgreen	circle	40	12
+ARF1	red	circle	120	36
+ARFRP1	grey	circle	40	12
+ARHGAP11A	grey	circle	40	12
+ARHGAP15	grey	circle	40	12
+ARHGAP28	grey	circle	40	12
+ARHGAP6	lightgreen	circle	40	12
+ARHGEF10	lightgreen	circle	40	12
+ARHGEF15	red	square	120	36
+ARID5B	lightgreen	circle	40	12
+ARIH2	grey	circle	40	12
+ARL15	grey	circle	40	12
+ARL4C	lightgreen	circle	40	12
+ARL8B	grey	circle	40	12
+ARNT2	grey	circle	40	12
+ARPC5	grey	circle	40	12
+ART3	grey	circle	40	12
+ASCL2	grey	circle	40	12
+ASPA	lightgreen	circle	40	12
+ASPHD1	grey	circle	40	12
+ASTE1	grey	circle	40	12
+ATAD3A	grey	circle	40	12
+ATF3	lightgreen	circle	40	12
+ATM	grey	circle	40	12
+ATP11B	grey	circle	40	12
+ATP1A2	red	square	120	36
+ATP1A3	grey	circle	40	12
+ATP2B2	grey	circle	40	12
+ATP6V0A4	grey	circle	40	12
+ATP6V1A	grey	circle	40	12
+ATP6V1B1	grey	circle	40	12
+ATXN1	grey	circle	40	12
+ATXN2L	grey	circle	40	12
+AU144294	grey	circle	40	12
+AURKA	grey	circle	40	12
+AURKB	grey	circle	40	12
+AW451236	grey	circle	40	12
+B3GALT1	grey	circle	40	12
+B4GALT6	grey	circle	40	12
+B9D1	grey	circle	40	12
+BAALC	grey	circle	40	12
+BAT1	grey	circle	40	12
+BAT2D1	grey	circle	40	12
+BAT3	grey	circle	40	12
+BAZ2B	grey	circle	40	12
+BBOX1	grey	circle	40	12
+BC002792	grey	circle	40	12
+BC005856	grey	circle	40	12
+BC006134	grey	circle	40	12
+BCAS1	grey	circle	40	12
+BCAT1	grey	circle	40	12
+BCL2A1	grey	circle	40	12
+BCL2L10	grey	circle	40	12
+BCLAF1	grey	circle	40	12
+BET1L	grey	circle	40	12
+BFSP2	grey	circle	40	12
+BGN	grey	circle	40	12
+BHLHB3	lightgreen	circle	40	12
+BHLHB5	red	square	120	36
+BHMT2	lightgreen	circle	40	12
+BIK	grey	circle	40	12
+BIRC5	lightgreen	circle	40	12
+BIRC7	grey	circle	40	12
+BLM	grey	circle	40	12
+BMP1	grey	circle	40	12
+BMP2	grey	circle	40	12
+BMP7	lightgreen	circle	40	12
+BMP8A	grey	circle	40	12
+BMPR1B	grey	circle	40	12
+BMS1	red	circle	120	36
+BMX	grey	circle	40	12
+BOLA2	grey	circle	40	12
+BPNT1	grey	circle	40	12
+BRI3	grey	circle	40	12
+BRPF1	grey	circle	40	12
+BTBD7	grey	circle	40	12
+BTG1	grey	circle	40	12
+BTG2	grey	circle	40	12
+BTG4	grey	circle	40	12
+BTRC	grey	circle	40	12
+BUB1	grey	circle	40	12
+BUB1B	grey	circle	40	12
+C10orf116	grey	circle	40	12
+C10orf47	grey	circle	40	12
+C10orf79	grey	circle	40	12
+C14orf106	grey	circle	40	12
+C14orf139	lightgreen	circle	40	12
+C14orf28	grey	circle	40	12
+C15orf28	grey	circle	40	12
+C15orf41	grey	circle	40	12
+C17orf28	grey	circle	40	12
+C17orf53	grey	circle	40	12
+C17orf60	grey	circle	40	12
+C18orf34	grey	circle	40	12
+C18orf51	grey	circle	40	12
+C19orf26	grey	circle	40	12
+C19orf6	lightgreen	circle	40	12
+C1orf14	grey	circle	40	12
+C1orf151	grey	circle	40	12
+C1R	grey	circle	40	12
+C1S	red	circle	120	36
+C20orf103	grey	circle	40	12
+C20orf30	grey	circle	40	12
+C20orf39	grey	circle	40	12
+C20orf82	grey	circle	40	12
+C22orf34	grey	circle	40	12
+C2orf68	grey	circle	40	12
+C3	grey	circle	40	12
+C3orf18	grey	circle	40	12
+C3orf63	lightgreen	circle	40	12
+C4A	grey	circle	40	12
+C4orf18	grey	circle	40	12
+C4orf23	grey	circle	40	12
+C5orf4	grey	circle	40	12
+C6orf211	grey	circle	40	12
+C6orf97	grey	circle	40	12
+C7	lightgreen	circle	40	12
+C7orf43	grey	circle	40	12
+C7orf58	red	circle	120	36
+C8orf4	grey	circle	40	12
+C9orf3	lightgreen	circle	40	12
+C9orf30	grey	circle	40	12
+C9orf38	grey	circle	40	12
+C9orf45	grey	circle	40	12
+C9orf68	grey	circle	40	12
+CA12	grey	circle	40	12
+CA3	red	circle	120	36
+CA4	grey	circle	40	12
+CA6	grey	circle	40	12
+CA9	grey	circle	40	12
+CAB39L	grey	circle	40	12
+CABIN1	grey	circle	40	12
+CACHD1	grey	circle	40	12
+CACNA1H	grey	circle	40	12
+CACNA2D2	grey	circle	40	12
+CACNA2D3	grey	circle	40	12
+CACNB2	grey	circle	40	12
+CACNB4	grey	circle	40	12
+CADM1	grey	circle	40	12
+CALB2	grey	circle	40	12
+CALCOCO1	grey	circle	40	12
+CALCRL	red	square	120	36
+CALD1	grey	circle	40	12
+CALM1	grey	circle	40	12
+CALU	lightgreen	circle	40	12
+CAMK2A	grey	circle	40	12
+CAMP	grey	circle	40	12
+CAMTA2	red	circle	120	36
+CAPN3	grey	circle	40	12
+CASK	grey	circle	40	12
+CASQ2	lightgreen	circle	40	12
+CAST	lightgreen	circle	40	12
+CAT	lightgreen	circle	40	12
+CAV1	red	square	120	36
+CAV2	lightgreen	circle	40	12
+CBLN1	grey	circle	40	12
+CBR1	grey	circle	40	12
+CBX6	grey	circle	40	12
+CBX7	lightgreen	circle	40	12
+CCDC102B	grey	circle	40	12
+CCDC46	lightgreen	circle	40	12
+CCDC52	grey	circle	40	12
+CCDC69	grey	circle	40	12
+CCDC72	grey	circle	40	12
+CCL14	red	square	120	36
+CCL16	grey	circle	40	12
+CCL19	grey	circle	40	12
+CCL2	grey	circle	40	12
+CCL20	grey	circle	40	12
+CCL21	lightgreen	circle	40	12
+CCNB2	grey	circle	40	12
+CCNF	lightgreen	circle	40	12
+CCNJ	grey	circle	40	12
+CCNT1	lightgreen	circle	40	12
+CCR1	grey	circle	40	12
+CCR6	grey	circle	40	12
+CD14	grey	circle	40	12
+CD163	grey	circle	40	12
+CD1C	lightgreen	circle	40	12
+CD1E	grey	circle	40	12
+CD209	grey	circle	40	12
+CD302	lightgreen	circle	40	12
+CD34	lightgreen	circle	40	12
+CD36	lightgreen	circle	40	12
+CD46	grey	circle	40	12
+CD58	grey	circle	40	12
+CD69	grey	circle	40	12
+CD93	lightgreen	circle	40	12
+CDC14B	lightgreen	circle	40	12
+CDC20	grey	circle	40	12
+CDC25A	grey	circle	40	12
+CDC25C	grey	circle	40	12
+CDC42	grey	circle	40	12
+CDC5L	grey	circle	40	12
+CDC6	grey	circle	40	12
+CDCA4	grey	circle	40	12
+CDCA8	grey	circle	40	12
+CDH13	grey	circle	40	12
+CDH15	lightgreen	circle	40	12
+CDH2	grey	circle	40	12
+CDH3	grey	circle	40	12
+CDH5	red	square	120	36
+CDH9	grey	circle	40	12
+CDKN1C	lightgreen	circle	40	12
+CDKN3	grey	circle	40	12
+CDO1	lightgreen	circle	40	12
+CEACAM21	grey	circle	40	12
+CELP	grey	circle	40	12
+CELSR1	lightgreen	circle	40	12
+CELSR2	grey	circle	40	12
+CELSR3	grey	circle	40	12
+CENPA	grey	circle	40	12
+CENPI	lightgreen	circle	40	12
+CENPM	grey	circle	40	12
+CEP55	grey	circle	40	12
+CEP68	grey	circle	40	12
+CES1	lightgreen	circle	40	12
+CFD	lightgreen	circle	40	12
+CFH	red	square	120	36
+CFHR1	red	circle	120	36
+CFI	lightgreen	circle	40	12
+CFLAR	grey	circle	40	12
+CGA	grey	circle	40	12
+CGGBP1	grey	circle	40	12
+CH25H	lightgreen	circle	40	12
+CHAD	grey	circle	40	12
+CHD5	grey	circle	40	12
+CHL1	lightgreen	circle	40	12
+CHRDL1	red	square	120	36
+CHST2	grey	circle	40	12
+CHST3	grey	circle	40	12
+CIDEA	lightgreen	circle	40	12
+CIDEC	lightgreen	circle	40	12
+CILP	red	square	120	36
+CIRBP	grey	circle	40	12
+CIT	lightgreen	circle	40	12
+CLCA1	grey	circle	40	12
+CLCA2	grey	circle	40	12
+CLDN11	lightgreen	circle	40	12
+CLDN5	red	square	120	36
+CLEC10A	grey	circle	40	12
+CLEC2B	grey	circle	40	12
+CLEC3B	lightgreen	circle	40	12
+CLEC5A	grey	circle	40	12
+CLIC4	lightgreen	circle	40	12
+CLIC5	lightgreen	circle	40	12
+CLTB	grey	circle	40	12
+CLU	lightgreen	circle	40	12
+CMA1	lightgreen	circle	40	12
+CMKLR1	grey	circle	40	12
+CNN1	lightgreen	circle	40	12
+CNR1	grey	circle	40	12
+CNTNAP2	grey	circle	40	12
+COL10A1	grey	circle	40	12
+COL14A1	red	square	120	36
+COL15A1	lightgreen	circle	40	12
+COL16A1	grey	circle	40	12
+COL21A1	lightgreen	circle	40	12
+COL3A1	grey	circle	40	12
+COL4A1	lightgreen	circle	40	12
+COL4A2	lightgreen	circle	40	12
+COL5A1	grey	circle	40	12
+COL5A2	grey	circle	40	12
+COL6A1	grey	circle	40	12
+COL8A1	grey	circle	40	12
+COMP	grey	circle	40	12
+COPE	grey	circle	40	12
+COPZ2	grey	circle	40	12
+CORO2B	lightgreen	circle	40	12
+COX6C	grey	circle	40	12
+CPA3	lightgreen	circle	40	12
+CPB2	grey	circle	40	12
+CPE	lightgreen	circle	40	12
+CPZ	grey	circle	40	12
+CRCT1	grey	circle	40	12
+CRIM1	grey	circle	40	12
+CRISP2	grey	circle	40	12
+CRISPLD2	grey	circle	40	12
+CRKRS	grey	circle	40	12
+CRLF1	grey	circle	40	12
+CRY2	grey	circle	40	12
+CRYAB	grey	circle	40	12
+CSAD	grey	circle	40	12
+CSAG2	grey	circle	40	12
+CSDA	lightgreen	circle	40	12
+CSF1	grey	circle	40	12
+CSGALNACT1	lightgreen	circle	40	12
+CSN1S1	grey	circle	40	12
+CSPG4	grey	circle	40	12
+CSRP2	lightgreen	circle	40	12
+CST6	lightgreen	circle	40	12
+CSTF2	grey	circle	40	12
+CTGF	grey	circle	40	12
+CTHRC1	grey	circle	40	12
+CTSG	lightgreen	circle	40	12
+CUGBP2	lightgreen	circle	40	12
+CUZD1	grey	circle	40	12
+CX3CR1	lightgreen	circle	40	12
+CXADR	grey	circle	40	12
+CXCL1	grey	circle	40	12
+CXCL12	lightgreen	circle	40	12
+CXCL14	lightgreen	circle	40	12
+CXCL2	lightgreen	circle	40	12
+CXCL3	grey	circle	40	12
+CXorf36	grey	circle	40	12
+CYBRD1	grey	circle	40	12
+CYFIP2	grey	circle	40	12
+CYP26B1	lightgreen	circle	40	12
+CYP27B1	grey	circle	40	12
+CYP2B6	grey	circle	40	12
+CYP2B7P1	grey	circle	40	12
+CYP4F3	grey	circle	40	12
+CYR61	lightgreen	circle	40	12
+CYTL1	lightgreen	circle	40	12
+DAAM2	grey	circle	40	12
+DAB2	lightgreen	circle	40	12
+DAPK2	grey	circle	40	12
+DARC	red	square	120	36
+DBF4B	grey	circle	40	12
+DCN	red	circle	120	36
+DCX	grey	circle	40	12
+DDIT4	grey	circle	40	12
+DDN	grey	circle	40	12
+DDX11	lightgreen	circle	40	12
+DDX24	grey	circle	40	12
+DDX39	grey	circle	40	12
+DEF8	grey	circle	40	12
+DEK	grey	circle	40	12
+DENND5B	grey	circle	40	12
+DEPDC1	lightgreen	circle	40	12
+DGAT2	grey	circle	40	12
+DGCR2	grey	circle	40	12
+DGUOK	grey	circle	40	12
+DHPS	grey	circle	40	12
+DHX8	grey	circle	40	12
+DIMT1L	grey	circle	40	12
+DIO1	grey	circle	40	12
+DIO2	grey	circle	40	12
+DIXDC1	grey	circle	40	12
+DKK2	lightgreen	circle	40	12
+DKK3	grey	circle	40	12
+DLAT	grey	circle	40	12
+DLC1	lightgreen	circle	40	12
+DLGAP5	grey	circle	40	12
+DLL3	grey	circle	40	12
+DMD	lightgreen	circle	40	12
+DMP1	grey	circle	40	12
+DNAJB11	red	circle	120	36
+DNASE2	lightgreen	circle	40	12
+DNHD1L	red	circle	120	36
+DOC2B	grey	circle	40	12
+DOCK3	grey	circle	40	12
+DPP4	lightgreen	circle	40	12
+DPT	red	square	120	36
+DPYSL2	lightgreen	circle	40	12
+DPYSL3	grey	circle	40	12
+DSCR6	grey	circle	40	12
+DST	grey	circle	40	12
+DTNA	grey	circle	40	12
+DUSP1	red	square	120	36
+DUSP6	grey	circle	40	12
+DVL3	grey	circle	40	12
+DYM	grey	circle	40	12
+DYRK2	lightgreen	circle	40	12
+DYSF	grey	circle	40	12
+DZIP1	lightgreen	circle	40	12
+E2F2	grey	circle	40	12
+EBF1	red	square	120	36
+EBP	grey	circle	40	12
+ECHDC1	grey	circle	40	12
+ECM2	red	circle	120	36
+EDN3	grey	circle	40	12
+EDNRB	lightgreen	circle	40	12
+EEF1A2	grey	circle	40	12
+EFEMP1	lightgreen	circle	40	12
+EFHC2	grey	circle	40	12
+EFR3A	grey	circle	40	12
+EGFL6	grey	circle	40	12
+EGFL7	grey	circle	40	12
+EGFR	lightgreen	circle	40	12
+EGLN3	grey	circle	40	12
+EGR1	lightgreen	circle	40	12
+EGR2	lightgreen	circle	40	12
+EGR3	lightgreen	circle	40	12
+EHBP1	grey	circle	40	12
+EHD3	lightgreen	circle	40	12
+EID1	grey	circle	40	12
+EIF1	grey	circle	40	12
+EIF1AY	grey	circle	40	12
+EIF4E2	grey	circle	40	12
+EIF4EBP1	grey	circle	40	12
+EIF4G1	grey	circle	40	12
+EIF4G2	grey	circle	40	12
+ELAC2	grey	circle	40	12
+ELK3	grey	circle	40	12
+ELN	lightgreen	circle	40	12
+ELOVL4	grey	circle	40	12
+ELOVL5	grey	circle	40	12
+ELTD1	red	square	120	36
+EMCN	red	square	120	36
+EMILIN1	grey	circle	40	12
+EMP1	lightgreen	circle	40	12
+EN2	grey	circle	40	12
+ENO1	red	square	120	36
+ENPEP	lightgreen	circle	40	12
+ENPP2	lightgreen	circle	40	12
+ENTPD1	grey	circle	40	12
+EPAS1	lightgreen	circle	40	12
+EPB41L2	lightgreen	circle	40	12
+EPB41L4A	grey	circle	40	12
+EPB41L5	grey	circle	40	12
+EPHA3	lightgreen	circle	40	12
+EPHA7	grey	circle	40	12
+EPHB3	grey	circle	40	12
+EPHX2	grey	circle	40	12
+EPS15L2	grey	circle	40	12
+ERAP1	grey	circle	40	12
+ERBB2	grey	circle	40	12
+ERBB4	grey	circle	40	12
+EREG	grey	circle	40	12
+ERGIC2	grey	circle	40	12
+ERRFI1	grey	circle	40	12
+ESPL1	grey	circle	40	12
+ESR1	lightgreen	circle	40	12
+ETFB	grey	circle	40	12
+ETS2	lightgreen	circle	40	12
+ETV1	grey	circle	40	12
+ETV7	grey	circle	40	12
+EVC	grey	circle	40	12
+EVI1	lightgreen	circle	40	12
+EVL	grey	circle	40	12
+EWSR1	grey	circle	40	12
+EXO1	grey	circle	40	12
+EXOC7	grey	circle	40	12
+F13A1	lightgreen	circle	40	12
+F13B	grey	circle	40	12
+F2R	lightgreen	circle	40	12
+F2RL2	lightgreen	circle	40	12
+F3	lightgreen	circle	40	12
+FABP4	red	square	120	36
+FABP5	lightgreen	circle	40	12
+FABP6	grey	circle	40	12
+FAM101A	grey	circle	40	12
+FAM107A	lightgreen	circle	40	12
+FAM118B	grey	circle	40	12
+FAM119B	grey	circle	40	12
+FAM120A	grey	circle	40	12
+FAM122A	grey	circle	40	12
+FAM124B	lightgreen	circle	40	12
+FAM126A	grey	circle	40	12
+FAM129A	grey	circle	40	12
+FAM134B	grey	circle	40	12
+FAM13C1	lightgreen	circle	40	12
+FAM149A	grey	circle	40	12
+FAM149B1	grey	circle	40	12
+FAM155B	grey	circle	40	12
+FAM160B2	grey	circle	40	12
+FAM38B	grey	circle	40	12
+FAM54A	grey	circle	40	12
+FAM59A	lightgreen	circle	40	12
+FAM5C	grey	circle	40	12
+FAM69A	grey	circle	40	12
+FAM70A	grey	circle	40	12
+FAM76A	grey	circle	40	12
+FANCA	grey	circle	40	12
+FARSA	lightgreen	circle	40	12
+FBLN2	grey	circle	40	12
+FBLN5	grey	circle	40	12
+FBN1	red	circle	120	36
+FBXO17	grey	circle	40	12
+FBXO2	grey	circle	40	12
+FBXO22	grey	circle	40	12
+FBXO32	grey	circle	40	12
+FBXO9	grey	circle	40	12
+FCER1A	lightgreen	circle	40	12
+FCER2	grey	circle	40	12
+FCGBP	grey	circle	40	12
+FCGR3B	grey	circle	40	12
+FES	grey	circle	40	12
+FETUB	grey	circle	40	12
+FFAR2	grey	circle	40	12
+FGF1	grey	circle	40	12
+FGF18	lightgreen	circle	40	12
+FGF2	lightgreen	circle	40	12
+FGFBP2	grey	circle	40	12
+FGL2	red	circle	120	36
+FHL1	red	square	120	36
+FHL2	lightgreen	circle	40	12
+FHL5	lightgreen	circle	40	12
+FHOD3	grey	circle	40	12
+FICD	lightgreen	circle	40	12
+FIGF	lightgreen	circle	40	12
+FJX1	grey	circle	40	12
+FKBP1B	lightgreen	circle	40	12
+FLI1	red	circle	120	36
+FLNB	grey	circle	40	12
+FLRT2	red	square	120	36
+FLT1	lightgreen	circle	40	12
+FMNL2	grey	circle	40	12
+FMO1	lightgreen	circle	40	12
+FMO2	lightgreen	circle	40	12
+FMOD	lightgreen	circle	40	12
+FN1	grey	circle	40	12
+FOS	red	square	120	36
+FOSB	red	square	120	36
+FOSL2	lightgreen	circle	40	12
+FOXA1	grey	circle	40	12
+FOXD2	grey	circle	40	12
+FOXO1	lightgreen	circle	40	12
+FOXP1	grey	circle	40	12
+FOXQ1	grey	circle	40	12
+FOXRED2	lightgreen	circle	40	12
+FRAP1	grey	circle	40	12
+FREM1	red	square	120	36
+FRMD4B	grey	circle	40	12
+FRMPD1	grey	circle	40	12
+FRS2	grey	circle	40	12
+FRZB	lightgreen	circle	40	12
+FSD1	grey	circle	40	12
+FSTL1	red	circle	120	36
+FTO	grey	circle	40	12
+FUT9	grey	circle	40	12
+FXYD1	lightgreen	circle	40	12
+FZD4	lightgreen	circle	40	12
+FZD7	grey	circle	40	12
+FZD9	grey	circle	40	12
+G0S2	red	square	120	36
+G6PC	grey	circle	40	12
+G6PC3	grey	circle	40	12
+GABRE	grey	circle	40	12
+GABRG3	grey	circle	40	12
+GADD45A	grey	circle	40	12
+GADD45B	lightgreen	circle	40	12
+GADD45GIP1	grey	circle	40	12
+GAL	grey	circle	40	12
+GALNT10	grey	circle	40	12
+GALNT12	lightgreen	circle	40	12
+GALNT3	grey	circle	40	12
+GALNTL2	lightgreen	circle	40	12
+GAMT	grey	circle	40	12
+GAPDH	red	circle	120	36
+GAS1	grey	circle	40	12
+GAS7	lightgreen	circle	40	12
+GATA2	grey	circle	40	12
+GATA3	grey	circle	40	12
+GATA4	lightgreen	circle	40	12
+GDI1	grey	circle	40	12
+GEM	lightgreen	circle	40	12
+GFPT2	grey	circle	40	12
+GFRA1	grey	circle	40	12
+GGT5	lightgreen	circle	40	12
+GHR	lightgreen	circle	40	12
+GHRH	grey	circle	40	12
+GIGYF1	grey	circle	40	12
+GIMAP4	grey	circle	40	12
+GIMAP6	grey	circle	40	12
+GIMAP7	red	circle	120	36
+GINS1	grey	circle	40	12
+GINS2	grey	circle	40	12
+GIPC2	lightgreen	circle	40	12
+GJA4	lightgreen	circle	40	12
+GLDN	grey	circle	40	12
+GLG1	lightgreen	circle	40	12
+GLI1	lightgreen	circle	40	12
+GLI2	grey	circle	40	12
+GLIPR1	grey	circle	40	12
+GLRA3	grey	circle	40	12
+GLS	lightgreen	circle	40	12
+GLT8D2	grey	circle	40	12
+GLT8D4	grey	circle	40	12
+GNA14	grey	circle	40	12
+GNAI1	grey	circle	40	12
+GNG11	lightgreen	circle	40	12
+GNG12	lightgreen	circle	40	12
+GNL2	grey	circle	40	12
+GNS	grey	circle	40	12
+GOLGA8B	grey	circle	40	12
+GP5	grey	circle	40	12
+GPAM	grey	circle	40	12
+GPC3	lightgreen	circle	40	12
+GPC5	grey	circle	40	12
+GPD1	red	square	120	36
+GPR109B	lightgreen	circle	40	12
+GPR115	grey	circle	40	12
+GPR116	red	square	120	36
+GPR124	grey	circle	40	12
+GPR153	lightgreen	circle	40	12
+GPR162	grey	circle	40	12
+GPR177	grey	circle	40	12
+GPR4	grey	circle	40	12
+GPR87	lightgreen	circle	40	12
+GPR88	grey	circle	40	12
+GPRASP1	lightgreen	circle	40	12
+GPRIN2	grey	circle	40	12
+GPX3	red	square	120	36
+GPX8	grey	circle	40	12
+GRAMD2	grey	circle	40	12
+GRB10	grey	circle	40	12
+GREM2	grey	circle	40	12
+GRK6	grey	circle	40	12
+GRM4	grey	circle	40	12
+GRM8	grey	circle	40	12
+GRRP1	lightgreen	circle	40	12
+GSN	lightgreen	circle	40	12
+GTPBP1	grey	circle	40	12
+GTPBP3	grey	circle	40	12
+GUCY1B3	grey	circle	40	12
+GULP1	grey	circle	40	12
+GYG2	lightgreen	circle	40	12
+GZMK	red	circle	120	36
+H2AFV	grey	circle	40	12
+H2AFZ	red	circle	120	36
+H3F3B	grey	circle	40	12
+HABP4	red	square	120	36
+HADHA	grey	circle	40	12
+HAGH	grey	circle	40	12
+HAL	grey	circle	40	12
+HAPLN1	grey	circle	40	12
+HAS1	grey	circle	40	12
+HAS2	lightgreen	circle	40	12
+HBA1	lightgreen	circle	40	12
+HBA2	lightgreen	circle	40	12
+HBB	lightgreen	circle	40	12
+HBEGF	lightgreen	circle	40	12
+HBG2	lightgreen	circle	40	12
+hCG_1774568	grey	circle	40	12
+hCG_1776259	grey	circle	40	12
+HCN2	grey	circle	40	12
+HDAC11	grey	circle	40	12
+HDC	grey	circle	40	12
+HDGFL1	grey	circle	40	12
+HELLS	grey	circle	40	12
+HERC4	grey	circle	40	12
+HES2	grey	circle	40	12
+HGF	lightgreen	circle	40	12
+HIC1	red	circle	120	36
+HIF1A	red	circle	120	36
+HIGD1B	lightgreen	circle	40	12
+HIGD2A	grey	circle	40	12
+HIST1H2BL	grey	circle	40	12
+HIST1H3F	lightgreen	circle	40	12
+HIST1H4A	grey	circle	40	12
+HIST1H4B	grey	circle	40	12
+HIST1H4F	grey	circle	40	12
+HIST1H4H	grey	circle	40	12
+HJURP	grey	circle	40	12
+HLA-DOB	grey	circle	40	12
+HLA-DRA	grey	circle	40	12
+HLF	grey	circle	40	12
+HMMR	grey	circle	40	12
+HMOX1	grey	circle	40	12
+HN1	grey	circle	40	12
+HNF1A	grey	circle	40	12
+HNF1B	grey	circle	40	12
+HNMT	lightgreen	circle	40	12
+HNRNPR	grey	circle	40	12
+HOMER1	grey	circle	40	12
+HOMER3	grey	circle	40	12
+HOXA1	grey	circle	40	12
+HOXA10	lightgreen	circle	40	12
+HOXA2	grey	circle	40	12
+HOXA5	lightgreen	circle	40	12
+HOXA7	lightgreen	circle	40	12
+HOXA9	lightgreen	circle	40	12
+HOXD11	grey	circle	40	12
+HP	lightgreen	circle	40	12
+HPGD	grey	circle	40	12
+HPN	grey	circle	40	12
+HPR	lightgreen	circle	40	12
+HPX	grey	circle	40	12
+HRASLS5	grey	circle	40	12
+HRK	grey	circle	40	12
+HS3ST1	grey	circle	40	12
+HS3ST3A1	lightgreen	circle	40	12
+HS3ST3B1	grey	circle	40	12
+HSD17B1	grey	circle	40	12
+HSPA8	red	circle	120	36
+HSPB2	red	square	120	36
+HSPB7	grey	circle	40	12
+HSPD1	grey	circle	40	12
+HSPG2	grey	circle	40	12
+HTR1A	grey	circle	40	12
+HTR1B	grey	circle	40	12
+HTR2B	lightgreen	circle	40	12
+HTRA1	grey	circle	40	12
+HUWE1	grey	circle	40	12
+HYDIN	grey	circle	40	12
+HYI	grey	circle	40	12
+ICAM4	grey	circle	40	12
+ID1	lightgreen	circle	40	12
+ID3	grey	circle	40	12
+ID4	red	circle	120	36
+IDH3A	grey	circle	40	12
+IDH3G	grey	circle	40	12
+IDUA	grey	circle	40	12
+IER2	lightgreen	circle	40	12
+IFI16	red	circle	120	36
+IFI44	grey	circle	40	12
+IFRD1	grey	circle	40	12
+IFT74	grey	circle	40	12
+IGBP1	grey	circle	40	12
+IGF1	red	square	120	36
+IGF1R	grey	circle	40	12
+IGF2R	grey	circle	40	12
+IGFBP4	grey	circle	40	12
+IGFBP5	grey	circle	40	12
+IGFBP6	lightgreen	circle	40	12
+IGFBP7	grey	circle	40	12
+IGHA1	grey	circle	40	12
+IGJ	red	circle	120	36
+IK	grey	circle	40	12
+IKBKB	grey	circle	40	12
+IL17B	red	circle	120	36
+IL1RAP	grey	circle	40	12
+IL24	grey	circle	40	12
+IL33	red	square	120	36
+IL4I1	grey	circle	40	12
+IL6	lightgreen	circle	40	12
+IL6R	grey	circle	40	12
+IL6ST	grey	circle	40	12
+IL8	lightgreen	circle	40	12
+ILF3	grey	circle	40	12
+INCENP	grey	circle	40	12
+INE1	grey	circle	40	12
+INHBA	grey	circle	40	12
+INHBB	grey	circle	40	12
+INHBE	grey	circle	40	12
+INPP4A	lightgreen	circle	40	12
+INVS	grey	circle	40	12
+IPO5	grey	circle	40	12
+IQCA1	grey	circle	40	12
+IQGAP2	grey	circle	40	12
+IRF4	red	circle	120	36
+IRS2	grey	circle	40	12
+ITGA7	red	square	120	36
+ITGAV	lightgreen	circle	40	12
+ITGB1	lightgreen	circle	40	12
+ITGB3	grey	circle	40	12
+ITGB5	lightgreen	circle	40	12
+ITGB8	grey	circle	40	12
+ITGBL1	grey	circle	40	12
+ITIH3	grey	circle	40	12
+ITIH5	lightgreen	circle	40	12
+ITM2A	red	square	120	36
+ITM2B	grey	circle	40	12
+ITM2C	grey	circle	40	12
+ITSN1	lightgreen	circle	40	12
+J00146	grey	circle	40	12
+JAG1	lightgreen	circle	40	12
+JAK1	lightgreen	circle	40	12
+JMJD5	grey	circle	40	12
+JUN	lightgreen	circle	40	12
+JUNB	lightgreen	circle	40	12
+KANK3	lightgreen	circle	40	12
+KCMF1	grey	circle	40	12
+KCNAB1	lightgreen	circle	40	12
+KCNAB2	grey	circle	40	12
+KCND3	grey	circle	40	12
+KCNE1	grey	circle	40	12
+KCNE4	grey	circle	40	12
+KCNH2	grey	circle	40	12
+KCNJ2	grey	circle	40	12
+KCNJ8	lightgreen	circle	40	12
+KCNK15	grey	circle	40	12
+KCNK5	grey	circle	40	12
+KCTD12	red	square	120	36
+KDELR3	lightgreen	circle	40	12
+KDR	lightgreen	circle	40	12
+KERA	lightgreen	circle	40	12
+KHDRBS3	lightgreen	circle	40	12
+KIAA0141	grey	circle	40	12
+KIAA0467	lightgreen	circle	40	12
+KIAA0494	grey	circle	40	12
+KIAA1009	grey	circle	40	12
+KIAA1305	grey	circle	40	12
+KIF18A	grey	circle	40	12
+KIF1C	grey	circle	40	12
+KIF20A	grey	circle	40	12
+KIF21A	grey	circle	40	12
+KIF23	grey	circle	40	12
+KIF25	grey	circle	40	12
+KIF26A	lightgreen	circle	40	12
+KIF2C	lightgreen	circle	40	12
+KIRREL	grey	circle	40	12
+KIT	lightgreen	circle	40	12
+KITLG	grey	circle	40	12
+KLF15	grey	circle	40	12
+KLF4	lightgreen	circle	40	12
+KLF6	grey	circle	40	12
+KLF9	grey	circle	40	12
+KLHL2	lightgreen	circle	40	12
+KPNA5	grey	circle	40	12
+KRT12	grey	circle	40	12
+KRT14	grey	circle	40	12
+KRT15	grey	circle	40	12
+KRT23	lightgreen	circle	40	12
+KRT8	grey	circle	40	12
+KRT81	grey	circle	40	12
+L06102	grey	circle	40	12
+L11372	grey	circle	40	12
+LAMA2	red	square	120	36
+LAMA4	grey	circle	40	12
+LAMB1	red	circle	120	36
+LAMB3	grey	circle	40	12
+LAMC1	lightgreen	circle	40	12
+LAMP1	grey	circle	40	12
+LASS4	grey	circle	40	12
+LCA5	grey	circle	40	12
+LDB2	red	square	120	36
+LDHA	grey	circle	40	12
+LDHB	grey	circle	40	12
+LDHC	grey	circle	40	12
+LDLR	grey	circle	40	12
+LEFTY2	grey	circle	40	12
+LENEP	grey	circle	40	12
+LEP	lightgreen	circle	40	12
+LEPR	red	square	120	36
+LEPREL1	grey	circle	40	12
+LFNG	grey	circle	40	12
+LGALS1	grey	circle	40	12
+LGALS12	grey	circle	40	12
+LGALS7	grey	circle	40	12
+LGMN	grey	circle	40	12
+LHFP	red	square	120	36
+LIF	lightgreen	circle	40	12
+LILRA2	red	circle	120	36
+LILRB1	red	circle	120	36
+LIMS2	red	square	120	36
+LIPE	lightgreen	circle	40	12
+LMNA	grey	circle	40	12
+LMO2	red	circle	120	36
+LMOD1	lightgreen	circle	40	12
+LOR	grey	circle	40	12
+LOXL1	grey	circle	40	12
+LOXL2	grey	circle	40	12
+LPAR1	lightgreen	circle	40	12
+LPAR4	grey	circle	40	12
+LPHN2	lightgreen	circle	40	12
+LPHN3	lightgreen	circle	40	12
+LPL	lightgreen	circle	40	12
+LRDD	grey	circle	40	12
+LRMP	grey	circle	40	12
+LRP12	grey	circle	40	12
+LRP4	grey	circle	40	12
+LRP8	grey	circle	40	12
+LRRC17	grey	circle	40	12
+LRRC37A4	grey	circle	40	12
+LRRC8B	grey	circle	40	12
+LRRK2	grey	circle	40	12
+LRRN3	lightgreen	circle	40	12
+LSM4	grey	circle	40	12
+LTBP1	grey	circle	40	12
+LTBP2	grey	circle	40	12
+LTBP4	grey	circle	40	12
+LTC4S	grey	circle	40	12
+LUZP2	grey	circle	40	12
+LUZP4	grey	circle	40	12
+LYVE1	lightgreen	circle	40	12
+LYZ	grey	circle	40	12
+LZTS1	lightgreen	circle	40	12
+MAB21L1	lightgreen	circle	40	12
+MAF	grey	circle	40	12
+MAFF	grey	circle	40	12
+MAGEB1	grey	circle	40	12
+MAGEB4	grey	circle	40	12
+MAGEC2	grey	circle	40	12
+MAGED4B	grey	circle	40	12
+MAGEH1	lightgreen	circle	40	12
+MALL	grey	circle	40	12
+MAN1A1	lightgreen	circle	40	12
+MAN1C1	grey	circle	40	12
+MAOA	grey	circle	40	12
+MAP1LC3C	grey	circle	40	12
+MAP4	lightgreen	circle	40	12
+MAP4K4	lightgreen	circle	40	12
+MAP4K5	lightgreen	circle	40	12
+MAP7D3	grey	circle	40	12
+MAPK8IP3	grey	circle	40	12
+MAPRE2	lightgreen	circle	40	12
+MAPT	grey	circle	40	12
+MARCKS	grey	circle	40	12
+MASP1	grey	circle	40	12
+MATK	grey	circle	40	12
+MATN2	lightgreen	circle	40	12
+MATN3	grey	circle	40	12
+MATN4	grey	circle	40	12
+MBD1	grey	circle	40	12
+MBD2	grey	circle	40	12
+MBNL1	grey	circle	40	12
+MBOAT7	grey	circle	40	12
+MBP	grey	circle	40	12
+MCAM	lightgreen	circle	40	12
+MCM3AP	grey	circle	40	12
+MCM4	grey	circle	40	12
+MCTP1	lightgreen	circle	40	12
+MED14	grey	circle	40	12
+MEF2C	lightgreen	circle	40	12
+MEIS2	grey	circle	40	12
+MEOX1	red	square	120	36
+MEOX2	red	square	120	36
+MET	lightgreen	circle	40	12
+METAP2	grey	circle	40	12
+MFAP2	grey	circle	40	12
+MFAP4	red	square	120	36
+MFGE8	grey	circle	40	12
+MGAM	grey	circle	40	12
+MGP	lightgreen	circle	40	12
+MICAL2	lightgreen	circle	40	12
+MID1	grey	circle	40	12
+MKI67	grey	circle	40	12
+MLPH	grey	circle	40	12
+MME	lightgreen	circle	40	12
+MMP1	lightgreen	circle	40	12
+MMP11	grey	circle	40	12
+MMP13	grey	circle	40	12
+MMP14	grey	circle	40	12
+MMP23B	lightgreen	circle	40	12
+MMP28	lightgreen	circle	40	12
+MMP3	lightgreen	circle	40	12
+MMP9	grey	circle	40	12
+MMRN1	red	square	120	36
+MN1	grey	circle	40	12
+MNDA	grey	circle	40	12
+MOCS1	lightgreen	circle	40	12
+MOSC1	grey	circle	40	12
+MPP6	grey	circle	40	12
+MPPE1	lightgreen	circle	40	12
+MPPED2	grey	circle	40	12
+MPZL1	grey	circle	40	12
+MRC2	grey	circle	40	12
+MRPS18C	grey	circle	40	12
+MS4A2	lightgreen	circle	40	12
+MSC	lightgreen	circle	40	12
+MSRB3	grey	circle	40	12
+MT1M	lightgreen	circle	40	12
+MTAP	grey	circle	40	12
+MTUS1	grey	circle	40	12
+MUC7	grey	circle	40	12
+MXRA8	grey	circle	40	12
+MYB	grey	circle	40	12
+MYBL2	grey	circle	40	12
+MYCN	grey	circle	40	12
+MYCT1	lightgreen	circle	40	12
+MYH1	grey	circle	40	12
+MYH11	lightgreen	circle	40	12
+MYH3	grey	circle	40	12
+MYLK	grey	circle	40	12
+MYO10	grey	circle	40	12
+MYO1B	lightgreen	circle	40	12
+MYO5C	grey	circle	40	12
+MYOM2	grey	circle	40	12
+MYRIP	grey	circle	40	12
+N4BP2L2	grey	circle	40	12
+NAALAD2	lightgreen	circle	40	12
+NACA2	grey	circle	40	12
+NADK	lightgreen	circle	40	12
+NAMPT	grey	circle	40	12
+NAP1L2	grey	circle	40	12
+NAP1L3	grey	circle	40	12
+NAT1	grey	circle	40	12
+NAT8	grey	circle	40	12
+NAV3	lightgreen	circle	40	12
+NCBP1	grey	circle	40	12
+NCOA2	grey	circle	40	12
+NDC80	grey	circle	40	12
+NDN	grey	circle	40	12
+NDRG1	grey	circle	40	12
+NDRG4	grey	circle	40	12
+NDUFA13	grey	circle	40	12
+NDUFA4L2	grey	circle	40	12
+NDUFA5	grey	circle	40	12
+NDUFA7	lightgreen	circle	40	12
+NDUFB7	grey	circle	40	12
+NDUFB8	grey	circle	40	12
+NDUFB9	grey	circle	40	12
+NEBL	lightgreen	circle	40	12
+NEFH	grey	circle	40	12
+NEK1	grey	circle	40	12
+NEK7	grey	circle	40	12
+NEK9	grey	circle	40	12
+NES	lightgreen	circle	40	12
+NEUROD1	grey	circle	40	12
+NFIB	grey	circle	40	12
+NFIX	grey	circle	40	12
+NFU1	grey	circle	40	12
+NGF	grey	circle	40	12
+NGFR	lightgreen	circle	40	12
+NGFRAP1	grey	circle	40	12
+NID1	grey	circle	40	12
+NKAIN1	grey	circle	40	12
+NKX3-2	grey	circle	40	12
+NLGN4X	lightgreen	circle	40	12
+NLGN4Y	grey	circle	40	12
+NLRP1	lightgreen	circle	40	12
+NLRP2	grey	circle	40	12
+NM_013293	grey	circle	40	12
+NM_014095	red	circle	120	36
+NM_014122	grey	circle	40	12
+NM_014162	grey	circle	40	12
+NM_015111	grey	circle	40	12
+NM_016380	grey	circle	40	12
+NM_018111	grey	circle	40	12
+NM_018382	grey	circle	40	12
+NM_018687	grey	circle	40	12
+NM_024977	grey	circle	40	12
+NM_025064	grey	circle	40	12
+NMNAT2	grey	circle	40	12
+NMT2	lightgreen	circle	40	12
+NNAT	grey	circle	40	12
+NNMT	grey	circle	40	12
+NOL5A	lightgreen	circle	40	12
+NOP16	grey	circle	40	12
+NOTCH2	grey	circle	40	12
+NOV	lightgreen	circle	40	12
+NOVA1	grey	circle	40	12
+NOX1	grey	circle	40	12
+NPAS3	grey	circle	40	12
+NPAT	grey	circle	40	12
+NPHS1	grey	circle	40	12
+NPIP	grey	circle	40	12
+NPR1	lightgreen	circle	40	12
+NPR2	lightgreen	circle	40	12
+NR2F1	lightgreen	circle	40	12
+NR3C1	grey	circle	40	12
+NR3C2	lightgreen	circle	40	12
+NR4A1	lightgreen	circle	40	12
+NR4A2	grey	circle	40	12
+NR5A2	lightgreen	circle	40	12
+NRG1	grey	circle	40	12
+NRIP2	grey	circle	40	12
+NRP1	lightgreen	circle	40	12
+NRXN2	lightgreen	circle	40	12
+NSUN5	grey	circle	40	12
+NT5M	grey	circle	40	12
+NTRK2	grey	circle	40	12
+NUAK1	grey	circle	40	12
+NUCB1	grey	circle	40	12
+NUMA1	grey	circle	40	12
+NUP210	lightgreen	circle	40	12
+NUP93	grey	circle	40	12
+NUSAP1	grey	circle	40	12
+NXT1	grey	circle	40	12
+ODZ2	grey	circle	40	12
+OGN	lightgreen	circle	40	12
+OLFM4	grey	circle	40	12
+OLIG2	grey	circle	40	12
+OMD	grey	circle	40	12
+OPRM1	grey	circle	40	12
+OR2W1	grey	circle	40	12
+ORC1L	grey	circle	40	12
+ORC6L	grey	circle	40	12
+OSBPL8	lightgreen	circle	40	12
+OTUB2	grey	circle	40	12
+OTUD4	grey	circle	40	12
+P2RY13	grey	circle	40	12
+P2RY5	lightgreen	circle	40	12
+P4HA1	grey	circle	40	12
+P4HA2	lightgreen	circle	40	12
+PACRG	grey	circle	40	12
+PADI2	grey	circle	40	12
+PAK2	grey	circle	40	12
+PAK7	grey	circle	40	12
+PALLD	grey	circle	40	12
+PALMD	lightgreen	circle	40	12
+PAM	lightgreen	circle	40	12
+PAQR4	grey	circle	40	12
+PARD6B	grey	circle	40	12
+PARP11	grey	circle	40	12
+PARVA	grey	circle	40	12
+PBX1	grey	circle	40	12
+PCDH12	lightgreen	circle	40	12
+PCDH18	grey	circle	40	12
+PCDH7	grey	circle	40	12
+PCDH8	grey	circle	40	12
+PCDH9	lightgreen	circle	40	12
+PCK1	red	square	120	36
+PCM1	grey	circle	40	12
+PCMTD2	grey	circle	40	12
+PCOLCE2	lightgreen	circle	40	12
+PCSK5	lightgreen	circle	40	12
+PCYOX1	grey	circle	40	12
+PCYT1B	grey	circle	40	12
+PDE10A	grey	circle	40	12
+PDE11A	grey	circle	40	12
+PDE2A	red	square	120	36
+PDE3A	grey	circle	40	12
+PDE3B	lightgreen	circle	40	12
+PDE8A	grey	circle	40	12
+PDGFA	lightgreen	circle	40	12
+PDGFD	lightgreen	circle	40	12
+PDGFRA	red	circle	120	36
+PDGFRL	grey	circle	40	12
+PDHA2	grey	circle	40	12
+PDK4	grey	circle	40	12
+PDLIM3	lightgreen	circle	40	12
+PDLIM4	lightgreen	circle	40	12
+PDLIM7	grey	circle	40	12
+PDS5A	grey	circle	40	12
+PDSS1	grey	circle	40	12
+PDZD2	lightgreen	circle	40	12
+PDZRN3	lightgreen	circle	40	12
+PECAM1	lightgreen	circle	40	12
+PELI2	lightgreen	circle	40	12
+PEMT	grey	circle	40	12
+PENK	grey	circle	40	12
+PER1	grey	circle	40	12
+PEX5	grey	circle	40	12
+PFKP	grey	circle	40	12
+PFTK1	lightgreen	circle	40	12
+PGAM5	grey	circle	40	12
+PGF	lightgreen	circle	40	12
+PGK1	red	circle	120	36
+PGM5	red	square	120	36
+PGRMC1	grey	circle	40	12
+PHACTR1	red	circle	120	36
+PHLDA1	grey	circle	40	12
+PHYHIP	grey	circle	40	12
+PI3	grey	circle	40	12
+PICALM	grey	circle	40	12
+PID1	lightgreen	circle	40	12
+PIF1	grey	circle	40	12
+PIK3R1	grey	circle	40	12
+PJA2	grey	circle	40	12
+PKIA	grey	circle	40	12
+PKN2	grey	circle	40	12
+PKP3	grey	circle	40	12
+PKP4	grey	circle	40	12
+PLA2G4A	red	square	120	36
+PLA2G5	lightgreen	circle	40	12
+PLA2R1	grey	circle	40	12
+PLAGL1	lightgreen	circle	40	12
+PLAU	grey	circle	40	12
+PLAUR	lightgreen	circle	40	12
+PLCB1	grey	circle	40	12
+PLCB4	grey	circle	40	12
+PLCE1	grey	circle	40	12
+PLEKHA4	grey	circle	40	12
+PLEKHB1	lightgreen	circle	40	12
+PLEKHB2	grey	circle	40	12
+PLEKHF1	lightgreen	circle	40	12
+PLIN	red	square	120	36
+PLN	lightgreen	circle	40	12
+PLOD2	lightgreen	circle	40	12
+PLP1	grey	circle	40	12
+PLS3	grey	circle	40	12
+PLSCR4	lightgreen	circle	40	12
+PLXNA1	grey	circle	40	12
+PLXNC1	grey	circle	40	12
+PMCHL1	grey	circle	40	12
+PMP22	grey	circle	40	12
+PNMA2	lightgreen	circle	40	12
+PNPLA2	grey	circle	40	12
+PODN	red	circle	120	36
+PODXL	grey	circle	40	12
+POLR2E	grey	circle	40	12
+POLR3G	grey	circle	40	12
+POM121	grey	circle	40	12
+POSTN	red	circle	120	36
+POU1F1	grey	circle	40	12
+PPAP2A	lightgreen	circle	40	12
+PPAP2B	lightgreen	circle	40	12
+PPARG	lightgreen	circle	40	12
+PPARGC1A	grey	circle	40	12
+PPAT	lightgreen	circle	40	12
+PPFIA1	grey	circle	40	12
+PPFIA4	grey	circle	40	12
+PPFIBP1	grey	circle	40	12
+PPIA	grey	circle	40	12
+PPL	grey	circle	40	12
+PPM1E	grey	circle	40	12
+PPM1F	lightgreen	circle	40	12
+PPP1R12B	lightgreen	circle	40	12
+PPP1R1A	lightgreen	circle	40	12
+PPP1R1C	grey	circle	40	12
+PPP1R3A	grey	circle	40	12
+PPP2R1B	lightgreen	circle	40	12
+PRCP	lightgreen	circle	40	12
+PRDM13	grey	circle	40	12
+PRELP	grey	circle	40	12
+PRKACB	grey	circle	40	12
+PRKAR2B	grey	circle	40	12
+PRKCA	lightgreen	circle	40	12
+PRKCB	grey	circle	40	12
+PRKCDBP	grey	circle	40	12
+PRKCSH	grey	circle	40	12
+PRKD3	lightgreen	circle	40	12
+PRKX	grey	circle	40	12
+PRNP	lightgreen	circle	40	12
+PROCR	lightgreen	circle	40	12
+PROM1	grey	circle	40	12
+PROS1	red	square	120	36
+PRPF31	grey	circle	40	12
+PRPH	grey	circle	40	12
+PRR11	grey	circle	40	12
+PRR16	grey	circle	40	12
+PRR19	grey	circle	40	12
+PRR5	lightgreen	circle	40	12
+PRRG1	grey	circle	40	12
+PRSS7	grey	circle	40	12
+PRUNE	grey	circle	40	12
+PSAP	grey	circle	40	12
+PSAT1	grey	circle	40	12
+PSMB2	grey	circle	40	12
+PSMC3	grey	circle	40	12
+PSMD10	grey	circle	40	12
+PSMD11	grey	circle	40	12
+PSMD2	grey	circle	40	12
+PSME3	grey	circle	40	12
+PTGER3	lightgreen	circle	40	12
+PTGER4	grey	circle	40	12
+PTGFR	red	square	120	36
+PTGIR	grey	circle	40	12
+PTGIS	lightgreen	circle	40	12
+PTGS2	lightgreen	circle	40	12
+PTHLH	grey	circle	40	12
+PTK2	grey	circle	40	12
+PTK7	lightgreen	circle	40	12
+PTMA	grey	circle	40	12
+PTN	grey	circle	40	12
+PTPLAD1	grey	circle	40	12
+PTPN1	grey	circle	40	12
+PTPN12	grey	circle	40	12
+PTPRB	lightgreen	circle	40	12
+PTPRC	grey	circle	40	12
+PTPRK	grey	circle	40	12
+PTPRM	lightgreen	circle	40	12
+PTPRN	lightgreen	circle	40	12
+PTPRN2	grey	circle	40	12
+PTPRZ1	grey	circle	40	12
+PTRF	red	circle	120	36
+PTTG1IP	lightgreen	circle	40	12
+PTTG2	grey	circle	40	12
+PXDN	grey	circle	40	12
+PYGL	grey	circle	40	12
+PYGO1	grey	circle	40	12
+PYY	grey	circle	40	12
+QKI	lightgreen	circle	40	12
+QPCT	grey	circle	40	12
+RAB11B	grey	circle	40	12
+RAB13	grey	circle	40	12
+RAB27A	grey	circle	40	12
+RAB31	grey	circle	40	12
+RABEP1	grey	circle	40	12
+RABIF	grey	circle	40	12
+RAD23A	grey	circle	40	12
+RAD23B	grey	circle	40	12
+RAD51	grey	circle	40	12
+RAD54L	grey	circle	40	12
+RAE1	grey	circle	40	12
+RAI2	grey	circle	40	12
+RALY	grey	circle	40	12
+RAMP2	lightgreen	circle	40	12
+RANBP1	grey	circle	40	12
+RAP1B	grey	circle	40	12
+RAP2B	grey	circle	40	12
+RAPGEF3	lightgreen	circle	40	12
+RARA	grey	circle	40	12
+RASA3	grey	circle	40	12
+RASGRP2	grey	circle	40	12
+RASL11B	grey	circle	40	12
+RASSF2	grey	circle	40	12
+RB1	grey	circle	40	12
+RBBP9	grey	circle	40	12
+RBM25	grey	circle	40	12
+RBM47	grey	circle	40	12
+RBM9	grey	circle	40	12
+RBMS1	lightgreen	circle	40	12
+RBMS2	grey	circle	40	12
+RBP4	red	square	120	36
+RCAN1	lightgreen	circle	40	12
+RCN3	grey	circle	40	12
+RDH5	lightgreen	circle	40	12
+RECK	red	circle	120	36
+RECQL	grey	circle	40	12
+RECQL4	grey	circle	40	12
+RECQL5	grey	circle	40	12
+REEP1	grey	circle	40	12
+RELL1	grey	circle	40	12
+RELN	grey	circle	40	12
+REPS2	grey	circle	40	12
+RERE	grey	circle	40	12
+RERGL	lightgreen	circle	40	12
+RGMA	grey	circle	40	12
+RGR	grey	circle	40	12
+RGS13	grey	circle	40	12
+RGS2	lightgreen	circle	40	12
+RGS20	grey	circle	40	12
+RGS3	lightgreen	circle	40	12
+RGS5	lightgreen	circle	40	12
+RHBDD3	grey	circle	40	12
+RHBDL1	grey	circle	40	12
+RHBDL2	grey	circle	40	12
+RHOBTB2	grey	circle	40	12
+RHOH	grey	circle	40	12
+RHOU	grey	circle	40	12
+RIN2	grey	circle	40	12
+RIOK2	grey	circle	40	12
+RIOK3	grey	circle	40	12
+RIPK2	grey	circle	40	12
+RIPK4	grey	circle	40	12
+RMND5B	lightgreen	circle	40	12
+RNASE4	grey	circle	40	12
+RNASEH1	grey	circle	40	12
+RNASEH2A	grey	circle	40	12
+RNASET2	grey	circle	40	12
+RND3	lightgreen	circle	40	12
+RNF145	grey	circle	40	12
+RNF187	grey	circle	40	12
+RNFT2	grey	circle	40	12
+ROBO1	lightgreen	circle	40	12
+ROR1	grey	circle	40	12
+RP1-21O18.1	grey	circle	40	12
+RPL13A	grey	circle	40	12
+RPL13L	grey	circle	40	12
+RPL36A	grey	circle	40	12
+RPP21	grey	circle	40	12
+RRAD	lightgreen	circle	40	12
+RRAS2	grey	circle	40	12
+RRP1B	grey	circle	40	12
+RSL1D1	grey	circle	40	12
+RTF1	lightgreen	circle	40	12
+RTN1	grey	circle	40	12
+RUNDC2C	grey	circle	40	12
+RUNDC3A	grey	circle	40	12
+RUNDC3B	grey	circle	40	12
+RUNX1	lightgreen	circle	40	12
+RUNX1T1	lightgreen	circle	40	12
+RUSC2	lightgreen	circle	40	12
+S100A1	grey	circle	40	12
+S100A10	lightgreen	circle	40	12
+S100A2	grey	circle	40	12
+S100A4	lightgreen	circle	40	12
+S100A6	lightgreen	circle	40	12
+S100A9	grey	circle	40	12
+S100B	grey	circle	40	12
+S100PBP	grey	circle	40	12
+SAA1	lightgreen	circle	40	12
+SACS	lightgreen	circle	40	12
+SAFB	grey	circle	40	12
+SALL1	lightgreen	circle	40	12
+SAMD4A	grey	circle	40	12
+SAMD5	grey	circle	40	12
+SATB2	lightgreen	circle	40	12
+SCARA3	grey	circle	40	12
+SCARB1	grey	circle	40	12
+SCD5	grey	circle	40	12
+SCG2	lightgreen	circle	40	12
+SCG3	grey	circle	40	12
+SCGB1D1	grey	circle	40	12
+SCHIP1	grey	circle	40	12
+SCLY	grey	circle	40	12
+SCML1	grey	circle	40	12
+SCN3A	lightgreen	circle	40	12
+SCNN1B	grey	circle	40	12
+SCUBE2	grey	circle	40	12
+SDC1	grey	circle	40	12
+SDPR	red	square	120	36
+SEC23A	grey	circle	40	12
+SEC24D	grey	circle	40	12
+SEC31A	grey	circle	40	12
+SEC62	grey	circle	40	12
+SEL1L	grey	circle	40	12
+SELE	lightgreen	circle	40	12
+SELP	lightgreen	circle	40	12
+SEMA3C	grey	circle	40	12
+SEMA3D	grey	circle	40	12
+SEMA3F	lightgreen	circle	40	12
+SEMA3G	red	square	120	36
+SEMA6B	grey	circle	40	12
+SEMA6D	grey	circle	40	12
+SEPP1	lightgreen	circle	40	12
+SERPINB2	grey	circle	40	12
+SERPINB4	grey	circle	40	12
+SERPINE1	grey	circle	40	12
+SERPINF1	red	circle	120	36
+SERPING1	grey	circle	40	12
+SERPINH1	grey	circle	40	12
+SESN1	grey	circle	40	12
+SEZ6L	grey	circle	40	12
+SFRP1	grey	circle	40	12
+SFRP4	red	square	120	36
+SFTPB	grey	circle	40	12
+SGCB	lightgreen	circle	40	12
+SGCE	grey	circle	40	12
+SGCG	grey	circle	40	12
+SGPP1	grey	circle	40	12
+SH3BGRL3	red	circle	120	36
+SH3D19	lightgreen	circle	40	12
+SH3RF3	grey	circle	40	12
+SHOX2	grey	circle	40	12
+SIDT2	grey	circle	40	12
+SIGLECP3	grey	circle	40	12
+SIM2	grey	circle	40	12
+SIRPA	grey	circle	40	12
+SIRT6	grey	circle	40	12
+SIX1	grey	circle	40	12
+SKAP2	grey	circle	40	12
+SKP2	grey	circle	40	12
+SLC11A1	grey	circle	40	12
+SLC11A2	grey	circle	40	12
+SLC12A4	lightgreen	circle	40	12
+SLC13A1	grey	circle	40	12
+SLC16A3	grey	circle	40	12
+SLC16A4	grey	circle	40	12
+SLC16A6	grey	circle	40	12
+SLC16A7	grey	circle	40	12
+SLC17A7	grey	circle	40	12
+SLC18A2	lightgreen	circle	40	12
+SLC19A2	grey	circle	40	12
+SLC19A3	lightgreen	circle	40	12
+SLC22A1	grey	circle	40	12
+SLC22A2	grey	circle	40	12
+SLC23A2	lightgreen	circle	40	12
+SLC2A3	grey	circle	40	12
+SLC2A5	grey	circle	40	12
+SLC34A1	grey	circle	40	12
+SLC36A1	lightgreen	circle	40	12
+SLC38A4	grey	circle	40	12
+SLC39A6	grey	circle	40	12
+SLC39A8	grey	circle	40	12
+SLC40A1	grey	circle	40	12
+SLC4A10	grey	circle	40	12
+SLC4A4	grey	circle	40	12
+SLC6A6	grey	circle	40	12
+SLC7A1	grey	circle	40	12
+SLC7A10	grey	circle	40	12
+SLC7A5	grey	circle	40	12
+SLC8A1	grey	circle	40	12
+SLC9A2	grey	circle	40	12
+SLC9A5	grey	circle	40	12
+SLCO3A1	grey	circle	40	12
+SLCO4A1	grey	circle	40	12
+SLFN12	lightgreen	circle	40	12
+SLIT2	red	square	120	36
+SLIT3	lightgreen	circle	40	12
+SMAD6	lightgreen	circle	40	12
+SMC5	red	circle	120	36
+SMPDL3B	grey	circle	40	12
+SNAP25	grey	circle	40	12
+SNAPC4	grey	circle	40	12
+SNCA	lightgreen	circle	40	12
+SNCAIP	lightgreen	circle	40	12
+SNED1	grey	circle	40	12
+SNRK	lightgreen	circle	40	12
+SNTB2	lightgreen	circle	40	12
+SNX1	lightgreen	circle	40	12
+SNX17	grey	circle	40	12
+SOBP	grey	circle	40	12
+SOCS3	lightgreen	circle	40	12
+SOD3	lightgreen	circle	40	12
+SOHLH2	grey	circle	40	12
+SORBS1	lightgreen	circle	40	12
+SOX10	grey	circle	40	12
+SOX11	grey	circle	40	12
+SOX18	lightgreen	circle	40	12
+SP1	grey	circle	40	12
+SPAG4	grey	circle	40	12
+SPAG5	grey	circle	40	12
+SPARC	grey	circle	40	12
+SPARCL1	red	square	120	36
+SPC25	grey	circle	40	12
+SPHK2	grey	circle	40	12
+SPON1	red	circle	120	36
+SPP1	lightgreen	circle	40	12
+SPRED2	grey	circle	40	12
+SPRR3	grey	circle	40	12
+SPRY1	lightgreen	circle	40	12
+SPRY2	lightgreen	circle	40	12
+SPTBN1	lightgreen	circle	40	12
+SPTBN4	grey	circle	40	12
+SPTLC1	red	circle	120	36
+SQRDL	grey	circle	40	12
+SRGN	grey	circle	40	12
+SRPX	red	square	120	36
+SSH3	grey	circle	40	12
+SSPN	grey	circle	40	12
+SSX5	grey	circle	40	12
+ST3GAL2	lightgreen	circle	40	12
+ST7L	grey	circle	40	12
+STAT5A	grey	circle	40	12
+STAT5B	lightgreen	circle	40	12
+STC2	grey	circle	40	12
+STEAP1	lightgreen	circle	40	12
+STEAP4	grey	circle	40	12
+STIL	grey	circle	40	12
+STIP1	grey	circle	40	12
+STK24	lightgreen	circle	40	12
+STMN1	lightgreen	circle	40	12
+STMN2	lightgreen	circle	40	12
+STMN3	grey	circle	40	12
+STX16	grey	circle	40	12
+STX2	lightgreen	circle	40	12
+SUB1	grey	circle	40	12
+SUCLG2	grey	circle	40	12
+SULF1	grey	circle	40	12
+SULT1C4	grey	circle	40	12
+SULT2A1	grey	circle	40	12
+SUSD5	grey	circle	40	12
+SV2B	lightgreen	circle	40	12
+SVEP1	red	square	120	36
+SYNGR4	grey	circle	40	12
+SYNM	red	circle	120	36
+SYNPO2	grey	circle	40	12
+SYNPO2L	grey	circle	40	12
+SYT17	grey	circle	40	12
+SYTL2	grey	circle	40	12
+TAC1	grey	circle	40	12
+TACSTD2	grey	circle	40	12
+TAF9B	grey	circle	40	12
+TAGLN	grey	circle	40	12
+TAL1	lightgreen	circle	40	12
+TAS2R13	grey	circle	40	12
+TAX1BP3	grey	circle	40	12
+TBC1D1	grey	circle	40	12
+TBC1D7	grey	circle	40	12
+TBC1D9	grey	circle	40	12
+TBX1	grey	circle	40	12
+TBX2	lightgreen	circle	40	12
+TBX5	grey	circle	40	12
+TCEAL7	lightgreen	circle	40	12
+TCEB3B	grey	circle	40	12
+TCF7L2	lightgreen	circle	40	12
+TCN1	grey	circle	40	12
+TCOF1	lightgreen	circle	40	12
+TDGF1	grey	circle	40	12
+TEF	grey	circle	40	12
+TEK	lightgreen	circle	40	12
+TENC1	lightgreen	circle	40	12
+TES	lightgreen	circle	40	12
+TESC	grey	circle	40	12
+TF	grey	circle	40	12
+TFDP1	grey	circle	40	12
+TFF1	grey	circle	40	12
+TFPI	lightgreen	circle	40	12
+TFR2	grey	circle	40	12
+TGFA	grey	circle	40	12
+TGFB1I1	grey	circle	40	12
+TGFB2	lightgreen	circle	40	12
+TGFB3	lightgreen	circle	40	12
+TGFBI	lightgreen	circle	40	12
+TGFBR2	lightgreen	circle	40	12
+TGFBR3	lightgreen	circle	40	12
+TGM2	grey	circle	40	12
+THAP3	grey	circle	40	12
+THBD	lightgreen	circle	40	12
+THBS1	grey	circle	40	12
+THBS4	lightgreen	circle	40	12
+THRA	grey	circle	40	12
+THSD4	grey	circle	40	12
+THSD7A	lightgreen	circle	40	12
+THYN1	grey	circle	40	12
+TIE1	lightgreen	circle	40	12
+TIMP2	lightgreen	circle	40	12
+TIMP4	red	square	120	36
+TJP3	grey	circle	40	12
+TK1	grey	circle	40	12
+TK2	grey	circle	40	12
+TKT	grey	circle	40	12
+TLE4	grey	circle	40	12
+TLN2	lightgreen	circle	40	12
+TLR1	red	circle	120	36
+TLR3	grey	circle	40	12
+TM4SF1	grey	circle	40	12
+TM4SF20	grey	circle	40	12
+TMED2	grey	circle	40	12
+TMEFF1	grey	circle	40	12
+TMEM100	red	square	120	36
+TMEM143	grey	circle	40	12
+TMEM144	grey	circle	40	12
+TMEM158	lightgreen	circle	40	12
+TMEM180	grey	circle	40	12
+TMEM183A	red	circle	120	36
+TMEM38B	red	circle	120	36
+TMEM45A	grey	circle	40	12
+TMEM47	grey	circle	40	12
+TMOD3	grey	circle	40	12
+TMPRSS4	grey	circle	40	12
+TMSB10	grey	circle	40	12
+TNFAIP6	grey	circle	40	12
+TNFRSF21	grey	circle	40	12
+TNFRSF25	red	circle	120	36
+TNFSF12	lightgreen	circle	40	12
+TNMD	lightgreen	circle	40	12
+TNN	lightgreen	circle	40	12
+TNNC2	grey	circle	40	12
+TNP2	grey	circle	40	12
+TNS1	lightgreen	circle	40	12
+TNS3	grey	circle	40	12
+TNXB	red	square	120	36
+TOMM34	grey	circle	40	12
+TOP1	grey	circle	40	12
+TPM1	lightgreen	circle	40	12
+TPM2	grey	circle	40	12
+TPO	grey	circle	40	12
+TPPP	grey	circle	40	12
+TPRG1	grey	circle	40	12
+TPSAB1	grey	circle	40	12
+TPX2	grey	circle	40	12
+TRDN	grey	circle	40	12
+TREM1	lightgreen	circle	40	12
+TRHDE	grey	circle	40	12
+TRIB1	grey	circle	40	12
+TRIM23	grey	circle	40	12
+TRIM29	grey	circle	40	12
+TRIM46	grey	circle	40	12
+TRIM59	grey	circle	40	12
+TRO	lightgreen	circle	40	12
+TROAP	grey	circle	40	12
+TRPC3	grey	circle	40	12
+TRPC6	grey	circle	40	12
+TRPM1	grey	circle	40	12
+TSHZ2	red	square	120	36
+TSHZ3	grey	circle	40	12
+TSKU	grey	circle	40	12
+TSN	grey	circle	40	12
+TSPAN13	grey	circle	40	12
+TSPAN2	grey	circle	40	12
+TSPAN4	lightgreen	circle	40	12
+TSPAN7	lightgreen	circle	40	12
+TSPAN8	grey	circle	40	12
+TTC22	grey	circle	40	12
+TTC28	lightgreen	circle	40	12
+TTK	grey	circle	40	12
+TTLL3	grey	circle	40	12
+TUBA1A	lightgreen	circle	40	12
+TUBA1B	grey	circle	40	12
+TUBA4B	grey	circle	40	12
+TUBB	grey	circle	40	12
+TUBB2A	lightgreen	circle	40	12
+TUBB2B	grey	circle	40	12
+TUBB4	grey	circle	40	12
+TUBB6	lightgreen	circle	40	12
+TUBGCP3	grey	circle	40	12
+TUSC2	grey	circle	40	12
+TWIST1	grey	circle	40	12
+TXNIP	lightgreen	circle	40	12
+TXNL4A	grey	circle	40	12
+TYMS	grey	circle	40	12
+U32581	grey	circle	40	12
+U79275	grey	circle	40	12
+U79293	grey	circle	40	12
+UBE2A	grey	circle	40	12
+UBE2C	grey	circle	40	12
+UBE2D1	grey	circle	40	12
+UBE2E3	lightgreen	circle	40	12
+UBE2O	grey	circle	40	12
+UBE2S	grey	circle	40	12
+UCHL1	grey	circle	40	12
+UGT8	grey	circle	40	12
+UHRF1BP1	grey	circle	40	12
+ULK2	grey	circle	40	12
+UNC13A	grey	circle	40	12
+UPK1A	grey	circle	40	12
+UPP1	grey	circle	40	12
+USP2	grey	circle	40	12
+USP25	grey	circle	40	12
+USP39	grey	circle	40	12
+VAMP3	red	circle	120	36
+VCAN	grey	circle	40	12
+VGLL3	red	circle	120	36
+VILL	grey	circle	40	12
+VIM	lightgreen	circle	40	12
+VNN1	grey	circle	40	12
+VPS13B	grey	circle	40	12
+VPS13C	lightgreen	circle	40	12
+VSIG4	grey	circle	40	12
+VTCN1	grey	circle	40	12
+VWF	lightgreen	circle	40	12
+WAC	grey	circle	40	12
+WBP5	lightgreen	circle	40	12
+WDHD1	grey	circle	40	12
+WDR19	grey	circle	40	12
+WDTC1	grey	circle	40	12
+WFDC1	lightgreen	circle	40	12
+WISP2	grey	circle	40	12
+WNT11	grey	circle	40	12
+WNT3	grey	circle	40	12
+WNT5B	grey	circle	40	12
+WT1	grey	circle	40	12
+WWOX	grey	circle	40	12
+WWTR1	lightgreen	circle	40	12
+X61070	grey	circle	40	12
+XBP1	grey	circle	40	12
+XCR1	grey	circle	40	12
+XM_496572	grey	circle	40	12
+YWHAZ	grey	circle	40	12
+ZBTB20	lightgreen	circle	40	12
+ZBTB38	grey	circle	40	12
+ZBTB4	grey	circle	40	12
+ZCCHC24	red	circle	120	36
+ZEB1	lightgreen	circle	40	12
+ZFP36	lightgreen	circle	40	12
+ZFP36L2	lightgreen	circle	40	12
+ZHX3	grey	circle	40	12
+ZKSCAN4	grey	circle	40	12
+ZMIZ1	grey	circle	40	12
+ZNF141	grey	circle	40	12
+ZNF222	grey	circle	40	12
+ZNF257	grey	circle	40	12
+ZNF276	lightgreen	circle	40	12
+ZNF280B	grey	circle	40	12
+ZNF287	grey	circle	40	12
+ZNF302	grey	circle	40	12
+ZNF423	lightgreen	circle	40	12
+ZNF532	lightgreen	circle	40	12
+ZNF667	grey	circle	40	12
+ZNF675	grey	circle	40	12
+ZNF701	grey	circle	40	12
+ZNF839	grey	circle	40	12
+ZNF91	grey	circle	40	12
+ZWINT	grey	circle	40	12
+edge_color_levels	grey
+src	dst	type
+50	1	1
+1211	3	1
+1442	4	1
+1271	5	1
+1424	7	1
+849	7	1
+380	7	1
+1748	9	1
+1317	10	1
+228	11	1
+545	12	1
+414	13	1
+1753	13	1
+1748	14	1
+565	15	1
+1587	16	1
+843	17	1
+370	18	1
+1575	18	1
+1730	18	1
+843	18	1
+942	18	1
+1045	18	1
+65	18	1
+459	18	1
+1041	19	1
+854	19	1
+885	19	1
+459	19	1
+972	19	1
+857	19	1
+576	20	1
+1193	21	1
+835	22	1
+232	22	1
+26	22	1
+541	23	1
+629	24	1
+370	25	1
+501	26	1
+1334	26	1
+1791	26	1
+1388	27	1
+1709	28	1
+844	28	1
+143	28	1
+1650	28	1
+565	29	1
+723	30	1
+876	30	1
+1095	31	1
+565	32	1
+541	33	1
+565	34	1
+286	35	1
+1708	36	1
+1593	37	1
+565	38	1
+65	40	1
+121	41	1
+1365	41	1
+284	41	1
+1282	42	1
+1832	44	1
+1651	45	1
+1515	45	1
+1020	46	1
+907	48	1
+124	50	1
+1628	51	1
+1040	52	1
+1806	55	1
+1786	55	1
+859	56	1
+689	56	1
+1332	56	1
+1586	60	1
+143	61	1
+384	62	1
+319	63	1
+964	63	1
+115	63	1
+1282	64	1
+509	65	1
+581	65	1
+1282	65	1
+64	65	1
+65	66	1
+18	66	1
+1282	67	1
+271	68	1
+1681	68	1
+862	68	1
+545	68	1
+1831	70	1
+1188	70	1
+487	72	1
+1748	73	1
+819	74	1
+755	75	1
+459	76	1
+523	77	1
+1009	78	1
+1433	79	1
+690	79	1
+943	79	1
+840	79	1
+1071	79	1
+565	80	1
+566	81	1
+1755	81	1
+1457	81	1
+193	81	1
+1756	81	1
+907	82	1
+1087	82	1
+30	83	1
+565	84	1
+1748	85	1
+755	86	1
+723	88	1
+1317	89	1
+1349	90	1
+1240	90	1
+714	92	1
+843	92	1
+755	94	1
+64	95	1
+96	95	1
+581	96	1
+67	96	1
+1410	96	1
+96	97	1
+581	97	1
+95	97	1
+295	97	1
+683	98	1
+1332	98	1
+1120	98	1
+979	98	1
+1665	99	1
+1786	101	1
+1086	102	1
+885	103	1
+1352	103	1
+843	103	1
+200	103	1
+370	104	1
+93	104	1
+1291	104	1
+641	105	1
+65	106	1
+1587	107	1
+412	109	1
+1674	110	1
+710	110	1
+150	111	1
+889	112	1
+21	112	1
+615	112	1
+980	113	1
+1615	114	1
+1410	115	1
+957	115	1
+68	115	1
+736	115	1
+820	115	1
+1710	116	1
+92	116	1
+1040	116	1
+1184	117	1
+1075	117	1
+59	117	1
+1287	117	1
+454	118	1
+579	119	1
+1615	120	1
+1473	120	1
+1803	121	1
+342	123	1
+121	123	1
+945	123	1
+521	123	1
+565	125	1
+370	126	1
+295	126	1
+876	126	1
+1282	126	1
+777	126	1
+1243	127	1
+1614	127	1
+1038	130	1
+381	131	1
+688	132	1
+700	132	1
+924	133	1
+203	133	1
+1135	134	1
+306	136	1
+459	136	1
+18	136	1
+765	137	1
+1040	138	1
+211	138	1
+459	138	1
+723	139	1
+374	139	1
+1054	140	1
+1674	142	1
+623	142	1
+1472	142	1
+545	144	1
+1576	145	1
+507	147	1
+153	148	1
+870	148	1
+408	149	1
+289	150	1
+360	151	1
+785	151	1
+151	152	1
+932	153	1
+1850	154	1
+1341	154	1
+565	156	1
+546	157	1
+1242	159	1
+581	160	1
+723	160	1
+1020	161	1
+638	162	1
+924	163	1
+454	164	1
+859	164	1
+545	165	1
+1786	166	1
+1509	167	1
+64	167	1
+1138	167	1
+1708	167	1
+876	167	1
+330	168	1
+426	169	1
+1020	170	1
+545	171	1
+1845	172	1
+942	173	1
+1748	174	1
+81	178	1
+1469	179	1
+138	180	1
+689	181	1
+1162	182	1
+1488	182	1
+354	185	1
+1185	186	1
+782	188	1
+1185	189	1
+1197	190	1
+1786	191	1
+1681	192	1
+1832	194	1
+1605	197	1
+1617	199	1
+778	199	1
+751	200	1
+442	201	1
+1338	202	1
+353	203	1
+1697	203	1
+176	203	1
+1784	203	1
+312	203	1
+1274	206	1
+1615	207	1
+532	208	1
+401	209	1
+565	210	1
+1040	212	1
+104	214	1
+1274	215	1
+545	217	1
+857	218	1
+501	219	1
+537	220	1
+565	224	1
+525	225	1
+1748	226	1
+1015	227	1
+370	228	1
+1040	228	1
+755	230	1
+1355	231	1
+924	233	1
+1048	234	1
+638	236	1
+104	237	1
+1249	238	1
+1296	238	1
+1314	239	1
+1587	240	1
+965	242	1
+396	243	1
+1680	243	1
+380	246	1
+1473	247	1
+1587	248	1
+7	249	1
+565	250	1
+796	251	1
+924	252	1
+565	253	1
+283	253	1
+150	254	1
+1669	255	1
+857	255	1
+442	255	1
+565	256	1
+565	257	1
+1730	258	1
+459	258	1
+541	258	1
+64	258	1
+1583	259	1
+715	261	1
+689	261	1
+198	262	1
+1773	263	1
+1016	264	1
+1281	265	1
+1054	266	1
+565	267	1
+96	269	1
+1640	270	1
+402	272	1
+380	274	1
+1786	275	1
+565	276	1
+616	277	1
+439	277	1
+399	278	1
+167	278	1
+95	279	1
+1169	280	1
+582	281	1
+1669	282	1
+1612	283	1
+260	283	1
+1578	283	1
+1799	283	1
+1747	286	1
+1070	286	1
+1518	286	1
+1197	287	1
+942	288	1
+567	290	1
+545	291	1
+1509	292	1
+1641	293	1
+886	294	1
+1459	294	1
+756	294	1
+1308	294	1
+628	295	1
+819	295	1
+1282	295	1
+18	295	1
+541	295	1
+295	296	1
+713	296	1
+1716	296	1
+121	296	1
+942	296	1
+150	297	1
+1122	298	1
+300	299	1
+1422	300	1
+1828	300	1
+1693	301	1
+1016	301	1
+755	301	1
+1214	302	1
+56	303	1
+402	305	1
+138	306	1
+459	306	1
+151	307	1
+857	308	1
+459	308	1
+859	309	1
+924	310	1
+459	311	1
+308	311	1
+1035	313	1
+699	313	1
+1732	315	1
+320	317	1
+308	320	1
+382	320	1
+459	320	1
+616	320	1
+320	321	1
+545	322	1
+1430	323	1
+260	323	1
+731	324	1
+1509	324	1
+981	325	1
+581	325	1
+1498	325	1
+1410	325	1
+1135	327	1
+1833	328	1
+501	328	1
+849	329	1
+343	329	1
+1706	330	1
+1609	330	1
+1332	330	1
+924	331	1
+924	332	1
+1313	333	1
+1017	334	1
+402	335	1
+354	336	1
+924	337	1
+924	338	1
+401	339	1
+1016	340	1
+1711	341	1
+540	343	1
+1097	344	1
+138	345	1
+923	345	1
+1615	345	1
+396	345	1
+806	347	1
+295	347	1
+890	348	1
+495	349	1
+1351	350	1
+1615	350	1
+686	350	1
+221	350	1
+350	351	1
+439	352	1
+1082	354	1
+1784	354	1
+746	354	1
+510	354	1
+924	356	1
+1231	357	1
+304	358	1
+628	358	1
+628	359	1
+370	359	1
+581	359	1
+1282	359	1
+627	360	1
+361	360	1
+1615	360	1
+495	360	1
+1045	360	1
+242	360	1
+1801	360	1
+295	360	1
+1243	362	1
+1786	364	1
+924	365	1
+1045	366	1
+200	366	1
+1002	366	1
+565	367	1
+1001	368	1
+843	369	1
+1708	369	1
+638	369	1
+18	369	1
+459	370	1
+65	370	1
+628	370	1
+723	373	1
+1282	373	1
+67	374	1
+1217	374	1
+1282	374	1
+53	375	1
+537	375	1
+396	375	1
+610	375	1
+711	375	1
+924	376	1
+564	377	1
+1002	380	1
+579	380	1
+1227	380	1
+1569	380	1
+1226	381	1
+1730	381	1
+885	382	1
+1040	382	1
+616	382	1
+1041	384	1
+370	384	1
+628	384	1
+1226	384	1
+1605	385	1
+1260	386	1
+1439	386	1
+1363	386	1
+696	387	1
+295	387	1
+167	387	1
+442	388	1
+556	389	1
+1485	389	1
+96	389	1
+306	390	1
+1269	391	1
+43	392	1
+935	392	1
+459	393	1
+258	393	1
+1828	394	1
+1414	396	1
+489	396	1
+965	397	1
+1754	397	1
+375	398	1
+638	398	1
+182	399	1
+551	399	1
+1488	399	1
+857	399	1
+302	400	1
+1636	401	1
+976	401	1
+1681	401	1
+545	402	1
+947	402	1
+695	402	1
+506	402	1
+1688	407	1
+607	408	1
+347	410	1
+843	410	1
+1086	410	1
+1663	411	1
+616	412	1
+1738	412	1
+977	413	1
+512	414	1
+942	414	1
+461	414	1
+1601	414	1
+380	415	1
+439	416	1
+1828	417	1
+1001	418	1
+1045	419	1
+1586	420	1
+1332	421	1
+1058	422	1
+736	423	1
+581	423	1
+819	423	1
+565	424	1
+924	425	1
+830	426	1
+1757	426	1
+1243	427	1
+1332	428	1
+1162	429	1
+607	429	1
+167	429	1
+401	430	1
+284	431	1
+686	431	1
+121	431	1
+952	431	1
+395	432	1
+938	432	1
+974	432	1
+354	433	1
+454	434	1
+1073	436	1
+1449	437	1
+1114	437	1
+627	437	1
+638	437	1
+793	439	1
+616	439	1
+1846	440	1
+1411	441	1
+444	441	1
+1615	442	1
+661	442	1
+461	442	1
+1516	442	1
+638	442	1
+600	443	1
+1831	443	1
+843	443	1
+859	444	1
+187	444	1
+646	444	1
+523	444	1
+115	445	1
+324	446	1
+1180	448	1
+1615	449	1
+628	449	1
+942	450	1
+565	451	1
+565	452	1
+1045	453	1
+108	454	1
+1555	454	1
+683	454	1
+501	454	1
+523	454	1
+944	454	1
+1243	455	1
+18	455	1
+950	456	1
+1615	457	1
+1587	458	1
+396	459	1
+1040	459	1
+311	460	1
+638	461	1
+1551	462	1
+545	463	1
+508	465	1
+1627	465	1
+773	465	1
+1613	465	1
+924	467	1
+582	468	1
+1777	470	1
+1106	471	1
+360	471	1
+924	471	1
+1220	472	1
+150	473	1
+150	474	1
+1350	478	1
+684	479	1
+1332	480	1
+715	480	1
+396	481	1
+733	481	1
+1041	481	1
+882	481	1
+357	481	1
+545	483	1
+1601	484	1
+1041	484	1
+358	486	1
+1269	487	1
+1487	487	1
+158	487	1
+1424	487	1
+1586	488	1
+588	490	1
+1733	492	1
+18	493	1
+242	494	1
+461	494	1
+461	495	1
+610	495	1
+661	495	1
+1522	495	1
+1641	495	1
+397	496	1
+1803	496	1
+1041	496	1
+7	496	1
+521	498	1
+396	499	1
+1430	499	1
+924	500	1
+283	501	1
+645	501	1
+924	502	1
+1609	503	1
+1415	505	1
+1395	505	1
+461	507	1
+372	507	1
+284	507	1
+1709	507	1
+1325	507	1
+924	508	1
+126	509	1
+41	511	1
+396	512	1
+1332	514	1
+306	514	1
+999	514	1
+565	515	1
+1332	516	1
+958	516	1
+495	517	1
+1693	520	1
+1521	521	1
+1681	522	1
+1783	523	1
+646	523	1
+645	523	1
+1753	523	1
+689	524	1
+523	524	1
+640	524	1
+645	525	1
+1674	525	1
+523	525	1
+999	526	1
+1678	527	1
+567	529	1
+306	533	1
+1015	533	1
+1610	534	1
+1576	535	1
+295	536	1
+396	537	1
+609	537	1
+398	537	1
+755	538	1
+459	541	1
+726	541	1
+1045	541	1
+283	541	1
+683	543	1
+647	544	1
+818	545	1
+778	545	1
+143	545	1
+1253	545	1
+682	545	1
+401	546	1
+370	547	1
+697	547	1
+907	548	1
+397	549	1
+343	549	1
+887	550	1
+1587	552	1
+1645	553	1
+67	553	1
+1600	553	1
+545	555	1
+594	557	1
+907	558	1
+455	558	1
+565	560	1
+142	561	1
+848	562	1
+487	563	1
+128	565	1
+1052	565	1
+1782	565	1
+1657	565	1
+646	567	1
+650	568	1
+924	569	1
+948	571	1
+1487	571	1
+565	572	1
+1766	573	1
+890	575	1
+1516	576	1
+1414	576	1
+497	576	1
+1724	577	1
+1617	578	1
+684	579	1
+1523	579	1
+1601	579	1
+396	580	1
+1247	580	1
+843	580	1
+1282	581	1
+67	581	1
+1410	581	1
+952	582	1
+1681	582	1
+648	582	1
+1220	582	1
+121	582	1
+715	583	1
+1773	584	1
+423	585	1
+138	585	1
+1624	587	1
+1587	589	1
+381	590	1
+1845	590	1
+1332	591	1
+765	592	1
+565	593	1
+1160	594	1
+1002	595	1
+755	596	1
+926	597	1
+1669	598	1
+1575	599	1
+1164	601	1
+1089	601	1
+1441	601	1
+136	602	1
+66	603	1
+907	604	1
+208	605	1
+821	607	1
+475	607	1
+1827	607	1
+992	607	1
+1326	607	1
+396	608	1
+942	609	1
+507	611	1
+132	612	1
+692	613	1
+545	614	1
+1045	616	1
+18	616	1
+1041	616	1
+396	616	1
+439	618	1
+1708	619	1
+1693	620	1
+1242	622	1
+407	624	1
+485	624	1
+1522	624	1
+1294	624	1
+1203	625	1
+1010	625	1
+1176	625	1
+1332	625	1
+1220	626	1
+126	628	1
+67	628	1
+461	628	1
+1282	628	1
+736	628	1
+512	628	1
+1041	628	1
+715	629	1
+1383	629	1
+306	630	1
+295	630	1
+973	631	1
+1187	632	1
+1380	632	1
+513	633	1
+64	633	1
+900	633	1
+18	633	1
+629	634	1
+1678	635	1
+875	635	1
+565	637	1
+1604	638	1
+1045	638	1
+1831	638	1
+283	639	1
+477	639	1
+1232	641	1
+242	641	1
+1730	642	1
+1233	643	1
+396	643	1
+1600	643	1
+646	645	1
+501	646	1
+1289	647	1
+1333	647	1
+565	649	1
+1746	650	1
+375	651	1
+924	653	1
+878	654	1
+1040	655	1
+1753	655	1
+1243	657	1
+360	658	1
+942	659	1
+1197	659	1
+1231	659	1
+243	659	1
+103	659	1
+1212	660	1
+1002	662	1
+167	662	1
+295	664	1
+1730	664	1
+126	665	1
+414	667	1
+67	668	1
+1282	668	1
+755	669	1
+1478	671	1
+755	672	1
+715	673	1
+2	674	1
+752	674	1
+1055	674	1
+607	675	1
+582	676	1
+880	677	1
+707	678	1
+1324	678	1
+1351	678	1
+586	678	1
+1786	679	1
+711	680	1
+1408	681	1
+461	684	1
+1617	684	1
+838	684	1
+1831	684	1
+412	685	1
+565	686	1
+129	687	1
+1729	687	1
+1213	689	1
+1045	689	1
+579	689	1
+1601	689	1
+565	691	1
+1045	692	1
+405	692	1
+1073	693	1
+581	693	1
+1282	693	1
+1467	694	1
+907	697	1
+843	701	1
+1601	701	1
+138	701	1
+381	702	1
+950	702	1
+581	703	1
+284	704	1
+1188	705	1
+1831	705	1
+684	706	1
+6	709	1
+87	709	1
+929	712	1
+999	713	1
+343	714	1
+1797	715	1
+1749	715	1
+447	715	1
+1210	715	1
+354	716	1
+545	717	1
+545	718	1
+1577	719	1
+65	720	1
+370	721	1
+18	721	1
+65	721	1
+668	723	1
+1282	723	1
+981	724	1
+399	725	1
+540	726	1
+628	726	1
+1468	727	1
+567	728	1
+1669	729	1
+396	730	1
+1002	730	1
+1033	731	1
+1472	732	1
+1602	734	1
+776	735	1
+581	736	1
+1282	736	1
+1528	736	1
+937	738	1
+567	739	1
+1164	740	1
+1287	741	1
+904	742	1
+521	743	1
+381	744	1
+138	744	1
+1588	745	1
+501	745	1
+1243	747	1
+1832	749	1
+1217	750	1
+581	750	1
+1587	754	1
+874	755	1
+1252	758	1
+203	759	1
+638	760	1
+929	760	1
+1555	761	1
+273	761	1
+384	762	1
+1833	762	1
+763	762	1
+764	763	1
+167	764	1
+65	764	1
+501	764	1
+370	764	1
+454	765	1
+859	765	1
+1555	765	1
+1110	766	1
+848	767	1
+1244	769	1
+521	770	1
+412	771	1
+1577	775	1
+722	776	1
+260	776	1
+1604	776	1
+975	776	1
+375	777	1
+876	779	1
+1430	779	1
+776	780	1
+684	781	1
+1825	782	1
+1232	782	1
+708	782	1
+1723	783	1
+885	784	1
+1663	786	1
+924	787	1
+926	790	1
+924	791	1
+1681	792	1
+203	793	1
+396	794	1
+1748	795	1
+512	796	1
+1581	796	1
+1587	797	1
+1786	798	1
+1587	799	1
+431	800	1
+1392	801	1
+805	801	1
+803	802	1
+801	804	1
+1100	804	1
+805	804	1
+803	804	1
+803	805	1
+1360	805	1
+774	807	1
+995	807	1
+67	807	1
+412	808	1
+565	809	1
+807	810	1
+1586	810	1
+136	811	1
+18	812	1
+565	813	1
+1681	814	1
+206	815	1
+866	815	1
+497	815	1
+1433	815	1
+815	816	1
+782	817	1
+969	819	1
+1615	819	1
+150	820	1
+541	822	1
+819	823	1
+439	824	1
+1522	825	1
+857	825	1
+942	825	1
+406	825	1
+877	827	1
+553	828	1
+849	831	1
+831	832	1
+950	832	1
+1332	833	1
+454	834	1
+431	836	1
+645	837	1
+1484	841	1
+1748	842	1
+942	843	1
+1040	843	1
+396	843	1
+885	843	1
+655	843	1
+1017	845	1
+1045	846	1
+1822	847	1
+1730	848	1
+1002	848	1
+409	848	1
+1601	849	1
+579	850	1
+895	852	1
+402	853	1
+1641	854	1
+1284	855	1
+1167	856	1
+306	857	1
+1062	857	1
+459	857	1
+1041	857	1
+1849	859	1
+319	859	1
+1555	859	1
+1020	860	1
+271	862	1
+1822	862	1
+539	862	1
+1397	864	1
+208	865	1
+923	867	1
+1302	868	1
+1037	869	1
+363	869	1
+1444	869	1
+617	869	1
+1656	869	1
+1601	872	1
+1601	873	1
+942	875	1
+1282	876	1
+1730	876	1
+65	876	1
+138	876	1
+1226	876	1
+723	876	1
+1800	877	1
+1499	878	1
+1606	878	1
+874	878	1
+788	880	1
+222	880	1
+1646	880	1
+71	880	1
+1177	880	1
+942	883	1
+628	884	1
+1040	884	1
+698	885	1
+1040	885	1
+851	885	1
+459	885	1
+857	885	1
+636	885	1
+1028	888	1
+58	888	1
+1405	888	1
+1172	890	1
+1213	890	1
+1016	890	1
+117	890	1
+943	890	1
+406	891	1
+653	892	1
+501	893	1
+523	893	1
+1371	893	1
+645	894	1
+381	895	1
+1144	895	1
+545	896	1
+1593	897	1
+25	897	1
+1332	898	1
+414	899	1
+565	901	1
+132	902	1
+1230	903	1
+1332	904	1
+381	904	1
+565	905	1
+838	907	1
+1256	907	1
+1702	907	1
+1371	907	1
+295	907	1
+1500	908	1
+1501	908	1
+1486	909	1
+987	910	1
+461	910	1
+1026	910	1
+1050	911	1
+242	911	1
+300	912	1
+1587	914	1
+1086	915	1
+1693	916	1
+639	918	1
+924	919	1
+471	920	1
+203	921	1
+516	922	1
+223	924	1
+564	924	1
+353	924	1
+177	924	1
+312	924	1
+205	924	1
+684	925	1
+1015	925	1
+1594	926	1
+833	926	1
+1073	927	1
+18	928	1
+645	929	1
+628	929	1
+1832	931	1
+657	932	1
+464	932	1
+1527	932	1
+755	933	1
+885	934	1
+906	937	1
+936	937	1
+1745	937	1
+1770	940	1
+1831	942	1
+396	942	1
+491	942	1
+1575	942	1
+1714	942	1
+967	942	1
+1045	942	1
+943	946	1
+1002	949	1
+295	950	1
+1226	950	1
+1831	950	1
+343	950	1
+1741	951	1
+545	953	1
+545	954	1
+523	955	1
+1481	956	1
+981	957	1
+723	957	1
+1397	957	1
+1282	957	1
+778	957	1
+1332	958	1
+950	958	1
+18	958	1
+1828	959	1
+1615	959	1
+1509	960	1
+302	961	1
+1282	962	1
+1133	963	1
+295	965	1
+396	965	1
+509	965	1
+1601	965	1
+454	966	1
+567	966	1
+43	969	1
+1294	969	1
+1248	970	1
+1282	970	1
+581	970	1
+1274	971	1
+1693	972	1
+1038	972	1
+907	972	1
+1243	972	1
+1197	972	1
+392	973	1
+381	973	1
+43	973	1
+1045	977	1
+442	977	1
+8	979	1
+306	980	1
+1280	980	1
+1753	980	1
+1282	981	1
+581	981	1
+1786	982	1
+547	983	1
+1773	984	1
+803	985	1
+924	986	1
+755	988	1
+1845	989	1
+796	990	1
+1601	991	1
+843	991	1
+396	991	1
+235	991	1
+965	994	1
+439	996	1
+1615	997	1
+384	998	1
+663	999	1
+1390	999	1
+547	999	1
+1142	1001	1
+542	1001	1
+1412	1001	1
+378	1001	1
+734	1002	1
+19	1002	1
+396	1002	1
+1095	1002	1
+843	1002	1
+50	1003	1
+765	1004	1
+428	1005	1
+1086	1006	1
+19	1007	1
+262	1008	1
+47	1009	1
+138	1010	1
+1806	1011	1
+1033	1012	1
+167	1013	1
+581	1013	1
+843	1014	1
+18	1014	1
+184	1015	1
+195	1015	1
+1433	1016	1
+748	1016	1
+1678	1016	1
+263	1016	1
+943	1016	1
+213	1017	1
+1204	1017	1
+135	1017	1
+112	1019	1
+39	1020	1
+371	1020	1
+242	1020	1
+565	1021	1
+1015	1022	1
+41	1023	1
+1243	1024	1
+1040	1025	1
+958	1025	1
+655	1025	1
+1430	1027	1
+1711	1029	1
+782	1030	1
+1708	1031	1
+1166	1032	1
+1764	1033	1
+402	1033	1
+1773	1033	1
+459	1034	1
+697	1036	1
+150	1037	1
+636	1038	1
+249	1038	1
+1018	1038	1
+1682	1038	1
+396	1039	1
+1041	1040	1
+1217	1041	1
+18	1041	1
+295	1041	1
+1730	1041	1
+833	1042	1
+521	1042	1
+1542	1043	1
+396	1045	1
+103	1045	1
+924	1047	1
+843	1048	1
+1159	1048	1
+645	1048	1
+833	1048	1
+403	1049	1
+839	1049	1
+924	1051	1
+1615	1053	1
+574	1054	1
+1681	1054	1
+1061	1054	1
+858	1054	1
+1054	1056	1
+1274	1057	1
+396	1058	1
+537	1058	1
+1045	1058	1
+1845	1059	1
+419	1060	1
+1232	1060	1
+1722	1062	1
+306	1062	1
+904	1065	1
+876	1065	1
+325	1066	1
+1786	1067	1
+476	1068	1
+1025	1069	1
+885	1072	1
+412	1073	1
+1516	1074	1
+1521	1076	1
+819	1076	1
+545	1077	1
+150	1078	1
+1166	1079	1
+969	1080	1
+565	1081	1
+1585	1083	1
+621	1084	1
+1652	1085	1
+973	1086	1
+392	1086	1
+1088	1086	1
+876	1086	1
+1423	1086	1
+1652	1087	1
+392	1088	1
+285	1090	1
+53	1090	1
+18	1092	1
+258	1093	1
+1587	1094	1
+167	1095	1
+359	1095	1
+978	1095	1
+843	1095	1
+869	1097	1
+1341	1097	1
+355	1097	1
+1411	1098	1
+958	1099	1
+565	1101	1
+1317	1102	1
+2	1103	1
+1100	1103	1
+1681	1104	1
+1015	1105	1
+68	1108	1
+1766	1109	1
+1033	1111	1
+402	1111	1
+1090	1112	1
+757	1113	1
+1775	1113	1
+545	1115	1
+1587	1116	1
+1137	1117	1
+861	1117	1
+244	1117	1
+1361	1117	1
+973	1118	1
+1680	1118	1
+375	1118	1
+932	1119	1
+1680	1121	1
+1562	1122	1
+1046	1122	1
+981	1123	1
+1327	1124	1
+1828	1125	1
+1659	1127	1
+1730	1128	1
+459	1128	1
+1811	1129	1
+1832	1130	1
+565	1131	1
+1604	1133	1
+1360	1133	1
+1133	1134	1
+1400	1135	1
+1002	1135	1
+146	1135	1
+283	1136	1
+1135	1139	1
+1212	1140	1
+1442	1141	1
+1777	1143	1
+545	1145	1
+358	1147	1
+736	1148	1
+514	1148	1
+1228	1149	1
+469	1149	1
+957	1150	1
+1773	1151	1
+1359	1152	1
+1183	1152	1
+1185	1153	1
+487	1155	1
+638	1155	1
+1025	1155	1
+396	1156	1
+755	1157	1
+56	1158	1
+295	1162	1
+381	1162	1
+942	1163	1
+1525	1163	1
+204	1163	1
+499	1164	1
+396	1164	1
+907	1165	1
+958	1166	1
+501	1167	1
+646	1167	1
+454	1167	1
+645	1168	1
+501	1168	1
+554	1169	1
+538	1169	1
+359	1169	1
+1408	1170	1
+1693	1171	1
+1576	1172	1
+405	1172	1
+1730	1173	1
+689	1173	1
+918	1173	1
+796	1174	1
+659	1175	1
+1086	1176	1
+18	1176	1
+238	1179	1
+821	1180	1
+216	1180	1
+203	1182	1
+710	1185	1
+661	1185	1
+396	1185	1
+926	1186	1
+1641	1186	1
+888	1189	1
+487	1190	1
+924	1191	1
+1587	1194	1
+1640	1195	1
+439	1196	1
+907	1197	1
+796	1197	1
+68	1198	1
+976	1199	1
+951	1199	1
+908	1199	1
+1786	1200	1
+565	1201	1
+913	1202	1
+65	1205	1
+241	1206	1
+284	1206	1
+1242	1206	1
+1720	1206	1
+1185	1207	1
+330	1208	1
+132	1209	1
+1693	1212	1
+1002	1213	1
+1748	1214	1
+1104	1216	1
+458	1216	1
+970	1216	1
+1282	1217	1
+1695	1217	1
+723	1217	1
+268	1217	1
+1587	1218	1
+545	1219	1
+668	1220	1
+881	1220	1
+957	1220	1
+1410	1220	1
+581	1220	1
+1217	1220	1
+396	1221	1
+1831	1221	1
+608	1221	1
+1832	1221	1
+1107	1221	1
+1615	1221	1
+999	1222	1
+1397	1223	1
+1693	1223	1
+302	1224	1
+150	1225	1
+138	1226	1
+1730	1226	1
+150	1226	1
+150	1227	1
+628	1228	1
+67	1228	1
+1016	1229	1
+1678	1230	1
+1161	1230	1
+734	1231	1
+512	1231	1
+1784	1231	1
+1587	1234	1
+581	1235	1
+435	1236	1
+1088	1236	1
+1151	1236	1
+1784	1237	1
+1346	1237	1
+1711	1238	1
+1352	1239	1
+1221	1241	1
+411	1241	1
+512	1241	1
+1130	1242	1
+1213	1242	1
+396	1242	1
+696	1243	1
+789	1243	1
+541	1243	1
+1831	1244	1
+1232	1244	1
+581	1245	1
+1095	1246	1
+545	1249	1
+1075	1250	1
+1667	1250	1
+203	1251	1
+401	1252	1
+1693	1252	1
+753	1254	1
+18	1254	1
+545	1255	1
+1378	1257	1
+1002	1258	1
+306	1258	1
+399	1259	1
+545	1260	1
+609	1261	1
+924	1262	1
+1828	1263	1
+1287	1264	1
+465	1264	1
+148	1265	1
+370	1267	1
+1017	1268	1
+907	1269	1
+1324	1269	1
+538	1269	1
+1215	1269	1
+1538	1269	1
+1456	1270	1
+833	1272	1
+284	1272	1
+402	1273	1
+1681	1274	1
+1273	1274	1
+1753	1275	1
+565	1276	1
+1828	1277	1
+525	1278	1
+379	1279	1
+1790	1279	1
+1450	1279	1
+1517	1281	1
+242	1281	1
+482	1283	1
+442	1283	1
+1711	1284	1
+1636	1284	1
+1708	1285	1
+1773	1286	1
+942	1287	1
+965	1287	1
+1414	1287	1
+396	1287	1
+1723	1288	1
+782	1290	1
+1100	1292	1
+1075	1292	1
+487	1295	1
+888	1300	1
+857	1301	1
+1332	1302	1
+1342	1302	1
+370	1303	1
+628	1303	1
+1695	1303	1
+1162	1303	1
+208	1304	1
+249	1305	1
+1015	1306	1
+885	1307	1
+1015	1309	1
+1663	1310	1
+1045	1311	1
+1503	1312	1
+381	1312	1
+438	1313	1
+581	1314	1
+65	1314	1
+374	1314	1
+962	1314	1
+804	1316	1
+876	1317	1
+668	1317	1
+1399	1318	1
+1587	1319	1
+1155	1320	1
+1777	1321	1
+581	1322	1
+1416	1323	1
+1192	1323	1
+1052	1323	1
+1640	1328	1
+1700	1329	1
+943	1330	1
+1601	1332	1
+942	1332	1
+950	1332	1
+907	1332	1
+1733	1336	1
+1287	1337	1
+559	1338	1
+1284	1339	1
+1590	1340	1
+565	1343	1
+1766	1344	1
+1766	1345	1
+1587	1347	1
+354	1348	1
+608	1350	1
+1496	1350	1
+1623	1350	1
+1506	1350	1
+1002	1351	1
+907	1351	1
+19	1352	1
+958	1352	1
+1269	1352	1
+755	1352	1
+167	1352	1
+833	1352	1
+1640	1353	1
+570	1354	1
+1522	1354	1
+56	1355	1
+1504	1355	1
+523	1355	1
+444	1355	1
+1269	1355	1
+1041	1355	1
+142	1356	1
+1097	1357	1
+1560	1358	1
+1518	1358	1
+1045	1360	1
+633	1362	1
+546	1363	1
+965	1364	1
+1786	1366	1
+950	1367	1
+206	1368	1
+442	1369	1
+387	1369	1
+1269	1370	1
+1146	1372	1
+924	1373	1
+1681	1375	1
+1270	1376	1
+991	1377	1
+1407	1378	1
+636	1378	1
+402	1378	1
+229	1378	1
+1269	1379	1
+1652	1381	1
+150	1382	1
+68	1384	1
+857	1385	1
+1038	1387	1
+1033	1388	1
+924	1389	1
+1103	1391	1
+1293	1393	1
+1430	1393	1
+208	1394	1
+1270	1396	1
+1784	1397	1
+772	1397	1
+381	1397	1
+533	1397	1
+565	1398	1
+1397	1400	1
+1680	1401	1
+437	1402	1
+1330	1403	1
+1693	1404	1
+1452	1408	1
+449	1409	1
+1282	1410	1
+67	1410	1
+955	1411	1
+175	1411	1
+1329	1411	1
+668	1413	1
+1681	1417	1
+565	1418	1
+1287	1419	1
+1332	1420	1
+565	1421	1
+895	1423	1
+1730	1423	1
+138	1423	1
+366	1424	1
+981	1425	1
+412	1426	1
+1555	1427	1
+454	1427	1
+1491	1427	1
+444	1427	1
+924	1428	1
+884	1429	1
+1518	1429	1
+821	1429	1
+541	1430	1
+1851	1430	1
+1601	1430	1
+1612	1430	1
+1509	1430	1
+18	1431	1
+1663	1432	1
+1680	1434	1
+1669	1434	1
+885	1435	1
+387	1436	1
+50	1437	1
+878	1438	1
+1669	1440	1
+155	1442	1
+670	1442	1
+414	1443	1
+607	1445	1
+1777	1446	1
+1700	1447	1
+1329	1448	1
+242	1451	1
+431	1452	1
+750	1453	1
+138	1454	1
+1832	1455	1
+1258	1458	1
+1386	1458	1
+656	1458	1
+638	1458	1
+1468	1460	1
+28	1461	1
+1091	1462	1
+439	1463	1
+547	1464	1
+428	1465	1
+1468	1466	1
+306	1466	1
+346	1467	1
+741	1467	1
+1045	1468	1
+222	1468	1
+396	1468	1
+638	1468	1
+1221	1468	1
+523	1468	1
+1206	1469	1
+1678	1469	1
+937	1470	1
+971	1471	1
+122	1471	1
+1406	1471	1
+1681	1473	1
+1378	1473	1
+961	1473	1
+1471	1474	1
+519	1474	1
+1206	1474	1
+1054	1475	1
+521	1476	1
+924	1477	1
+668	1478	1
+1521	1478	1
+423	1478	1
+581	1478	1
+1672	1478	1
+941	1479	1
+607	1480	1
+245	1481	1
+710	1481	1
+484	1482	1
+1753	1483	1
+187	1484	1
+1852	1484	1
+1543	1484	1
+1172	1486	1
+466	1488	1
+1522	1488	1
+1315	1488	1
+1354	1488	1
+885	1489	1
+1020	1490	1
+1327	1492	1
+1221	1493	1
+1040	1494	1
+1045	1494	1
+1283	1495	1
+880	1497	1
+18	1498	1
+1287	1499	1
+459	1504	1
+308	1504	1
+859	1504	1
+459	1505	1
+897	1507	1
+1615	1508	1
+1696	1508	1
+645	1509	1
+1669	1509	1
+876	1509	1
+567	1510	1
+1002	1511	1
+1744	1512	1
+1601	1512	1
+886	1512	1
+1133	1513	1
+1711	1518	1
+1045	1519	1
+736	1520	1
+843	1521	1
+1575	1521	1
+461	1522	1
+1188	1522	1
+882	1522	1
+1000	1524	1
+195	1524	1
+1615	1525	1
+957	1526	1
+1806	1527	1
+1287	1529	1
+1601	1529	1
+1773	1530	1
+507	1531	1
+1669	1532	1
+412	1533	1
+396	1534	1
+545	1535	1
+1833	1536	1
+1038	1537	1
+1832	1538	1
+924	1539	1
+1832	1540	1
+1274	1540	1
+628	1540	1
+1243	1541	1
+829	1542	1
+1274	1544	1
+1681	1544	1
+942	1545	1
+565	1546	1
+726	1547	1
+1665	1548	1
+1738	1549	1
+412	1549	1
+565	1550	1
+1827	1551	1
+1243	1552	1
+401	1553	1
+1297	1554	1
+68	1555	1
+1605	1556	1
+819	1557	1
+286	1558	1
+1468	1559	1
+565	1560	1
+41	1561	1
+582	1563	1
+1284	1564	1
+755	1565	1
+1770	1566	1
+723	1567	1
+957	1567	1
+924	1568	1
+300	1570	1
+495	1571	1
+381	1572	1
+1041	1573	1
+1654	1574	1
+1414	1574	1
+1026	1574	1
+509	1575	1
+1601	1575	1
+360	1575	1
+396	1575	1
+1414	1576	1
+495	1576	1
+628	1576	1
+384	1576	1
+1514	1577	1
+1468	1579	1
+1488	1580	1
+518	1582	1
+1025	1583	1
+1615	1583	1
+1213	1583	1
+396	1583	1
+203	1584	1
+1094	1585	1
+49	1585	1
+260	1585	1
+1096	1585	1
+504	1585	1
+879	1586	1
+1739	1587	1
+718	1587	1
+638	1587	1
+1828	1587	1
+638	1589	1
+1084	1590	1
+930	1590	1
+1833	1590	1
+150	1591	1
+1424	1591	1
+132	1592	1
+295	1593	1
+581	1593	1
+126	1593	1
+1282	1593	1
+565	1595	1
+1040	1596	1
+81	1597	1
+523	1598	1
+203	1599	1
+1299	1601	1
+607	1603	1
+1681	1605	1
+443	1607	1
+396	1608	1
+1213	1609	1
+1332	1609	1
+1041	1610	1
+1126	1610	1
+745	1610	1
+1627	1610	1
+132	1611	1
+459	1615	1
+1516	1615	1
+944	1615	1
+1332	1615	1
+1232	1615	1
+565	1616	1
+1048	1616	1
+350	1616	1
+399	1618	1
+1037	1619	1
+1298	1619	1
+887	1619	1
+1423	1620	1
+1622	1621	1
+1784	1622	1
+1587	1622	1
+370	1624	1
+1615	1624	1
+91	1624	1
+1317	1625	1
+924	1626	1
+818	1628	1
+183	1628	1
+871	1628	1
+222	1629	1
+917	1629	1
+1734	1630	1
+863	1630	1
+882	1630	1
+1097	1631	1
+1097	1632	1
+79	1633	1
+326	1633	1
+880	1634	1
+545	1635	1
+1054	1636	1
+876	1637	1
+507	1638	1
+1283	1639	1
+126	1640	1
+1750	1640	1
+381	1640	1
+18	1641	1
+1197	1642	1
+579	1644	1
+1640	1647	1
+1086	1648	1
+1494	1649	1
+392	1651	1
+195	1652	1
+69	1652	1
+521	1653	1
+1016	1655	1
+1097	1658	1
+1693	1659	1
+862	1660	1
+1601	1661	1
+1020	1662	1
+1154	1663	1
+1242	1663	1
+396	1664	1
+141	1665	1
+480	1665	1
+1762	1665	1
+374	1666	1
+1041	1668	1
+108	1668	1
+1575	1669	1
+1335	1669	1
+314	1670	1
+459	1671	1
+1040	1671	1
+1220	1672	1
+1628	1673	1
+228	1675	1
+973	1675	1
+1164	1676	1
+392	1676	1
+150	1677	1
+530	1679	1
+993	1679	1
+454	1679	1
+123	1679	1
+396	1680	1
+778	1680	1
+826	1680	1
+1711	1681	1
+644	1681	1
+318	1681	1
+316	1681	1
+1064	1681	1
+976	1681	1
+383	1682	1
+1041	1682	1
+745	1682	1
+370	1683	1
+900	1683	1
+138	1683	1
+843	1683	1
+843	1684	1
+1054	1685	1
+1243	1686	1
+442	1686	1
+745	1687	1
+1831	1688	1
+1081	1688	1
+843	1688	1
+126	1688	1
+1509	1689	1
+1786	1690	1
+1730	1691	1
+1096	1691	1
+167	1692	1
+616	1692	1
+381	1693	1
+950	1693	1
+792	1694	1
+1057	1694	1
+1681	1694	1
+67	1695	1
+1282	1695	1
+65	1695	1
+723	1695	1
+1045	1698	1
+545	1699	1
+694	1701	1
+939	1701	1
+1197	1703	1
+1327	1704	1
+1062	1705	1
+1711	1707	1
+1785	1708	1
+370	1708	1
+1173	1708	1
+843	1708	1
+648	1711	1
+1720	1711	1
+1274	1711	1
+1132	1711	1
+976	1711	1
+866	1711	1
+857	1712	1
+1773	1715	1
+1332	1716	1
+545	1717	1
+1076	1718	1
+1587	1719	1
+565	1721	1
+1135	1722	1
+1197	1723	1
+374	1724	1
+581	1724	1
+1045	1725	1
+1624	1726	1
+755	1727	1
+1266	1728	1
+196	1728	1
+1040	1730	1
+1254	1730	1
+459	1730	1
+1498	1730	1
+907	1731	1
+1015	1732	1
+528	1733	1
+1374	1733	1
+1711	1733	1
+1504	1735	1
+565	1736	1
+565	1737	1
+1327	1740	1
+1605	1741	1
+1544	1741	1
+668	1742	1
+67	1742	1
+893	1743	1
+1678	1748	1
+768	1748	1
+138	1751	1
+755	1752	1
+968	1753	1
+1713	1753	1
+1643	1753	1
+582	1758	1
+1178	1759	1
+950	1760	1
+66	1761	1
+1468	1761	1
+1831	1763	1
+545	1765	1
+531	1766	1
+100	1766	1
+1181	1766	1
+1766	1767	1
+401	1768	1
+354	1769	1
+1049	1770	1
+1772	1770	1
+431	1771	1
+1766	1772	1
+1433	1773	1
+57	1773	1
+1273	1773	1
+1325	1773	1
+1378	1774	1
+302	1776	1
+18	1777	1
+1243	1777	1
+484	1777	1
+203	1778	1
+1615	1779	1
+1015	1780	1
+523	1781	1
+924	1784	1
+276	1786	1
+666	1786	1
+1331	1786	1
+203	1787	1
+1529	1788	1
+203	1788	1
+582	1789	1
+1773	1789	1
+545	1792	1
+1488	1793	1
+1846	1794	1
+1681	1795	1
+1694	1796	1
+1583	1796	1
+1766	1798	1
+545	1799	1
+18	1802	1
+300	1802	1
+404	1803	1
+849	1803	1
+1371	1803	1
+1773	1803	1
+406	1803	1
+41	1804	1
+1730	1805	1
+1587	1806	1
+576	1807	1
+1048	1808	1
+459	1809	1
+545	1810	1
+1502	1811	1
+737	1811	1
+284	1811	1
+981	1812	1
+565	1813	1
+1016	1814	1
+392	1815	1
+652	1815	1
+1734	1815	1
+1522	1816	1
+680	1816	1
+1708	1817	1
+601	1818	1
+1711	1819	1
+1054	1820	1
+980	1821	1
+1786	1822	1
+342	1822	1
+946	1823	1
+350	1824	1
+1197	1825	1
+1615	1826	1
+1601	1828	1
+1831	1828	1
+1806	1829	1
+924	1830	1
+1045	1831	1
+1799	1832	1
+461	1832	1
+1044	1832	1
+480	1832	1
+610	1832	1
+646	1833	1
+454	1833	1
+1045	1834	1
+151	1834	1
+659	1835	1
+755	1836	1
+1652	1837	1
+160	1838	1
+1016	1839	1
+946	1840	1
+1681	1840	1
+606	1841	1
+54	1841	1
+375	1842	1
+755	1843	1
+1197	1844	1
+1831	1845	1
+1063	1845	1
+1518	1846	1
+1086	1847	1
+585	1848	1

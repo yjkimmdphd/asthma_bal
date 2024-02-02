@@ -194,8 +194,6 @@ print(sapply(df.pos,dim)[1,])
 # nasal expression = ~ log(cell count>=0) + batch4 vs other batch
 #################################################################
 # coldata for DESeq2
-head(nphen) 
-# count table for DESeq2
 df.input<-df
 
 # filtering counts table to remove low expressed genes
@@ -270,8 +268,6 @@ if(dir.exists(deg.dir)){
 # nasal expression = ~ log(cell count>0) + batch4 vs other batch
 #################################################################
 # coldata for DESeq2
-head(nphen)
-# count table for DESeq2
 df.input<-df.pos
 
 
@@ -494,7 +490,7 @@ if(dir.exists(deg.dir)){
   a<-generate_DEG_input_summary_table()
   write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg",unique(phen$Type),"poscells","analysis_input","cellcount+IsBatch4",Sys.Date(),".csv",sep="_"))) #specify allcells vs poscells
 }
-
+e
 ## summary table of the DEG analysis
 if(dir.exists(deg.dir)){
   a<-generate_DEG_summary_table()

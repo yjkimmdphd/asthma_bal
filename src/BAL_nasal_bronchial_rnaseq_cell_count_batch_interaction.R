@@ -217,7 +217,7 @@ c2<-filter_low_expressed_genes_method2(ct,4)
 
 ## design: Batches. all cell counts 
 
-deg.design<-paste("~",source.cell.log,"+ Batch")
+deg.design<-paste("~",source.cell.log,"+ Batch +",paste(source.cell.log,"Batch",sep=":"))
 ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered 
 
 print(deg.design)
@@ -288,7 +288,7 @@ c2<-filter_low_expressed_genes_method2(ct,4)
 
 # run the DEG for continuous predictors
 
-deg.design<-paste("~",source.cell.log,"+ Batch") # set design: nasal expression ~ log(cell count>0) + Batch 
+deg.design<-paste("~",source.cell.log,"+ Batch +",paste(source.cell.log,"Batch",sep=":")) # set design: nasal expression ~ log(cell count>0) + Batch 
 ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered using method 2: use TMM normalized lcpm as a cutoff point
 
 print(deg.design)
@@ -381,7 +381,7 @@ c2<-filter_low_expressed_genes_method2(ct,4)
 
 # run the DEG for continuous predictors
 
-deg.design<-paste("~",source.cell.log,"+ Batch") # set design: nasal expression ~ log(cell count>0) + Batch 
+deg.design<-paste("~",source.cell.log,"+ Batch +",paste(source.cell.log,"Batch",sep=":")) # set design: nasal expression ~ log(cell count>0) + Batch 
 ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered using method 2: use TMM normalized lcpm as a cutoff point
 
 print(deg.design)
@@ -449,7 +449,7 @@ c2<-filter_low_expressed_genes_method2(ct,4)
 
 # run the DEG for continuous predictors
 
-deg.design<-paste("~",source.cell.log,"+ Batch") # set design: nasal expression ~ log(cell count>0) + Batch 
+deg.design<-paste("~",source.cell.log,"+ Batch +",paste(source.cell.log,"Batch",sep=":")) # set design: nasal expression ~ log(cell count>0) + Batch 
 ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered using method 2: use TMM normalized lcpm as a cutoff point
 
 print(deg.design)

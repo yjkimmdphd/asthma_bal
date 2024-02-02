@@ -1,8 +1,10 @@
+##
+# RNAseq with nasal/bronchial rna expression ~ dichotomous cell count (ie percent > threshold, count > threshold) + batch
+## 
 library(limma)
 library(edgeR)
 library(dplyr)
 library(DESeq2)
-
 ######################
 ## load readcount data
 ######################
@@ -48,8 +50,6 @@ phenotype<-if(file.exists(phenotype)){read.csv(phenotype, row.names = NULL)}
 numeric_id<-phenotype$ID
 phenotype$ID<-sprintf("%03d",numeric_id) # adds padded zeros in front of the subject ID numbers
 phenotype<-mutate(phenotype,pos_cellcount=phenotype[,source.cell]>0)%>%arrange(ID) # check which cell counts are positive. 
-
-
 
 ###########################################################################################
 ## subset phenotype data for which the samples exist for nasal/bronchial RNAseq experiments   
@@ -171,30 +171,77 @@ generate_DEG_summary_table<-function(){
 phen<-nphen  # If nasal analysis, use this
 # phen<-bphen # If bronchial analysis, use this
 
-# all non-NA values. cell count >=0
-pi<-lapply(phen[,source.cell.log],function(data){a<-!is.na(data);return(a)})
-df<-vector("list",length=10) # list of data framese used as an input for deseq2. all cell counts
-names(df)<-paste(source.cell.log,"all",sep="_")
-for(i in 1:10){
-  df[[i]]<-phen[pi[[i]],c("SampleID",source.cell.log[i], "Batch","IsBatch4")]
+# determine which phenotypoic thresholds to use by assessing the proportion of samples below the potential thresholds
+
+checkThreshold<-function(data){
+  a<-c(max(which(data[,2]<0.54)),  max(which(data[,2]<0.60)),  max(which(data[,2]<0.70)),  max(which(data[,2]<0.80)))
+  b<-c(max(which(data[,3]<0.54)),  max(which(data[,3]<0.60)),  max(which(data[,3]<0.70)),  max(which(data[,3]<0.80)))
+  return(data.frame(proportion=c("54%","60%","70%","80%"),bal_eos_p_thr=a,bal_eos_ct_thr=b))
+} # function that helps to determine the thresholds
+
+
+## For BAL Eos
+
+### threshold assessment for bal Eos %
+a<-numeric()
+for(i in 1:40){
+  a[i]<-sum(phen$BAL_eos_p<i)/nrow(phen)
 }
-print(sapply(df,dim)[1,])
 
-# all cell count >0
-pi.pos<-lapply(phen[,source.cell],function(data){a<-which(data>0);return(a)})
-df.pos<-vector("list",length=10) # list of data framese used as an input for deseq2. subset cell count > 0
-names(df.pos)<-paste(source.cell.log,"pos",sep = "_")
-for(i in 1:10){
-  df.pos[[i]]<-phen[pi.pos[[i]],c("SampleID",source.cell.log[i], "Batch","IsBatch4")]
+### threshold assessment for bal Eos count 
+b<-numeric()
+for(i in 1:40){
+  b[i]<-sum(phen$BAL_eos_ct<i)/nrow(phen)
 }
-print(sapply(df.pos,dim)[1,])
-# if analyzing only cell counts >0, use df<-df.pos
+### Eos summary
+eos_thr<-data.frame(threshold=1:40,eos_p_fraction= round(a,2),eos_ct_fraction=round(b,2))
+checkThreshold(eos_thr)
 
 
+## For blood Eos
 
-#################################################
-# nasal expression ~ log(cell count>=0) + Batch
-#################################################
+### threshold assessment for blood Eos %
+c<-numeric()
+na.omit(phen$blood_eos_p)%>%range
+for(i in 1:18){
+  c[i]<-sum(na.omit(phen$blood_eos_p)<i)/length(na.omit(phen$blood_eos_p))
+}
+
+### threshold assessment for blood Eos count 
+d<-numeric()
+for(i in seq(1,1701,by=100)){
+  d[round(i/100+1,0)]<-sum(na.omit(phen$blood_eos)<i)/length(na.omit(phen$blood_eos))
+}
+
+### blood Eos summary
+print(data.frame(blood_eos_p_thr=1:18,proportion=c, blood_eos_ct_thr= seq(1,1701,by=100),proportion=d))
+
+# compare the each samples bal Eos data against the threshold 
+phen<-phen%>%mutate(isBalEosCtNa=is.na(BAL_eos_ct),
+                    isbloodEosCtNa=is.na(blood_eos),
+              isBalEosCtZero=BAL_eos_ct==0,
+              isBalEosct2=BAL_eos_ct<2,
+              isBalEosP2=BAL_eos_p<2,
+              isBalEosct6=BAL_eos_ct<6,
+              isBalEosP6=BAL_eos_p<6,
+              isbldEosCtZero=blood_eos==0,
+              isbldEosp4=blood_eos_p<4,
+              isbldEosp6=blood_eos_p<6,
+              isbldEosct200=blood_eos<200,
+              isbldEosct400=blood_eos<400
+              )
+
+df<-vector("list",length=length(49:58)) # list of data framese used as an input for deseq2. all cell counts
+names(df)<-colnames(phen)[49:58]
+pi<-lapply(phen[,names(df)],function(data){a<-!is.na(data);return(a)})
+for(i in 1:length(df)){
+  df[[i]]<-phen[pi[[i]],c("SampleID",names(df)[i], "Batch","isBalEosCtNa","isbloodEosCtNa")]
+}
+
+###########################################---------------------###########################################
+# sample type: nasal
+# gene filter: remove low counts
+###########################################---------------------###########################################
 # coldata for DESeq2
 df.input<-df
 
@@ -211,31 +258,29 @@ rownames(ct)<-genes
 
 c2<-filter_low_expressed_genes_method2(ct,4)
 
-
 # run the DEG for continuous predictors
 
 
-## design: Batches. all cell counts 
+## design: gene expression ~ is_cellcount_threshold + Batch
 
-deg.design<-paste("~",source.cell.log,"+ Batch")
-ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered 
+deg.design<-paste("~",names(df),"+ Batch")
+ct<-rowgenes_counttable(ct,c2) # low counts will be filtered 
 
 print(deg.design)
 count.table<-lapply(df.input,function(df){d<-df; ct<-ct[,colnames(ct)%in%d$SampleID]; return(ct)}) # list of subsetted count table. Each element is a count table with samples for each of the experimental design. 
 
-dds<-vector("list",length=10)
-res<-vector("list",length=10)
-res.sig<-vector("list",length=10)
+dds<-vector("list",length=length(df))
+res<-vector("list",length=length(df))
+res.sig<-vector("list",length=length(df))
 
 names(res)<-deg.design
 names(res.sig)<-deg.design
 
-for(i in 1:10){
+for(i in 1:length(df)){
   dds[[i]]<-run_deseq2_DEG_analysis(count.table[[i]], df.input[[i]], deg.design[i],deg.design[i])
-  res[[i]]<-get_DEG_results(dds[[i]], source.cell.log[i])
+  res[[i]]<-get_DEG_results(dds[[i]], paste(names(df),"TRUE",sep="")[i])
   res.sig[[i]]<-res[[i]][which(res[[i]]$padj<=0.05),]
   head(res.sig[[i]])
-  
 }
 
 ## writing the results 
@@ -246,126 +291,108 @@ if(!dir.exists(deg.dir)){
 }
 
 if(dir.exists(deg.dir)){
-  for(i in 1:10){
+  for(i in 1:length(df)){
     a<-res.sig[[i]]
-    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg",unique(phen$Type),"allcells",deg.design[[i]],"res",i,Sys.Date(),".csv",sep="_"))) }
+    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg",unique(phen$Type),"allcells","res",i,deg.design[[i]],Sys.Date(),".csv",sep="_"))) }
 }
 
 ## summarize the data input 
 
 if(dir.exists(deg.dir)){
   a<-generate_DEG_input_summary_table()
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg",unique(phen$Type),"allcells","cellcount+batch","analysis_input",Sys.Date(),".csv",sep="_")))
+  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg",unique(phen$Type),"allcells","analysis_input","cellcount_thr+Batch",Sys.Date(),".csv",sep="_")))
 }
 
 ## summary table of the DEG analysis
 
 if(dir.exists(deg.dir)){
   a<-generate_DEG_summary_table()
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds",unique(phen$Type),"allcells","cellcount+batch","res_summary",Sys.Date(),".csv",sep="_")))
+  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds",unique(phen$Type),"allcells","res_summary","cellcount_thr+Batch",Sys.Date(),".csv",sep="_")))
 }
 
 
-################################################
-# nasal expression ~ log(cell count>0) + Batch
-################################################
-# coldata for DESeq2
-df.input<-df.pos
-
-
-# filtering counts table to remove low expressed genes
-
-## select RNAseq counts
-id<-phen$SampleID
-cols<-colnames(counts)%in%id
-ct<-counts[,cols] # First column is actually gene name 
-genes<-counts$SampleID
-rownames(ct)<-genes
-
-## Filter counts (readcount table for nasal sample
-c2<-filter_low_expressed_genes_method2(ct,4)
-
-
-# run the DEG for continuous predictors
-
-deg.design<-paste("~",source.cell.log,"+ Batch") # set design: nasal expression ~ log(cell count>0) + Batch 
-ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered using method 2: use TMM normalized lcpm as a cutoff point
-
-print(deg.design)
-count.table<-lapply(df.input,function(df){d<-df; ct<-ct[,colnames(ct)%in%d$SampleID]; return(ct)}) # list of subsetted count table. Each element is a count table with samples for each of the experimental design. 
-
-dds<-vector("list",length=10)
-res<-vector("list",length=10)
-res.sig<-vector("list",length=10)
-
-names(res)<-deg.design
-names(res.sig)<-deg.design
-
-for(i in 1:10){
-  dds[[i]]<-run_deseq2_DEG_analysis(count.table[[i]], df.input[[i]], deg.design[i],deg.design[i])
-  res[[i]]<-get_DEG_results(dds[[i]], source.cell.log[i])
-  res.sig[[i]]<-res[[i]][which(res[[i]]$padj<=0.05),]
-  head(res.sig[[i]])
-  
-}
-
-## writing the results 
-deg.folder<-paste("deg",Sys.Date(),sep="_")
-deg.dir<-file.path("./reports",deg.folder)
-if(!dir.exists(deg.dir)){
-  dir.create(deg.dir)
-}
-
-if(dir.exists(deg.dir)){
-  for(i in 1:10){
-    a<-res.sig[[i]]
-    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg",unique(phen$Type),"poscells",deg.design[[i]],"res",i,Sys.Date(),".csv",sep="_"))) } #specify allcells vs poscells
-}
-
-## summarize the data input 
-if(dir.exists(deg.dir)){
-  a<-generate_DEG_input_summary_table()
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg",unique(phen$Type),"poscells","cellcount+batch","analysis_input",Sys.Date(),".csv",sep="_"))) #specify allcells vs poscells
-}
-
-## summary table of the DEG analysis
-if(dir.exists(deg.dir)){
-  a<-generate_DEG_summary_table()
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds",unique(phen$Type),"poscells","cellcount+batch","res_summary",Sys.Date(),".csv",sep="_"))) #specify allcells vs poscells
-}
-
-#-----------------------
-##############################################################
+##########################################################
 #set colData (phenotype data) for bronchial RNAseq experiments
-##############################################################
-phen<-bphen  # If bronchial analysis, use this
+##########################################################
 
-# all non-NA values. cell count >=0
-pi<-lapply(phen[,source.cell.log],function(data){a<-!is.na(data);return(a)})
-df<-vector("list",length=10) # list of data framese used as an input for deseq2. all cell counts
-names(df)<-paste(source.cell.log,"all",sep="_")
-for(i in 1:10){
-  df[[i]]<-phen[pi[[i]],c("SampleID",source.cell.log[i], "Batch","IsBatch4")]
+# if nasal cell analysis, phen<-nphen. 
+phen<-bphen  # If nasal analysis, use this
+# phen<-bphen # If bronchial analysis, use this
+
+# determine which phenotypoic thresholds to use by assessing the proportion of samples below the potential thresholds
+
+checkThreshold<-function(data){
+  a<-c(max(which(data[,2]<0.54)),  max(which(data[,2]<0.60)),  max(which(data[,2]<0.70)),  max(which(data[,2]<0.80)))
+  b<-c(max(which(data[,3]<0.54)),  max(which(data[,3]<0.60)),  max(which(data[,3]<0.70)),  max(which(data[,3]<0.80)))
+  return(data.frame(proportion=c("54%","60%","70%","80%"),bal_eos_p_thr=a,bal_eos_ct_thr=b))
+} # function that helps to determine the thresholds
+
+
+## For BAL Eos
+
+### threshold assessment for bal Eos %
+a<-numeric()
+for(i in 1:40){
+  a[i]<-sum(phen$BAL_eos_p<i)/nrow(phen)
 }
-print(sapply(df,dim)[1,])
 
-# all cell count >0
-pi.pos<-lapply(phen[,source.cell],function(data){a<-which(data>0);return(a)})
-df.pos<-vector("list",length=10) # list of data framese used as an input for deseq2. subset cell count > 0
-names(df.pos)<-paste(source.cell.log,"pos",sep = "_")
-for(i in 1:10){
-  df.pos[[i]]<-phen[pi.pos[[i]],c("SampleID",source.cell.log[i], "Batch","IsBatch4")]
+### threshold assessment for bal Eos count 
+b<-numeric()
+for(i in 1:40){
+  b[i]<-sum(phen$BAL_eos_ct<i)/nrow(phen)
 }
-print(sapply(df.pos,dim)[1,])
-# if analyzing only cell counts >0, use df<-df.pos
+### Eos summary
+eos_thr<-data.frame(threshold=1:40,eos_p_fraction= round(a,2),eos_ct_fraction=round(b,2))
+checkThreshold(eos_thr)
 
-#################################################################
-# bronchial expression ~ log(cell count>=0) + Batch
-#################################################################
+
+## For blood Eos
+
+### threshold assessment for blood Eos %
+c<-numeric()
+na.omit(phen$blood_eos_p)%>%range
+for(i in 1:18){
+  c[i]<-sum(na.omit(phen$blood_eos_p)<i)/length(na.omit(phen$blood_eos_p))
+}
+
+### threshold assessment for blood Eos count 
+d<-numeric()
+for(i in seq(1,1701,by=100)){
+  d[round(i/100+1,0)]<-sum(na.omit(phen$blood_eos)<i)/length(na.omit(phen$blood_eos))
+}
+
+### blood Eos summary
+print(data.frame(blood_eos_p_thr=1:18,proportion=c, blood_eos_ct_thr= seq(1,1701,by=100),proportion=d))
+
+# compare the each samples bal Eos data against the threshold 
+phen<-phen%>%mutate(isBalEosCtNa=is.na(BAL_eos_ct),
+                    isbloodEosCtNa=is.na(blood_eos),
+                    isBalEosCtZero=BAL_eos_ct==0,
+                    isBalEosct2=BAL_eos_ct<2,
+                    isBalEosP2=BAL_eos_p<2,
+                    isBalEosct6=BAL_eos_ct<6,
+                    isBalEosP6=BAL_eos_p<6,
+                    isbldEosCtZero=blood_eos==0,
+                    isbldEosp4=blood_eos_p<4,
+                    isbldEosp6=blood_eos_p<6,
+                    isbldEosct200=blood_eos<200,
+                    isbldEosct400=blood_eos<400
+)
+
+df<-vector("list",length=length(49:58)) # list of data framese used as an input for deseq2. all cell counts
+names(df)<-colnames(phen)[49:58]
+pi<-lapply(phen[,names(df)],function(data){a<-!is.na(data);return(a)})
+for(i in 1:length(df)){
+  df[[i]]<-phen[pi[[i]],c("SampleID",names(df)[i], "Batch","isBalEosCtNa","isbloodEosCtNa")]
+}
+
+###########################################---------------------###########################################
+# sample type: bronchial
+# gene filter: remove low counts
+###########################################---------------------###########################################
 # coldata for DESeq2
 df.input<-df
 
-
 # filtering counts table to remove low expressed genes
 
 ## select RNAseq counts
@@ -376,30 +403,32 @@ genes<-counts$SampleID
 rownames(ct)<-genes
 
 ## Filter counts (readcount table for nasal sample
-c2<-filter_low_expressed_genes_method2(ct,4)
 
+c2<-filter_low_expressed_genes_method2(ct,4)
 
 # run the DEG for continuous predictors
 
-deg.design<-paste("~",source.cell.log,"+ Batch") # set design: nasal expression ~ log(cell count>0) + Batch 
-ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered using method 2: use TMM normalized lcpm as a cutoff point
+
+## design: gene expression ~ is_cellcount_threshold + Batch
+
+deg.design<-paste("~",names(df),"+ Batch")
+ct<-rowgenes_counttable(ct,c2) # low counts will be filtered 
 
 print(deg.design)
 count.table<-lapply(df.input,function(df){d<-df; ct<-ct[,colnames(ct)%in%d$SampleID]; return(ct)}) # list of subsetted count table. Each element is a count table with samples for each of the experimental design. 
 
-dds<-vector("list",length=10)
-res<-vector("list",length=10)
-res.sig<-vector("list",length=10)
+dds<-vector("list",length=length(df))
+res<-vector("list",length=length(df))
+res.sig<-vector("list",length=length(df))
 
 names(res)<-deg.design
 names(res.sig)<-deg.design
 
-for(i in 1:10){
+for(i in 1:length(df)){
   dds[[i]]<-run_deseq2_DEG_analysis(count.table[[i]], df.input[[i]], deg.design[i],deg.design[i])
-  res[[i]]<-get_DEG_results(dds[[i]], source.cell.log[i])
+  res[[i]]<-get_DEG_results(dds[[i]], paste(names(df),"TRUE",sep="")[i])
   res.sig[[i]]<-res[[i]][which(res[[i]]$padj<=0.05),]
   head(res.sig[[i]])
-  
 }
 
 ## writing the results 
@@ -410,87 +439,21 @@ if(!dir.exists(deg.dir)){
 }
 
 if(dir.exists(deg.dir)){
-  for(i in 1:10){
+  for(i in 1:length(df)){
     a<-res.sig[[i]]
-    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg",unique(phen$Type),"allcells",deg.design[[i]],"res",i,Sys.Date(),".csv",sep="_"))) } #specify allcells vs poscells
+    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg",unique(phen$Type),"allcells","res",i,deg.design[[i]],Sys.Date(),".csv",sep="_"))) }
 }
 
 ## summarize the data input 
+
 if(dir.exists(deg.dir)){
   a<-generate_DEG_input_summary_table()
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg",unique(phen$Type),"allcells","cellcount+batch","analysis_input",Sys.Date(),".csv",sep="_"))) #specify allcells vs poscells
+  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg",unique(phen$Type),"allcells","analysis_input","cellcount_thr+Batch",Sys.Date(),".csv",sep="_")))
 }
 
 ## summary table of the DEG analysis
+
 if(dir.exists(deg.dir)){
   a<-generate_DEG_summary_table()
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds",unique(phen$Type),"allcells","cellcount+batch","res_summary",Sys.Date(),".csv",sep="_"))) #specify allcells vs poscells
+  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds",unique(phen$Type),"allcells","res_summary","cellcount_thr+Batch",Sys.Date(),".csv",sep="_")))
 }
-
-
-#################################################################
-# bronchial expression ~ log(cell count>0) + Batch
-#################################################################
-# coldata for DESeq2
-df.input<-df.pos
-
-# filtering counts table to remove low expressed genes
-
-## select RNAseq counts
-id<-phen$SampleID
-cols<-colnames(counts)%in%id
-ct<-counts[,cols] # First column is actually gene name 
-genes<-counts$SampleID
-rownames(ct)<-genes
-
-## Filter counts (readcount table for nasal sample
-c2<-filter_low_expressed_genes_method2(ct,4)
-
-
-# run the DEG for continuous predictors
-
-deg.design<-paste("~",source.cell.log,"+ Batch") # set design: nasal expression ~ log(cell count>0) + Batch 
-ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered using method 2: use TMM normalized lcpm as a cutoff point
-
-print(deg.design)
-count.table<-lapply(df.input,function(df){d<-df; ct<-ct[,colnames(ct)%in%d$SampleID]; return(ct)}) # list of subsetted count table. Each element is a count table with samples for each of the experimental design. 
-
-dds<-vector("list",length=10)
-res<-vector("list",length=10)
-res.sig<-vector("list",length=10)
-
-names(res)<-deg.design
-names(res.sig)<-deg.design
-
-for(i in 1:10){
-  dds[[i]]<-run_deseq2_DEG_analysis(count.table[[i]], df.input[[i]], deg.design[i],deg.design[i])
-  res[[i]]<-get_DEG_results(dds[[i]], source.cell.log[i])
-  res.sig[[i]]<-res[[i]][which(res[[i]]$padj<=0.05),]
-  head(res.sig[[i]])
-  
-}
-
-## writing the results 
-deg.folder<-paste("deg",Sys.Date(),sep="_")
-deg.dir<-file.path("./reports",deg.folder)
-if(!dir.exists(deg.dir)){
-  dir.create(deg.dir)
-}
-
-if(dir.exists(deg.dir)){
-  for(i in 1:10){
-    a<-res.sig[[i]]
-    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg",unique(phen$Type),"poscells",deg.design[[i]],"res",i,Sys.Date(),".csv",sep="_"))) } #specify allcells vs poscells
-}
-
-## summarize the data input 
-if(dir.exists(deg.dir)){
-  a<-generate_DEG_input_summary_table()
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg",unique(phen$Type),"poscells","cellcount+batch","analysis_input",Sys.Date(),".csv",sep="_"))) #specify allcells vs poscells
-}
-
-## summary table of the DEG analysis
-if(dir.exists(deg.dir)){
-  a<-generate_DEG_summary_table()
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds",unique(phen$Type),"poscells","cellcount+batch","res_summary",Sys.Date(),".csv",sep="_"))) #specify allcells vs poscells
-} 

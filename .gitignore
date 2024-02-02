@@ -96,3 +96,4 @@ sandbox/
 reports/local_only
 DEG_results_local/
 .Rproj.user
+reports/figures/
