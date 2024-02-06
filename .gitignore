@@ -97,3 +97,4 @@ reports/local_only
 DEG_results_local/
 .Rproj.user
 reports/figures/
+reports/from_minerva_git.ignore
