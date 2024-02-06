@@ -42,17 +42,16 @@
 #
 #
 # ---------------------------------- Parameters to be changed -----------------------------------------
-
+source("./src/function/kda_source.R")
 library(dplyr)
-nasal_bn<-read.table("./resources/nasal_BN/BN.nasal_asthma.txt")
-nasal_blood_eos<-read.csv("./resources/nasal_BN/signature/deg_Nasal_poscells_~ blood_eos_log + Batch_res_6_2024-01-09_.csv")
-nasal_blood_eos<-nasal_blood_eos%>%mutate(module=ifelse(log2FoldChange>0,"up","down"))
-nasal_blood_eos<-data.frame(gene=nasal_blood_eos$X,module=nasal_blood_eos$module)
+
+nasal_bn<-file.path("./resources/kda/nasal_kda/BN.nasal_asthma.txt")
+nasal_blood_eos<-file.path("./resources/kda/nasal_kda/asthma_bal_nasal_blood_eos.txt")
 
 fcausalnet <- nasal_bn
 finputlist <- nasal_blood_eos
 directed <- TRUE
-layer <- 0
+layer <- 2
 minDsCut <- -1
 fgeneinfo <- NULL
 
@@ -60,9 +59,9 @@ fgeneinfo <- NULL
 #
 
 if (directed) {
-outputDir <- "KeyDrivers/"
+  outputDir <- "./reports/kda/asthma_nasal_KeyDrivers/"
 } else {
-  outputDir <- "KeyDrivers-undirected/"
+  outputDir <- "./reports/kda/asthma_nasal_KeyDrivers_undirected/"
 }
 
 #
@@ -71,11 +70,9 @@ outputDir <- "KeyDrivers/"
 library( class )
 library( cluster )
 library( rpart )
-library( sma ) # this is needed for plot.mat below
+#library( sma ) # this is needed for plot.mat below
 library( lattice ) # require is design for use inside functions 
 
-memory.size( TRUE )   # check the maximum memory that can be allocated
-memory.limit( size = 3800 )   # increase the available memory
 
 ################################################################################################
 #    1. read in network
@@ -86,7 +83,7 @@ dim( cnet )
 
 totalnodes <- union( cnet[,1] , cnet[,2] )
 
-fname <- getFileName( fcausalnet )
+fname <- "asthma_bal_nasal_blood_eos"
 fname <- paste( fname , "_L" , layer , sep = "" )
 
 ################################################################################################
@@ -109,8 +106,7 @@ paraMatrix <- NULL
 # 3. process each gene list
 #
 
-for ( em in modules )
-{
+for ( em in modules ){
   
   #em="green"
   
@@ -207,8 +203,7 @@ for ( em in modules )
 
 # save all key drivers
 colnames( xkdrMatrix ) <- c( "module" , colnames( fkd ) )
-write.table( xkdrMatrix , xkdFall , sep = "\t" , quote = FALSE , col.names = TRUE , 
-             row.names = FALSE )     
+write.table( xkdrMatrix , xkdFall , sep = "\t" , quote = FALSE , col.names = TRUE ,row.names = FALSE )     
 
 # save parameters used
 #
