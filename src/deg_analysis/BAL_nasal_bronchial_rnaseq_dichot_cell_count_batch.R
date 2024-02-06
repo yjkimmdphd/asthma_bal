@@ -219,16 +219,16 @@ print(data.frame(blood_eos_p_thr=1:18,proportion=c, blood_eos_ct_thr= seq(1,1701
 # compare the each samples bal Eos data against the threshold 
 phen<-phen%>%mutate(isBalEosCtNa=is.na(BAL_eos_ct),
                     isbloodEosCtNa=is.na(blood_eos),
-              !isBalEosCtZero=BAL_eos_ct==0,
-              !isBalEosct2=BAL_eos_ct<2,
-              !isBalEosP2=BAL_eos_p<2,
-              !isBalEosct6=BAL_eos_ct<6,
-              !isBalEosP6=BAL_eos_p<6,
-              !isbldEosCtZero=blood_eos==0,
-              !isbldEosp4=blood_eos_p<4,
-              !isbldEosp6=blood_eos_p<6,
-              !isbldEosct200=blood_eos<200,
-              !isbldEosct400=blood_eos<400
+              isBalEosCtZero=!BAL_eos_ct==0,
+              isBalEosct2=!BAL_eos_ct<2,
+              isBalEosP2=!BAL_eos_p<2,
+              isBalEosct6=!BAL_eos_ct<6,
+              isBalEosP6=!BAL_eos_p<6,
+              isbldEosCtZero=!blood_eos==0,
+              isbldEosp4=!blood_eos_p<4,
+              isbldEosp6=!blood_eos_p<6,
+              isbldEosct200=!blood_eos<200,
+              isbldEosct400=!blood_eos<400
               ) # if greater than threshold, 'TRUE'; if lower than threshold, 'False'. 
 
 df<-vector("list",length=length(49:58)) # list of data framese used as an input for deseq2. all cell counts
