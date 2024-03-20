@@ -170,10 +170,12 @@ library(ggplot2)
 # Plot
 ggplot(nasal_go, aes(x = Fold.Enrichment, y = term, fill = -log10(FDR))) +
   geom_bar(stat = "identity") +
-  geom_text(aes(label = round(-log10(FDR), 1)), hjust = -0.1, size = 3, color = "black") +  # Add text labels for log10(FDR)
+  geom_label(aes(label = round(-log10(FDR), 1)), fill="white",nudge_y=0.3, hjust = -0.1, size = 3, color = "black") +  # Add text labels for log10(FDR)
   scale_fill_gradient(low = "blue", high = "red") +  # Adjust color gradient as needed
   labs(x = "Fold Enrichment", y = "Gene Ontology Term", fill = "-log10(FDR)") +
-  theme(axis.text.y = element_text(size = 10))  # Adjust y-axis label size for better readability
+  theme(axis.text.x = element_text(size = 15),  # Change size of x-axis labels
+        axis.text.y = element_text(size = 12),
+        axis.title= element_text(size=20))  # Adjust y-axis label size for better readability
 
 # 2. GO term for Bronch DEG ~ BAL ANC +batch
 bronch_go<-read.csv(file.path(go_folder,"GO_david_Bronchial_poscells_~ BAL_neut_ct_log + Batch_pos_cells_res_3_min_abs_lfc_0.58_top100.csv"))
@@ -186,9 +188,56 @@ bronch_go$term<-factor(bronch_go$term, levels=unique(bronch_go$term))
 library(ggplot2)
 ggplot(bronch_go, aes(x = Fold.Enrichment, y = term, fill = -log10(FDR))) +
   geom_bar(stat = "identity") +
-  geom_text(aes(label = round(-log10(FDR), 1)), hjust = -0.1, size = 3, color = "black") +  # Add text labels for log10(FDR)
+  geom_label(aes(label = round(-log10(FDR), 1)), fill="white",nudge_y=0.3, hjust = -0.1, size = 3, color = "black") +  # Add text labels for log10(FDR)
   scale_fill_gradient(low = "blue", high = "red") +  # Adjust color gradient as needed
   labs(x = "Fold Enrichment", y = "Gene Ontology Term", fill = "-log10(FDR)") +
-  theme(axis.text.y = element_text(size = 10))  # Adjust y-axis label size for better readability
+  theme(axis.text.x = element_text(size = 15),  # Change size of x-axis labels
+        axis.text.y = element_text(size = 15),
+        axis.title= element_text(size=20))  # Change size of y-axis labels  # Adjust y-axis label size for better readability
 
 bronch_go%>%filter(term=="serine protease inhibitor complex")
+
+
+######
+# volcano plot of bronch DE genes assoc with BAL neutrophilia 
+# plot the genes assoc with the GO terms
+######
+
+rownames(bronch_go)<-c(1:nrow(bronch_go))
+sapply(bronch_go$Genes[1:16], function(genes){strsplit(genes, ", ")})
+  
+    unlist()
+# create custom 'bronch' gene key-value pairs for color based on whethe rsomething is KDA DEG or not
+keyvals_b <- ifelse(
+  bronch_genes%in%nasal_kda_down_genes, '#648FFF',
+  ifelse(bronch_genes%in%nasal_kda_up_genes, '#FFB000',
+         '#DC267F'))
+
+keyvals_b[is.na(keyvals_b)] <- 'grey'
+names(keyvals_b)[keyvals_b == 'gold'] <- 'nasal_KDA_up'
+names(keyvals_b)[keyvals_b == '#DC267F'] <- 'bronch_deg'
+names(keyvals_b)[keyvals_b == 'royalblue'] <- 'nasal_KDA_down'
+
+p3<-EnhancedVolcano(res_bronch,
+                      lab = rownames(res_bronch),
+                      title = "Bronch DEG",
+                      subtitle = "~ BAL ANC + batch",
+                      x = 'log2FoldChange',
+                      y = 'pvalue',
+                      xlab = bquote(~Log[2]~ 'fold change'),
+                      xlim=c(-2.5,2.5),
+                      ylim=c(0,8),
+                      pCutoff = 5e-3,
+                      FCcutoff = 0.58,
+                      cutoffLineType = 'twodash',
+                      cutoffLineWidth = 0.8,
+                      pointSize = 4.0,
+                      labSize = 3,
+                      colAlpha = 0.4,
+                      legendLabels=c('Not sig.','Log (base 2) FC','p-value',
+                                     'p-value & Log (base 2) FC (>0.58)'),
+                      legendPosition = 'right',
+                      legendLabSize = 10,
+                      legendIconSize = 5.0,    
+                      drawConnectors = TRUE,
+                      widthConnectors = 0.75)
