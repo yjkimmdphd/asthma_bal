@@ -12,7 +12,7 @@ data.folder<-file.path("./reports/local_only/deg~bal-blood_cell(continuous)+batc
 
 res_nasal<-read.csv(file.path(data.folder,"nasal_res6.csv"),row.names = 1)
 res_bronch<-read.csv(file.path(data.folder,"bronch_res3.csv"),row.names = 1)
-par(mfrow=c(1,2))
+par(mfrow=c(1,1))
 
 nasal_kda_up_genes<-c("FAM92B", "AK7", "DNAH9", "TSNAXIP1", "LRRC23", "RSPH14","RSPH4A","SPA17", "SAXO2","NME9","CCDC108","DZIP1L")
 nasal_kda_down_genes<-c("MIER3","FGL2","VSIG10L","FAM49B","HOPX","NAMPT","IL1RAP","TGFBI","PHF20L1","PLXNC1")
@@ -31,7 +31,7 @@ keyvals_n[which(nasal_genes%in%anh_do_nasal_kda_cilia_module)]<-"cyan"
 keyvals_n[which(nasal_genes%in%anh_do_nasal_kda_inf_module)]<-"magenta"
 
 
-keyvals_n[is.na(keyvals)] <- 'grey'
+keyvals_n[is.na(keyvals_n)] <- 'grey'
 names(keyvals_n)[keyvals_n == 'gold'] <- 'nasal_KDA_up'
 names(keyvals_n)[keyvals_n == 'grey'] <- 'nasal_deg'
 names(keyvals_n)[keyvals_n == 'royalblue'] <- 'nasal_KDA_down'
@@ -49,6 +49,8 @@ names(keyvals_b)[keyvals_b == 'gold'] <- 'nasal_KDA_up'
 names(keyvals_b)[keyvals_b == '#DC267F'] <- 'bronch_deg'
 names(keyvals_b)[keyvals_b == 'royalblue'] <- 'nasal_KDA_down'
 
+
+# padj are BH adjusted pvalues 
 p1<-EnhancedVolcano(res_nasal,
                 lab = rownames(res_nasal),
                 title='Nasal DEG',
@@ -68,7 +70,7 @@ p1<-EnhancedVolcano(res_nasal,
                 colAlpha = 0.4,
                 colCustom = keyvals_n,
                 legendLabels=c('Not sig.','Log (base 2) FC','p-value',
-                               'p-adj (<0.005) & Log (base 2) FC'),
+                               'p-adj (<0.05) & Log (base 2) FC'),
                 legendPosition = 'right',
                 legendLabSize = 10,
                 legendIconSize = 5.0,    
@@ -91,15 +93,40 @@ p1.2<-EnhancedVolcano(res_nasal,
                     labSize = 3,
                     colAlpha = 0.4,
                     legendLabels=c('Not sig.','Log (base 2) FC','p-value',
-                                   'p-adj (<0.005) & Log (base 2) FC'),
+                                   'p-adj (<0.05) & Log (base 2) FC'),
                     legendPosition = 'right',
                     legendLabSize = 10,
                     legendIconSize = 5.0,    
                     drawConnectors = TRUE,
                     widthConnectors = 0.75)
 
+p1.3<-EnhancedVolcano(res_nasal,
+                      lab = rownames(res_nasal),
+                      title='Nasal DEG',
+                      subtitle = '~ blood AEC + batch, p-adj (BH)',
+                      x = 'log2FoldChange',
+                      y = 'pvalue',
+                      xlab = bquote(~Log[2]~ 'fold change'),
+                      xlim=c(-10,8),
+                      ylim=c(0,8),
+                      pCutoff = 5e-3,
+                      FCcutoff = 1,
+                      cutoffLineType = 'twodash',
+                      cutoffLineWidth = 0.8,
+                      pointSize = 4.0,
+                      labSize = 3,
+                      colAlpha = 0.2,
+                      selectLab = rownames(res_nasal)[which(names(keyvals_n)%in%c('nasal_KDA_up','nasal_KDA_down'))],
+                      legendLabels=c('Not sig.','Log (base 2) FC','p-value',
+                                     'p-adj (<0.05) & Log (base 2) FC'),
+                      legendPosition = 'right',
+                      legendLabSize = 10,
+                      legendIconSize = 5.0,    
+                      drawConnectors = TRUE,
+                      widthConnectors = 0.75)
+
 p1
-p1.2
+p1.3
 
 p2<-EnhancedVolcano(res_bronch,
                 lab = rownames(res_bronch),
@@ -120,7 +147,7 @@ p2<-EnhancedVolcano(res_bronch,
                 colAlpha = 0.4,
                 colCustom = keyvals_b,
                 legendLabels=c('Not sig.','Log (base 2) FC','p-value',
-                               'p-adj (<0.005) & Log (base 2) FC'),
+                               'p-adj (<0.05) & Log (base 2) FC'),
                 legendPosition = 'right',
                 legendLabSize = 10,
                 legendIconSize = 5.0,    

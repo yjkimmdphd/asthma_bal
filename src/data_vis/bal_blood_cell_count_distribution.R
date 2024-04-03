@@ -84,3 +84,12 @@ for(i in seq(from = 12, to = 20, by = 2)){
        breaks=seq(min(k),max(k),length.out=25),
        xlab = paste(xlab[i],"standardized",sep=" "), ylab = "Frequency", col = "#69b3a2", border = "black")
 }
+
+# covariance graph blood WBC ~ blood ANC
+blood_wbc_anc<-data.frame(anc=a$blood_neut_log,wbc=a$blood_wbc_log)%>%subset(!is.na(anc)|!is.na(wbc))
+# Compute covariance matrix
+correlation <- cor(blood_wbc_anc)
+plot(blood_wbc_anc$anc, blood_wbc_anc$wbc, 
+     main = paste("Blood ANC vs Blood WBC\nPearson r:", round(correlation[1,2], 2)), 
+     xlab = "log(blood_anc)", 
+     ylab = "log(blood_wbc)")
