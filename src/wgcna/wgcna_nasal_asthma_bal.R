@@ -265,3 +265,5 @@ plotDendroAndColors(geneTree, ModuleColors,"Module",
                     dendroLabels = FALSE, hang = 0.03,
                     addGuide = TRUE, guideHang = 0.05,
                     main = "Gene dendrogram and module colors")
+
+save.image("wgcna_workspace_dendrogram.Rdata")
