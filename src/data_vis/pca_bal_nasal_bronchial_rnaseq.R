@@ -939,7 +939,9 @@ col[which(phen$ethnicity=="not-latino"),"ethnicity"]<-"green" # not latino = gre
 col[which(phen$ethnicity=="unk"),"ethnicity"] <-"black" # black if unknown ethnicity
 
 # plot the MDS
+
 par(mfrow=c(2,5),mar=c(5,5,2,2),xpd=TRUE)
+par(mfrow=c(2,3),mar=c(5,5,2,2),xpd=TRUE)
 color_factor<- factor(c("25-50%tile","50-75%tile",">75%tile","<25%tile","cell count=0"),
                       levels= c("25-50%tile","50-75%tile",">75%tile","<25%tile","cell count=0"))
 mds.ct1<-plotMDS(lcpm.ct,  col= col$BAL_eos_ct_log, labels=phen$BAL_eos_ct, main=source.cell[1])
@@ -960,6 +962,7 @@ mds.age<-plotMDS(lcpm.ct,  col= col$age, labels=phen$Age, main = "age")
 legend("bottomleft", cex=0.8,inset=c(-0.2,0),col=c("red","green","blue"), pch=c(10,10), legend=c("<=7yo","8-13yo","14-19yo"), title="Age")
 mds.race<-plotMDS(lcpm.ct,  col= col$Race, labels=phen$Race, main = "Race")
 mds.race<-plotMDS(lcpm.ct,  col= col$ethnicity, labels=phen$ethnicity, main = "ethnicity")
+mds.sex<-plotMDS(lcpm.ct,  col= col$sex, labels=phen$sex, main = "Sex")
 # significant batch effect
 
 library(ggpubr) #load in library for multi-panel figures

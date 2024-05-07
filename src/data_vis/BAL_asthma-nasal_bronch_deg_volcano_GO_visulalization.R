@@ -56,11 +56,11 @@ p1<-EnhancedVolcano(res_nasal,
                 title='Nasal DEG',
                 subtitle = '~ blood AEC + batch',
                 x = 'log2FoldChange',
-                y = 'pvalue',
+                y = 'padj',
                 xlab = bquote(~Log[2]~ 'fold change'),
                 xlim=c(-10,8),
                 ylim=c(0,8),
-                pCutoff = 5e-3,
+                pCutoff = 5e-2,
                 FCcutoff = 1,
                 cutoffLineType = 'twodash',
                 cutoffLineWidth = 0.8,
@@ -81,11 +81,11 @@ p1.2<-EnhancedVolcano(res_nasal,
                     title='Nasal DEG',
                     subtitle = '~ blood AEC + batch',
                     x = 'log2FoldChange',
-                    y = 'pvalue',
+                    y = 'padj',
                     xlab = bquote(~Log[2]~ 'fold change'),
                     xlim=c(-10,8),
                     ylim=c(0,8),
-                    pCutoff = 5e-3,
+                    pCutoff = 5e-2,
                     FCcutoff = 1,
                     cutoffLineType = 'twodash',
                     cutoffLineWidth = 0.8,
@@ -99,27 +99,33 @@ p1.2<-EnhancedVolcano(res_nasal,
                     legendIconSize = 5.0,    
                     drawConnectors = TRUE,
                     widthConnectors = 0.75)
+res_nasal<-res_nasal%>%mutate(deg_sig=ifelse(padj<0.05&log2FoldChange>1,'cyan',
+                                  ifelse(padj<0.05&log2FoldChange< -1,'magenta',
+                                         'grey')))
 
-p1.3<-EnhancedVolcano(res_nasal,
+keyvals_n <- ifelse(res_nasal$padj<0.05&res_nasal$log2FoldChange>1,'cyan',
+                    ifelse(res_nasal$padj<0.05&res_nasal$log2FoldChange< -1,'magenta',
+                           'grey'))
+keyvals_n[is.na(keyvals_n)] <- 'black'
+
+EnhancedVolcano(res_nasal,
                       lab = rownames(res_nasal),
                       title='Nasal DEG',
                       subtitle = '~ blood AEC + batch, p-adj (BH)',
                       x = 'log2FoldChange',
-                      y = 'pvalue',
+                      y = 'padj',
                       xlab = bquote(~Log[2]~ 'fold change'),
                       xlim=c(-10,8),
-                      ylim=c(0,8),
-                      pCutoff = 5e-3,
+                      ylim=c(0,3.5),
+                      pCutoff = 5e-2,
                       FCcutoff = 1,
                       cutoffLineType = 'twodash',
                       cutoffLineWidth = 0.8,
                       pointSize = 4.0,
                       labSize = 3,
                       colAlpha = 0.2,
-                      selectLab = rownames(res_nasal)[which(names(keyvals_n)%in%c('nasal_KDA_up','nasal_KDA_down'))],
-                      legendLabels=c('Not sig.','Log (base 2) FC','p-value',
-                                     'p-adj (<0.05) & Log (base 2) FC'),
-                      legendPosition = 'right',
+                      colCustom = keyvals_n,
+                      selectLab = NA,
                       legendLabSize = 10,
                       legendIconSize = 5.0,    
                       drawConnectors = TRUE,
@@ -133,11 +139,11 @@ p2<-EnhancedVolcano(res_bronch,
                 title = "Bronch DEG",
                 subtitle = "~ BAL ANC + batch",
                 x = 'log2FoldChange',
-                y = 'pvalue',
+                y = 'padj',
                 xlab = bquote(~Log[2]~ 'fold change'),
                 xlim=c(-2.5,2.5),
                 ylim=c(0,8),
-                pCutoff = 5e-3,
+                pCutoff = 5e-2,
                 FCcutoff = 0.58,
                 cutoffLineType = 'twodash',
                 cutoffLineWidth = 0.8,
@@ -158,11 +164,11 @@ p2.2<-EnhancedVolcano(res_bronch,
                     title = "Bronch DEG",
                     subtitle = "~ BAL ANC + batch",
                     x = 'log2FoldChange',
-                    y = 'pvalue',
+                    y = 'padj',
                     xlab = bquote(~Log[2]~ 'fold change'),
                     xlim=c(-2.5,2.5),
                     ylim=c(0,8),
-                    pCutoff = 5e-3,
+                    pCutoff = 5e-2,
                     FCcutoff = 0.58,
                     cutoffLineType = 'twodash',
                     cutoffLineWidth = 0.8,
@@ -190,19 +196,26 @@ nasal_go<-nasal_go%>%
   filter(FDR<0.05)%>%
   mutate(Fold.Enrichment=ifelse(deg_lfc2=="down",-Fold.Enrichment,Fold.Enrichment))%>%
   arrange(desc(deg_lfc2),desc(Fold.Enrichment))
-nasal_go<-nasal_go[c(1:10,129:138),]
-nasal_go$term<-factor(nasal_go$term, levels=unique(nasal_go$term))
-library(ggplot2)
+# focused GO term plots
+focused_nasal_GO_blood_AEC<-c("epithelial cilium movement","cilium movement involved in cell motility","cilium-dependent cell motility","inflammasome complex","negative regulation of T cell mediated cytotoxicity","positive regulation of regulatory T cell differentiation","B cell homeostasis","inflammatory response")
+focused_nasal_GO_blood_AEC<-nasal_go[nasal_go$term%in%focused_nasal_GO_blood_AEC,]
+focused_nasal_GO_blood_AEC$term<-factor(focused_nasal_GO_blood_AEC$term, levels=unique(focused_nasal_GO_blood_AEC$term))
 
+nasal_go_top10<-nasal_go[c(1:10,129:138),]
+nasal_go_top10$term<-factor(nasal_go_top10$term, levels=unique(nasal_go_top10$term))
+library(ggplot2)
+library(stringr)
+wrapped_label<-str_wrap(focused_nasal_GO_blood_AEC$term,width = 20)
 # Plot
-ggplot(nasal_go, aes(x = Fold.Enrichment, y = term, fill = -log10(FDR))) +
+ggplot(focused_nasal_GO_blood_AEC, aes(x = Fold.Enrichment, y = term, fill = -log10(FDR))) +
   geom_bar(stat = "identity") +
   geom_label(aes(label = round(-log10(FDR), 1)), fill="white",nudge_y=0.3, hjust = -0.1, size = 3, color = "black") +  # Add text labels for log10(FDR)
   scale_fill_gradient(low = "blue", high = "red") +  # Adjust color gradient as needed
   labs(x = "Fold Enrichment", y = "Gene Ontology Term", fill = "-log10(FDR)") +
   theme(axis.text.x = element_text(size = 15),  # Change size of x-axis labels
-        axis.text.y = element_text(size = 12),
-        axis.title= element_text(size=20))  # Adjust y-axis label size for better readability
+        axis.text.y = element_text(size = 17),
+        axis.title= element_text(size=20))+  # Adjust y-axis label size for better readability
+  scale_y_discrete(labels=wrapped_label)
 
 # 2. GO term for Bronch DEG ~ BAL ANC +batch
 bronch_go<-read.csv(file.path(go_folder,"GO_david_Bronchial_poscells_~ BAL_neut_ct_log + Batch_pos_cells_res_3_min_abs_lfc_0.58_top100.csv"))

@@ -1,30 +1,30 @@
-,Total (N=75)
-"Age, mean (SD)",11.6 (4.1)
-"Sex female, no. (%)",39 (52%)
-"Race/Ethnicity, no. (%)",
-Asian,2 (2.7%)
-Black,25 (33.3%)
-Multiple race/Unknown,21 (28%)
-White,27 (36%)
-Latino,28 (37.3%)
-"Asthma medication prescribed, no. (%)",
-SABA,11 (14.7%)
-ICS,72 (96%)
-ICS/LABA,56 (74.7%)
-LTR,41 (54.7%)
-Omalizumab,5 (6.7%)
-Ipratropium,1 (1.3%)
-"ACT score, mean (SD)",13.8 (4.3)
-"FEV1% predicted, mean (SD)",85.6 (21.6)
-"FEV1/FVC ratio, mean (SD)",75.1 (11.6)
-"Allergen sensitization, no. (%)",38 (50.7%)
-"Hospitalization for asthma in the past year, no. (%)",
-0,26 (34.7%)
-1,27 (36%)
-?2,10 (13.3%)
-unknown,12 (16%)
-"Emergency dept visits for asthma in the past year, no. (%)",
-0,8 (10.7%)
-1,18 (24%)
-?2,7 (9.3%)
-unknown,42 (56%)
+,Total (N=75),Processed samples (N=40),
+"Age, mean (SD)",11.6 (4.1),12.3,4.3
+"Sex female, no. (%)",39 (52%),20,50
+"Race/Ethnicity, no. (%)",,,
+Asian,2 (2.7%),2,5
+Black,25 (33.3%),13,32.5
+Multiple race/Unknown,21 (28%),10,25
+White,27 (36%),15,37.5
+Latino,28 (37.3%),14,35
+"Asthma medication prescribed, no. (%)",,,
+SABA,11 (14.7%),7,17.5
+ICS,72 (96%),38,95
+ICS/LABA,56 (74.7%),27,67.5
+LTR,41 (54.7%),21,52.5
+Omalizumab,5 (6.7%),2,5
+Ipratropium,1 (1.3%),0,0
+"ACT score, mean (SD)",13.8 (4.3),12.9,4.4
+"FEV1% predicted, mean (SD)",85.6 (21.6),87.9,19.4
+"FEV1/FVC ratio, mean (SD)",75.1 (11.6),76.2,10.3
+"Allergen sensitization, no. (%)",38 (50.7%),24,60
+"Hospitalization for asthma in the past year, no. (%)",,,
+0,26 (34.7%),,
+1,27 (36%),,
+?2,10 (13.3%),,
+unknown,12 (16%),,
+"Emergency dept visits for asthma in the past year, no. (%)",,,
+0,8 (10.7%),,
+1,18 (24%),,
+?2,7 (9.3%),,
+unknown,42 (56%),,

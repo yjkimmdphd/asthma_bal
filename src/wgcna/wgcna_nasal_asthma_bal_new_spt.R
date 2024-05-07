@@ -224,15 +224,16 @@ abline(h=0.80,col="red")
 
 #Plot mean connectivity as a function of soft thresholds
 par(mar=c(1,1,1,1))
+dev.off()
 plot(spt$fitIndices[,1], spt$fitIndices[,5],
      xlab="Soft Threshold (power)",ylab="Mean Connectivity", type="n",
      main = paste("Mean connectivity"))
 text(spt$fitIndices[,1], spt$fitIndices[,5], labels= spt$fitIndices[,1],col="red")
 
-# spt should be 11, since after it, the power is above 0.8, for a short period lol
+# spt should be 14, since after it, the power is above 0.8, for a short period lol
 
 #calling the adjacency fx
-softPower <- 11
+softPower <- 14
 adjacency <- adjacency(expression.data, power = softPower)
 
 ###
@@ -273,11 +274,6 @@ plotDendroAndColors(geneTree, ModuleColors,"Module",
 # A ME (Module Eigengene) is the standardized gene expression profile for a given module.
 ###
 
-# workspace saving
-## save.image("wgcna_workspace_dendrogram.Rdata")
-
-# load Rdata
-# load("./resources/processed_data/wgcna_nasal/wgcna_workspace_dendrogram.Rdata")
 
 MElist <- moduleEigengenes(expression.data, colors = ModuleColors) 
 MEs <- MElist$eigengenes 
@@ -386,6 +382,13 @@ for(mod in modNames){
                      main = paste("Module membership vs. gene significance\n"),
                      cex.main = 1.2, cex.lab = 1.2, cex.axis = 1.2, col = module)
 }
+
+
+# workspace saving
+save.image("wgcna_workspace_dendrogram.Rdata")
+
+# load Rdata
+# load("./resources/processed_data/wgcna_nasal/wgcna_workspace_dendrogram.Rdata")
 
 # interesting modules: 
 # mediumpurple2
