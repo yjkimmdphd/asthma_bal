@@ -139,9 +139,9 @@ df.input<-df
 
 ## select RNAseq counts
 id<-phen$SampleID
-cols<-colnames(counts)%in%id
-ct<-counts[,cols] # First column is actually gene name 
-genes<-counts$SampleID
+cols<-colnames(bronch.counts)%in%id
+ct<-bronch.counts[,cols] # First column is actually gene name 
+genes<-bronch.counts$SampleID
 rownames(ct)<-genes
 
 ## Filter counts (readcount table for nasal sample
@@ -207,9 +207,9 @@ df.input<-df.pos
 
 ## select RNAseq counts
 id<-phen$SampleID
-cols<-colnames(counts)%in%id
-ct<-counts[,cols] # First column is actually gene name 
-genes<-counts$SampleID
+cols<-colnames(bronch.counts)%in%id
+ct<-bronch.counts[,cols] # First column is actually gene name 
+genes<-bronch.counts$SampleID
 rownames(ct)<-genes
 
 ## Filter counts (readcount table for nasal sample
