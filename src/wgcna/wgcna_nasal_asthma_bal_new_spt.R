@@ -390,25 +390,7 @@ save.image("wgcna_workspace_dendrogram.Rdata")
 # load Rdata
 # load("./resources/processed_data/wgcna_nasal/wgcna_workspace_dendrogram.Rdata")
 
-# interesting modules: 
-# mediumpurple2
-# coral1
-# steelblue
-# firebrick4
-# thistle2
-# blue
-# antiquewhite4
-# skyblue1
-# plum2
-# brown
-# grey60
-# plum
-# pink 
-# skyblue
-# cyan
-# darkviolet
-# blue2
-# orangered3
+c("lightcyan","greenyellow","cyan","darkorange","salmon","skyblue3","salmon4","pink","darkgreen","paleturquoise","plum2","violet","blue","grey")
 
 ###
 # 10. Network Visualization of Eigengenes
@@ -442,8 +424,7 @@ plotEigengeneNetworks(MET, "Eigengene adjacency heatmap", marHeatmap = c(5,5,2,2
 
 gene.module.table<-data.frame(genes=colnames(expression.data),modules=mergedColors)
 
-mod=c("mediumpurple2","coral1","steelblue","firebrick4","thistle2","blue","antiquewhite4","skyblue1","plum2","brown","grey60"
-          ,"plum","pink","skyblue","cyan","darkviolet","blue2","orangered3","darkgreen","darkmagenta","floralwhite")
+mod=c("lightcyan","greenyellow","cyan","darkorange","salmon","skyblue3","salmon4","pink","darkgreen","paleturquoise","plum2","violet","blue","grey")
 
 gene.module.table<-gene.module.table%>%filter(modules%in%mod)
 
@@ -470,7 +451,7 @@ df_genelist <- as.data.frame(genelist_padded)
 
 
 # Writing the data frame to a tab-delimited text file without column names
-write.table(df_genelist, file = "./reports/wgcna/nasal/genelist.txt", sep = "\t", row.names = FALSE, col.names = TRUE, na = "", quote = FALSE)
+write.table(df_genelist, file = "./reports/wgcna/nasal/genelist_new_spt.txt", sep = "\t", row.names = FALSE, col.names = TRUE, na = "", quote = FALSE)
 
 # Loop through each element in the list and write to a CSV file
 for (module_name in names(list_of_dfs)) {
