@@ -103,6 +103,14 @@ bphen<-mutate_at(bphen,vars(all_of(source.cell.log)),scale) # scales and mutates
 
 source("./src/function/deg_custom_functions.R")
 
+generate_DEG_summary_table<-function(){
+  reslist<-paste("res.sig",1:length(res.sig),sep="")
+  n_sig_deg<-sapply(res.sig,nrow)
+  design<-deg.design
+  source_cell<-source.cell
+  df<-data.frame(type="bronch",results=reslist,n_sig_deg,design=design,source_cell=source_cell, row.names = NULL)
+  return(df)
+} # needed to fix "type=unique(phen$Type)" to "type="bronch""
 #-----------------------
 ##############################################################
 #set colData (phenotype data) for bronchial RNAseq experiments
@@ -181,19 +189,19 @@ if(!dir.exists(deg.dir)){
 if(dir.exists(deg.dir)){
   for(i in 1:10){
     a<-res.sig[[i]]
-    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg",unique(phen$Type),"allcells",deg.design[[i]],"res",i,Sys.Date(),".csv",sep="_"))) } #specify allcells vs poscells
+    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg","bronch","allcells",deg.design[[i]],"res",i,Sys.Date(),".csv",sep="_"))) } #specify allcells vs poscells
 }
 
 ## summarize the data input 
 if(dir.exists(deg.dir)){
   a<-generate_DEG_input_summary_table()
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg",unique(phen$Type),"allcells","cellcount+batch","analysis_input",Sys.Date(),".csv",sep="_"))) #specify allcells vs poscells
+  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg","bronch","allcells","cellcount+batch","analysis_input",Sys.Date(),".csv",sep="_"))) #specify allcells vs poscells
 }
 
 ## summary table of the DEG analysis
 if(dir.exists(deg.dir)){
   a<-generate_DEG_summary_table()
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds",unique(phen$Type),"allcells","cellcount+batch","res_summary",Sys.Date(),".csv",sep="_"))) #specify allcells vs poscells
+  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds","bronch","allcells","cellcount+batch","res_summary",Sys.Date(),".csv",sep="_"))) #specify allcells vs poscells
 }
 
 
@@ -249,19 +257,19 @@ if(!dir.exists(deg.dir)){
 if(dir.exists(deg.dir)){
   for(i in 1:10){
     a<-res.sig[[i]]
-    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg",unique(phen$Type),"poscells",deg.design[[i]],"res",i,Sys.Date(),".csv",sep="_"))) } #specify allcells vs poscells
+    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg","bronch","poscells",deg.design[[i]],"res",i,Sys.Date(),".csv",sep="_"))) } #specify allcells vs poscells
 }
 
 ## summarize the data input 
 if(dir.exists(deg.dir)){
   a<-generate_DEG_input_summary_table()
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg",unique(phen$Type),"poscells","cellcount+batch","analysis_input",Sys.Date(),".csv",sep="_"))) #specify allcells vs poscells
+  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg","bronch","poscells","cellcount+batch","analysis_input",Sys.Date(),".csv",sep="_"))) #specify allcells vs poscells
 }
 
 ## summary table of the DEG analysis
 if(dir.exists(deg.dir)){
   a<-generate_DEG_summary_table()
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds",unique(phen$Type),"poscells","cellcount+batch","res_summary",Sys.Date(),".csv",sep="_"))) #specify allcells vs poscells
+  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds","bronch","poscells","cellcount+batch","res_summary",Sys.Date(),".csv",sep="_"))) #specify allcells vs poscells
 } 
 
 # save Rdata of the current session
