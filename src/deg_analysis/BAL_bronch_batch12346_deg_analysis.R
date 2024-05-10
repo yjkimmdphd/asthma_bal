@@ -287,7 +287,4 @@ if(dir.exists(deg.dir)){
 if(dir.exists(deg.dir)){
   a<-generate_DEG_summary_table()
   write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds","bronch","poscells","cellcount+batch","res_summary",Sys.Date(),".csv",sep="_"))) #specify allcells vs poscells
-} 
-
-# save Rdata of the current session
-save.image(file="./resources/processed_data/Rdata/bal_bronch_batch12346_deg.Rdata")
+}
