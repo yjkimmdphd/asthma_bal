@@ -216,10 +216,10 @@ plot(spt$fitIndices[,1], spt$fitIndices[,5],
 text(spt$fitIndices[,1], spt$fitIndices[,5], labels= spt$fitIndices[,1],col="red")
 
 
-# spt should be 14, since after it, the power is above 0.8, for a short period lol
+# spt should be 4, since after it, the power is above 0.8, for a short period lol
 
 #calling the adjacency fx
-softPower <- 14
+softPower <- 4
 adjacency <- adjacency(expression.data, power = softPower)
 
 ###
