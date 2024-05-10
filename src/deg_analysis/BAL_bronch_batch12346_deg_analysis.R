@@ -62,7 +62,7 @@ phenotype<-mutate(phenotype,pos_cellcount=phenotype[,source.cell]>0)%>%arrange(I
 ###########################################################################################
 bID<-paste0("B",phenotype$ID) # B*** indicates bronchial sample ID, sequence data is not available for all as of 2023-10-04
 bexist<-bID%in%counts.ID # find which subjects s/p BAL and had bronchial sample RNAseq completed 
-bsample<-bID[bexist] # bronchial sample ID in the readcount matrix (batch 1-4) that has BAL phenotype data
+bsample<-bID[bexist] # bronchial sample ID in the readcount matrix (batch 1-4,6) that has BAL phenotype data
 bphen<-phenotype[phenotype$ID%in%substring(bsample,2),] # phenotype table with bsample
 bphen<-mutate(bphen, SampleID=bsample)%>%relocate(SampleID, .before=1) # include sample ID for bronchial RNAseq samples
 
@@ -186,10 +186,20 @@ if(!dir.exists(deg.dir)){
   dir.create(deg.dir)
 }
 
+### write all results
+
+
+### write only the significant results
 if(dir.exists(deg.dir)){
   for(i in 1:10){
     a<-res.sig[[i]]
-    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg","bronch","allcells",deg.design[[i]],"res",i,Sys.Date(),".csv",sep="_"))) } #specify allcells vs poscells
+    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg","bronch","allcells",deg.design[[i]],"deg_res",i,Sys.Date(),".csv",sep="_"))) } #specify allcells vs poscells
+}
+
+if(dir.exists(deg.dir)){
+  for(i in 1:10){
+    a<-data.frame(res[[i]])
+    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg","bronch","allcells",deg.design[[i]],"all_results_of_res",i,Sys.Date(),".csv",sep="_"))) } #specify allcells vs poscells
 }
 
 ## summarize the data input 
@@ -257,8 +267,15 @@ if(!dir.exists(deg.dir)){
 if(dir.exists(deg.dir)){
   for(i in 1:10){
     a<-res.sig[[i]]
-    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg","bronch","poscells",deg.design[[i]],"res",i,Sys.Date(),".csv",sep="_"))) } #specify allcells vs poscells
+    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg","bronch","poscells",deg.design[[i]],"deg_res",i,Sys.Date(),".csv",sep="_"))) } #specify allcells vs poscells
 }
+
+if(dir.exists(deg.dir)){
+  for(i in 1:10){
+    a<-data.frame(res[[i]])
+    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg","bronch","poscells",deg.design[[i]],"all_results_of_res",i,Sys.Date(),".csv",sep="_"))) } #specify allcells vs poscells
+}
+
 
 ## summarize the data input 
 if(dir.exists(deg.dir)){
