@@ -197,7 +197,7 @@ dim(expression.data)
 # Determining the Soft Power Threshold
 spt <- pickSoftThreshold(expression.data) 
 
-save(spt,"./resources/processed_data/Rdata/wgcna_bronch_spt_batch12346.Rdata") # save the spt as Rdata
+save(spt,file="./resources/processed_data/Rdata/wgcna_bronch_spt_batch12346.Rdata") # save the spt as Rdata
 
 # Plot the R2 values as a function of the soft thresholds
 par(mar=c(1,1,1,1))
@@ -229,6 +229,8 @@ adjacency <- adjacency(expression.data, power = softPower)
 # this takes the longest and needs HPC 
 TOM <- TOMsimilarity(adjacency)
 TOM.dissimilarity <- 1-TOM
+
+save(TOM,file="./resources/processed_data/Rdata/wgcna_bronch_TOM_batch12346.Rdata") # save the TOM as Rdata
 
 # Hierarchical Clustering Analysis
 
@@ -292,7 +294,7 @@ plotDendroAndColors(geneTree, cbind(ModuleColors, mergedColors),
                     dendroLabels = FALSE, hang = 0.03,
                     addGuide = TRUE, guideHang = 0.05,
                     main = "Gene dendrogram and module colors for original and merged modules")
-alltraits<-nphen[nphen$SampleID%in%rownames(mergedMEs),]
+alltraits<-phen[phen$SampleID%in%rownames(mergedMEs),]
 rownames(alltraits)<-alltraits$SampleID
 alltraits<-alltraits[,3:12]
 good<-!(sapply(alltraits,is.na)%>%rowSums()>0) # remove rows with at least one NA
