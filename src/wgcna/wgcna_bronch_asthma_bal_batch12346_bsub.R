@@ -169,21 +169,21 @@ if (!gsg$allOK)
 sampleTree <- hclust(dist(expression), method = "average") #Clustering samples based on distance 
 
 #Setting the graphical parameters
-par(cex = 0.6);
-par(mar = c(0,4,2,0))
+#par(cex = 0.6);
+#par(mar = c(0,4,2,0))
 
 #Plotting the cluster dendrogram
 #plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,
 #     cex.axis = 1.5, cex.main = 2)
 
 #Setting the graphical parameters
-par(cex = 0.6);
-par(mar = c(0,4,2,0))
+#par(cex = 0.6);
+#par(mar = c(0,4,2,0))
 #plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,
 #     cex.axis = 1.5, cex.main = 2)
 
 #draw on line to show cutoff height
-abline(h = 3e6, col = "red")
+#abline(h = 3e6, col = "red")
 
 # height of 3e6 removes sample ID N277
 cut.sampleTree <- cutreeStatic(sampleTree, cutHeight = 3e6, minSize = 10) #returns numeric vector
@@ -202,17 +202,17 @@ spt <- pickSoftThreshold(expression.data)
 save(spt,file="./resources/processed_data/Rdata/wgcna_bronch_spt_batch12346.Rdata") # save the spt as Rdata
 
 # Plot the R2 values as a function of the soft thresholds
-par(mar=c(1,1,1,1))
+#par(mar=c(1,1,1,1))
 #plot(spt$fitIndices[,1],spt$fitIndices[,2],
 #     xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit,signed R^2",type="n",
 #     main = paste("Scale independence"))
 
 #text(spt$fitIndices[,1],spt$fitIndices[,2],col="red")
-abline(h=0.80,col="red")
+##abline(h=0.80,col="red")
 
 #Plot mean connectivity as a function of soft thresholds
-par(mar=c(1,1,1,1))
-dev.off()
+#par(mar=c(1,1,1,1))
+#dev.off()
 #plot(spt$fitIndices[,1], spt$fitIndices[,5],
 #     xlab="Soft Threshold (power)",ylab="Mean Connectivity", type="n",
 #     main = paste("Mean connectivity"))
@@ -281,10 +281,10 @@ head(MEs)
 # remove the NA values
 ME.dissimilarity = 1-cor(MElist$eigengenes, use="complete") #Calculate eigengene dissimilarity
 METree = hclust(as.dist(ME.dissimilarity), method = "average") #Clustering eigengenes 
-par(mar = c(0,4,2,0)) #seting margin sizes
-par(cex = 0.6);#scaling the graphic
+#par(mar = c(0,4,2,0)) #seting margin sizes
+#par(cex = 0.6);#scaling the graphic
 #plot(METree)
-abline(h=.25, col = "red") #a height of 0.25 corresponds to correlation of 0.75 (i.e.,  all of the modules which are more than 75% similar.)
+#abline(h=.25, col = "red") #a height of 0.25 corresponds to correlation of 0.75 (i.e.,  all of the modules which are more than 75% similar.)
 
 merge <- mergeCloseModules(expression.data, ModuleColors, cutHeight = .25) # merge the modules which are below the threshold
 
@@ -323,7 +323,7 @@ module.trait.Pvalue = corPvalueStudent(module.trait.correlation, nSamples) #calc
 textMatrix = paste(signif(module.trait.correlation, 2), "\n(",
                    signif(module.trait.Pvalue, 1), ")", sep = "");
 dim(textMatrix) = dim(module.trait.correlation)
-par(mar = c(6, 8.5, 3, 1))
+#par(mar = c(6, 8.5, 3, 1))
 # Display the correlation values within a heatmap plot
 labeledHeatmap(Matrix = module.trait.correlation,
                xLabels = names(datTraits),
@@ -363,7 +363,7 @@ head(GSPvalue)
 
 # scatter plot of gene significance vs. module membership in all the module
 
-par(mfrow=c(4,4))
+#par(mfrow=c(4,4))
 for(mod in modNames){
   module = mod
   column = match(module, modNames)
@@ -394,18 +394,18 @@ names(blood_eos_log) = "blood_eos_log"
 MEs<-MEs[rownames(MEs)%in%rownames(datTraits),]
 MET = orderMEs(cbind(MEs, blood_eos_log))
 # Plot the relationships among the eigengenes and the trait
-par(cex = 0.9)
+#par(cex = 0.9)
 plotEigengeneNetworks(MET, "", marDendro = c(0,4,1,2), marHeatmap = c(5,4,1,2), cex.lab = 0.8, xLabelsAngle
                       = 90)
 
 
 # Plot the dendrogram
-par(cex = 1.0)
+#par(cex = 1.0)
 plotEigengeneNetworks(MET, "Eigengene dendrogram", marDendro = c(0,4,2,0),
                       plotHeatmaps = FALSE)
 
 # Plot the heatmap matrix (note: this plot will overwrite the dendrogram plot)
-par(cex = 1.0, mar = c(1,1,1,1))
+#par(cex = 1.0, mar = c(1,1,1,1))
 plotEigengeneNetworks(MET, "Eigengene adjacency heatmap", marHeatmap = c(5,5,2,2),
                       plotDendrograms = FALSE, xLabelsAngle = 90)
 
