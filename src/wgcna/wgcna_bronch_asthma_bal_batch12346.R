@@ -227,6 +227,7 @@ adjacency <- adjacency(expression.data, power = softPower)
 ### 
 # convert the adjacency matrix into a TOM similarity matrix we can call the WGCNA function 
 # this takes the longest and needs HPC 
+print("calculating TOM")
 TOM <- TOMsimilarity(adjacency)
 TOM.dissimilarity <- 1-TOM
 
