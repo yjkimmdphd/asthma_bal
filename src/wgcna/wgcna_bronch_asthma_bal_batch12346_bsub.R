@@ -123,15 +123,17 @@ for(i in 1:10){
 }
 print(sapply(df,dim)[1,]) # shows number of 
 
-# select RNAseq counts
+## select RNAseq counts
 id<-phen$SampleID
-cols<-colnames(counts)%in%id
-ct<-counts[,cols] # First column is actually gene name 
-genes<-counts$SampleID
+cols<-colnames(bronch.counts)%in%id
+ct<-bronch.counts[,cols] # First column is actually gene name 
+genes<-bronch.counts$SampleID
 rownames(ct)<-genes
 
-# filter low count genes: which genes have normalized lcpm less than the cutoff in >10% of the samples (8)
-ct<-filter_low_expressed_genes_method2(ct,8)
+## Filter counts
+c2<-filter_low_expressed_genes_method2(ct,8)
+ct<-c2
+genes<-rownames(ct)
 ###############
 #
 #### WGCNA ####

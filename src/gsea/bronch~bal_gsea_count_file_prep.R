@@ -109,3 +109,7 @@ bphen<-mutate_at(bphen,vars(all_of(source.cell.log)),scale) # scales and mutates
 
 # decide which analysis to perform, then set the phenotype data as phen
 
+csl_phen<-t(bphen[,3:7])
+colnames(csl_phen)<-bphen$SampleID
+
+write.table(csl_phen,"./resources/processed_data/gsea/bronch_batch12346_phenotype_for_csl.txt",row.names = TRUE,sep = "\t")
