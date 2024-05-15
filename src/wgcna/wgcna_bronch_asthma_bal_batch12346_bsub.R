@@ -7,6 +7,20 @@ library(edgeR)
 library(tidyverse)
 library(DESeq2)
 library(WGCNA)
+
+###################################
+# custom functions for DEG analysis
+###################################
+# should load the following fx:
+## filter_low_expressed_genes_method2: Filters low counts genes using TMM normalized lcpm as a cutoff point. Requires 'limma'
+## rowgenes_counttable: changes the row names of the count table with gene names
+## run_deseq2_DEG_analysis: takes countdata,coldata,design,des as variables, and runs DEG on DESeq2
+## get_DEG_results: saves result of DESeq2 output, ordered in padj 
+## generate_DEG_input_summary_table: makes a table of input information
+## generate_DEG_summary_table: makes results summary (i.e., # of DEG for each analysis)
+
+source("./src/function/deg_custom_functions.R")
+
 ######################
 ## load readcount data
 ######################
@@ -20,6 +34,7 @@ colnames(bronch.counts)[bronch.samples]<-substr(colnames(bronch.counts)[bronch.s
 head(bronch.counts)
 counts.ID<-colnames(bronch.counts)
 counts<-bronch.counts
+
 ################################
 ## load phenotype and batch data
 ################################
@@ -92,19 +107,6 @@ bphen<-mutate_at(bphen,vars(all_of(source.cell.log)),scale) # scales and mutates
 # decide which analysis to perform, then set the phenotype data as phen
 
 
-###################################
-# custom functions for DEG analysis
-###################################
-# should load the following fx:
-## filter_low_expressed_genes_method2: Filters low counts genes using TMM normalized lcpm as a cutoff point. Requires 'limma'
-## rowgenes_counttable: changes the row names of the count table with gene names
-## run_deseq2_DEG_analysis: takes countdata,coldata,design,des as variables, and runs DEG on DESeq2
-## get_DEG_results: saves result of DESeq2 output, ordered in padj 
-## generate_DEG_input_summary_table: makes a table of input information
-## generate_DEG_summary_table: makes results summary (i.e., # of DEG for each analysis)
-
-source("./src/function/deg_custom_functions.R")
-
 
 ##########################################################
 #set colData (phenotype data) for bronchial RNAseq experiments
@@ -128,6 +130,8 @@ ct<-counts[,cols] # First column is actually gene name
 genes<-counts$SampleID
 rownames(ct)<-genes
 
+# filter low count genes: which genes have normalized lcpm less than the cutoff in >10% of the samples (8)
+ct<-filter_low_expressed_genes_method2(ct,8)
 ###############
 #
 #### WGCNA ####
