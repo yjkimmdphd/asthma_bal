@@ -241,7 +241,7 @@ print("calculating TOM")
 TOM <- TOMsimilarity(adjacency)
 TOM.dissimilarity <- 1-TOM
 
-save(TOM,file="./resources/processed_data/Rdata/wgcna_bronch_TOM_batch12346.Rdata") # save the TOM as Rdata
+save(TOM.dissimilarity,file="./resources/processed_data/Rdata/wgcna_bronch_TOM_batch12346.Rdata") # save the TOM as Rdata
 
 # Hierarchical Clustering Analysis
 
@@ -382,12 +382,6 @@ for(mod in modNames){
                      cex.main = 1.2, cex.lab = 1.2, cex.axis = 1.2, col = module)
 }
 
-
-# workspace saving
-save.image("wgcna_workspace_dendrogram.Rdata")
-
-# load Rdata
-# load("./resources/processed_data/wgcna_nasal/wgcna_workspace_dendrogram.Rdata")
 
 ###
 # 10. Network Visualization of Eigengenes
