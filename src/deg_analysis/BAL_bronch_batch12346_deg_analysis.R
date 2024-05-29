@@ -153,7 +153,7 @@ genes<-bronch.counts$SampleID
 rownames(ct)<-genes
 
 ## Filter counts (readcount table for nasal sample
-c2<-filter_low_expressed_genes_method2(ct,4)
+c2<-filter_low_expressed_genes_method2(ct,7)
 
 
 # run the DEG for continuous predictors
