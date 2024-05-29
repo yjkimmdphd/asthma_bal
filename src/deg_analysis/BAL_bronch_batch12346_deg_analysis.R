@@ -49,46 +49,15 @@ source.cell<-c(
 
 
 # asthma biomarker phenotype file saved in  'phenotype'
-phenotype<-file.path("./resources/processed_data/Nasal_Biomarkers_BAL_transformed.csv")
+phenotype<-file.path("./resources/processed_data/nasal_biomarker_phenotype_batch12346_merged.csv")
 phenotype<-if(file.exists(phenotype)){read.csv(phenotype, row.names = NULL)}
-numeric_id<-phenotype$ID
-phenotype$ID<-sprintf("%03d",numeric_id) # adds padded zeros in front of the subject ID numbers
-phenotype<-mutate(phenotype,pos_cellcount=phenotype[,source.cell]>0)%>%arrange(ID) # check which cell counts are positive. 
-
-
 
 ###########################################################################################
-## subset phenotype data for which the samples exist for nasal/bronchial RNAseq experiments   
+## subset phenotype data for which the samples exist for bronchial RNAseq experiments   
 ###########################################################################################
-bID<-paste0("B",phenotype$ID) # B*** indicates bronchial sample ID, sequence data is not available for all as of 2023-10-04
-bexist<-bID%in%counts.ID # find which subjects s/p BAL and had bronchial sample RNAseq completed 
-bsample<-bID[bexist] # bronchial sample ID in the readcount matrix (batch 1-4,6) that has BAL phenotype data
-bphen<-phenotype[phenotype$ID%in%substring(bsample,2),] # phenotype table with bsample
-bphen<-mutate(bphen, SampleID=bsample)%>%relocate(SampleID, .before=1) # include sample ID for bronchial RNAseq samples
-
-# left join batch info table with nasal/bronchial phenotype table  
-## get batch information
-batch<-file.path("./resources/raw_data/MS_asthma/MS_asthma_phenotype.batch12346.final.csv")
-batch.info<-if(file.exists(batch)){read.csv(batch)}
-bronch.batch.info<-batch.info[1:75,2:3]
-bronch.batch.info$SampleID<-substr(bronch.batch.info$SampleID,1,4)
-
-## define function join_phenotype_batch_info. p is phenotype table. b is batch info table. Factorize the batch info. 
-join_phenotype_batch_info<-function(p,b){
-  table<-left_join(p,b, by="SampleID")
-  table$Batch<-factor(table$Batch, levels=unique(table$Batch))
-  return(table)
-}
-bphen<-join_phenotype_batch_info(bphen,bronch.batch.info)
-bphen<-bphen%>%mutate(IsBatch4 = Batch == "batch4")
-# scale the cell count information 
-# Mike Love: I'd recommend however to center and scale the numeric covariates for model fitting improvement.
-# scale the columns named with source.cell.log
-
-bphen<-mutate_at(bphen,vars(all_of(source.cell.log)),scale) # scales and mutates all log-transformed cell counts 
-
-# decide which analysis to perform, then set the phenotype data as phen
-
+bexist<-phenotype$SampleID%in%counts.ID # find which subjects s/p BAL and had bronchial sample RNAseq completed 
+bphen<-phenotype[bexist,]
+bphen<-mutate_at(bphen,vars(all_of(source.cell.log)),scale)
 
 ###################################
 # custom functions for DEG analysis
@@ -122,7 +91,7 @@ pi<-lapply(phen[,source.cell.log],function(data){a<-!is.na(data);return(a)})
 df<-vector("list",length=10) # list of data framese used as an input for deseq2. all cell counts
 names(df)<-paste(source.cell.log,"all",sep="_")
 for(i in 1:10){
-  df[[i]]<-phen[pi[[i]],c("SampleID",source.cell.log[i], "Batch","IsBatch4")]
+  df[[i]]<-phen[pi[[i]],c("SampleID",source.cell.log[i], "Batch")]
 }
 print(sapply(df,dim)[1,])
 
@@ -131,13 +100,13 @@ pi.pos<-lapply(phen[,source.cell],function(data){a<-which(data>0);return(a)})
 df.pos<-vector("list",length=10) # list of data framese used as an input for deseq2. subset cell count > 0
 names(df.pos)<-paste(source.cell.log,"pos",sep = "_")
 for(i in 1:10){
-  df.pos[[i]]<-phen[pi.pos[[i]],c("SampleID",source.cell.log[i], "Batch","IsBatch4")]
+  df.pos[[i]]<-phen[pi.pos[[i]],c("SampleID",source.cell.log[i], "Batch")]
 }
 print(sapply(df.pos,dim)[1,])
 # if analyzing only cell counts >0, use df<-df.pos
 
 #################################################################
-# bronchial expression ~ log(cell count>=0) + Batch
+# bronchial expression ~ log(cell count>=0) + Batch12346
 #################################################################
 # coldata for DESeq2
 df.input<-df
@@ -152,17 +121,20 @@ ct<-bronch.counts[,cols] # First column is actually gene name
 genes<-bronch.counts$SampleID
 rownames(ct)<-genes
 
-## Filter counts (readcount table for nasal sample
+## Filter counts 
 c2<-filter_low_expressed_genes_method2(ct,7)
 
 
 # run the DEG for continuous predictors
 
-deg.design<-paste("~",source.cell.log,"+ Batch") # set design: nasal expression ~ log(cell count>0) + Batch 
+deg.design<-paste("~",source.cell.log,"+ Batch")
+print(deg.design)
 ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered using method 2: use TMM normalized lcpm as a cutoff point
 
 print(deg.design)
-count.table<-lapply(df.input,function(df){d<-df; ct<-ct[,colnames(ct)%in%d$SampleID]; return(ct)}) # list of subsetted count table. Each element is a count table with samples for each of the experimental design. 
+
+# make a list of count table. Each element is a count table with samples for each of the experimental design. 
+count.table<-lapply(df.input,function(df){d<-df; ct<-ct[,colnames(ct)%in%d$SampleID]; return(ct)}) 
 
 dds<-vector("list",length=10)
 res<-vector("list",length=10)
