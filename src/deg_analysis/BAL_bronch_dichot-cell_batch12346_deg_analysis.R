@@ -170,14 +170,6 @@ for(i in 1:length(df)){
   head(res.sig[[i]])
 }
 
-
-for(i in 1:1){
-  dds[[i]]<-run_deseq2_DEG_analysis(count.table[[i]], df.input[[i]], deg.design[i],deg.design[i])
-  res[[i]]<-get_DEG_results(dds[[i]], paste(names(df),"TRUE",sep="")[i])
-  res.sig[[i]]<-res[[i]][which(res[[i]]$padj<=0.05),]
-  head(res.sig[[i]])
-}
-
 ## writing the results 
 deg.folder<-paste("deg",Sys.Date(),sep="_")
 deg.dir<-file.path("./reports",deg.folder)
@@ -188,20 +180,20 @@ if(!dir.exists(deg.dir)){
 if(dir.exists(deg.dir)){
   for(i in 1:length(df)){
     a<-res.sig[[i]]
-    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg",unique(phen$Type),"allcells","res",i,deg.design[[i]],Sys.Date(),".csv",sep="_"))) }
+    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg","bronch","dichot","res",i,deg.design[[i]],Sys.Date(),".csv",sep="_"))) }
 }
 
 ## summarize the data input 
 
 if(dir.exists(deg.dir)){
   a<-generate_DEG_input_summary_table()
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg",unique(phen$Type),"allcells","analysis_input","cellcount_thr+Batch",Sys.Date(),".csv",sep="_")))
+  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg","bronch","dichot","analysis_input","cellcount_thr+Batch",Sys.Date(),".csv",sep="_")))
 }
 
 ## summary table of the DEG analysis
 
 if(dir.exists(deg.dir)){
   a<-generate_DEG_summary_table()
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds",unique(phen$Type),"allcells","res_summary","cellcount_thr+Batch",Sys.Date(),".csv",sep="_")))
+  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds","bronch","dichot","res_summary","cellcount_thr+Batch",Sys.Date(),".csv",sep="_")))
 }
 
