@@ -2,6 +2,7 @@
 # Bronchial RNAseq analysis with new samples:
 # additional samples run in the batch 6
 # alignment based on new reference genome GRCh38
+# phenotype table was updated. loading was simplified
 ##
 
 library(tidyverse)
@@ -202,17 +203,19 @@ ct<-bronch.counts[,cols] # First column is actually gene name
 genes<-bronch.counts$SampleID
 rownames(ct)<-genes
 
-## Filter counts (readcount table for nasal sample
-c2<-filter_low_expressed_genes_method2(ct,4)
+## Filter counts
+c2<-filter_low_expressed_genes_method2(ct,7)
 
 
 # run the DEG for continuous predictors
 
-deg.design<-paste("~",source.cell.log,"+ Batch") # set design: nasal expression ~ log(cell count>0) + Batch 
+deg.design<-paste("~",source.cell.log,"+ Batch") 
 ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered using method 2: use TMM normalized lcpm as a cutoff point
 
 print(deg.design)
-count.table<-lapply(df.input,function(df){d<-df; ct<-ct[,colnames(ct)%in%d$SampleID]; return(ct)}) # list of subsetted count table. Each element is a count table with samples for each of the experimental design. 
+
+# list of subsetted count table. Each element is a count table with samples for each of the experimental design. 
+count.table<-lapply(df.input,function(df){d<-df; ct<-ct[,colnames(ct)%in%d$SampleID]; return(ct)})
 
 dds<-vector("list",length=10)
 res<-vector("list",length=10)
