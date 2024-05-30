@@ -70,14 +70,6 @@ bphen<-mutate_at(bphen,vars(all_of(source.cell.log)),scale)
 
 source("./src/function/deg_custom_functions.R")
 
-generate_DEG_summary_table<-function(){
-  reslist<-paste("res.sig",1:length(res.sig),sep="")
-  n_sig_deg<-sapply(res.sig,nrow)
-  design<-deg.design
-  source_cell<-source.cell
-  df<-data.frame(type="bronch",results=reslist,n_sig_deg,design=design,source_cell=source_cell, row.names = NULL)
-  return(df)
-} # needed to fix "type=unique(phen$Type)" to "type="bronch""
 #-----------------------
 
 # Function to get quartiles for each column
@@ -170,7 +162,7 @@ for(i in 1:length(df)){
   head(res.sig[[i]])
 }
 
-## writing the results 
+## writing the significant and all results 
 deg.folder<-paste("deg",Sys.Date(),sep="_")
 deg.dir<-file.path("./reports",deg.folder)
 if(!dir.exists(deg.dir)){
@@ -180,20 +172,47 @@ if(!dir.exists(deg.dir)){
 if(dir.exists(deg.dir)){
   for(i in 1:length(df)){
     a<-res.sig[[i]]
-    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg","bronch","dichot","res",i,deg.design[[i]],Sys.Date(),".csv",sep="_"))) }
+    b<-res[[i]]
+    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg","bronch","dichot","res_sig",i,deg.design[[i]],Sys.Date(),".csv",sep="_")))
+    write.csv(b,row.names=TRUE,file.path(deg.dir,paste("deg","bronch","dichot","res_all",i,deg.design[[i]],Sys.Date(),".csv",sep="_")))
+    }
 }
 
 ## summarize the data input 
 
+generate_DEG_input_summary_table<-function(original_ct,filtered_ct,dds,res,des){
+  filter_method<-"TMM normalized LCPM cutoff"
+  n_filtered_genes<-paste("analyzed n_genes:", nrow(filtered_ct),",","filtered n_genes:",nrow(original_ct)-nrow(filtered_ct))
+  samples<-sapply(dds, function(d){colData(d)$SampleID%>%paste(collapse = ",")})
+  dds<-paste("dds",1:length(dds),sep="")
+  results<-paste("res",1:length(res),sep="")
+  design<-des
+  df<-data.frame(dds=dds,results=results,design=design,samples=samples,filter_method=filter_method,n_filtered_genes=n_filtered_genes)
+  return(df)
+}
+
+
 if(dir.exists(deg.dir)){
-  a<-generate_DEG_input_summary_table()
+  a<-generate_DEG_input_summary_table(bronch.counts[,cols],ct,dds,res,deg.design)
   write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg","bronch","dichot","analysis_input","cellcount_thr+Batch",Sys.Date(),".csv",sep="_")))
 }
 
 ## summary table of the DEG analysis
+generate_DEG_summary_table<-function(results_significant,deg_design,variable){
+  res.sig<-results_significant
+  deg.design<-deg_design
+  var<-variable
+  
+  reslist<-paste("res.sig",1:length(res.sig),sep="")
+  n_sig_deg<-unlist(sapply(res.sig,nrow))
+  design<-deg.design
+  
+  df<-data.frame(type="bronch",results=reslist,n_sig_deg=n_sig_deg,design=design,variable=var, row.names = NULL)
+  return(df)
+}
 
 if(dir.exists(deg.dir)){
-  a<-generate_DEG_summary_table()
+  a<-generate_DEG_summary_table(res.sig,deg.design,var_dichot)
   write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds","bronch","dichot","res_summary","cellcount_thr+Batch",Sys.Date(),".csv",sep="_")))
 }
 
