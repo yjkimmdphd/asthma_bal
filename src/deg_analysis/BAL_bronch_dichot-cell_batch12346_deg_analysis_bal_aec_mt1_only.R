@@ -173,7 +173,7 @@ res.sig<-vector("list",length=length(df))
 names(res)<-deg.design
 names(res.sig)<-deg.design
 
-for(i in 1:length(df)){
+for(i in 2:2){
   dds[[i]]<-run_deseq2_DEG_analysis(count.table[[i]], df.input[[i]], deg.design[i],deg.design[i])
   res[[i]]<-get_DEG_results(dds[[i]], paste(names(df),"TRUE",sep="")[i])
   res.sig[[i]]<-res[[i]][which(res[[i]]$padj<=0.05),]
@@ -188,7 +188,7 @@ if(!dir.exists(deg.dir)){
 }
 
 if(dir.exists(deg.dir)){
-  for(i in 1:length(df)){
+  for(i in 2:2){
     a<-res.sig[[i]]
     b<-res[[i]]
     write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg","bronch","dichot","res_sig",i,deg.design[[i]],Sys.Date(),".csv",sep="_")))

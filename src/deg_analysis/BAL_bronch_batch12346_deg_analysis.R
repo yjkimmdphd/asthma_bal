@@ -143,17 +143,6 @@ for(i in 1:10){
   
 }
 
-k<-dds[[1]]
-m<-res[[1]]
-for(i in 1:10){
-  dds[[i]]<-k
-  res[[i]]<-m
-  res.sig[[i]]<-m[which(m$padj<=0.05),]
-  head(res.sig[[i]])
-  
-}
-
-
 ## writing the significant and all results 
 deg.folder<-paste("deg",Sys.Date(),sep="_")
 deg.dir<-file.path("./reports",deg.folder)

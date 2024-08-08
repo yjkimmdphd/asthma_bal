@@ -3,7 +3,7 @@ library(EnhancedVolcano)
 library(pheatmap)
 library(gridExtra)
 library(grid)
-data.folder<-file.path("./reports/local_only/deg~bal-blood_cell(continuous)+batch/deg_gene_list")
+data.folder<-file.path("./reports/local_only/deg_nasal-bronch~bal-blood_cell(continuous)+batch/deg_gene_list")
 ####################################################################
 # data exploration of DEG analysis using nasal/bronchial rnaseq data
 # model: "Nasal DEG ~ blood AEC (>0) + Batch
@@ -99,40 +99,47 @@ p1.2<-EnhancedVolcano(res_nasal,
                     legendIconSize = 5.0,    
                     drawConnectors = TRUE,
                     widthConnectors = 0.75)
-res_nasal<-res_nasal%>%mutate(deg_sig=ifelse(padj<0.05&log2FoldChange>1,'cyan',
-                                  ifelse(padj<0.05&log2FoldChange< -1,'magenta',
+
+res_nasal<-res_nasal%>%mutate(deg_sig=ifelse(padj<0.05&log2FoldChange>0.585,'cyan',
+                                  ifelse(padj<0.05&log2FoldChange< -0.585,'magenta',
                                          'grey')))
 
-keyvals_n <- ifelse(res_nasal$padj<0.05&res_nasal$log2FoldChange>1,'cyan',
-                    ifelse(res_nasal$padj<0.05&res_nasal$log2FoldChange< -1,'magenta',
+keyvals_n <- ifelse(res_nasal$padj<0.05&res_nasal$log2FoldChange>0.585,'cyan',
+                    ifelse(res_nasal$padj<0.05&res_nasal$log2FoldChange< -0.585,'magenta',
                            'grey'))
 keyvals_n[is.na(keyvals_n)] <- 'black'
 
-EnhancedVolcano(res_nasal,
-                      lab = rownames(res_nasal),
-                      title='Nasal DEG',
-                      subtitle = '~ blood AEC + batch, p-adj (BH)',
-                      x = 'log2FoldChange',
-                      y = 'padj',
-                      xlab = bquote(~Log[2]~ 'fold change'),
-                      xlim=c(-10,8),
-                      ylim=c(0,3.5),
-                      pCutoff = 5e-2,
-                      FCcutoff = 1,
-                      cutoffLineType = 'twodash',
-                      cutoffLineWidth = 0.8,
-                      pointSize = 4.0,
-                      labSize = 3,
-                      colAlpha = 0.2,
-                      colCustom = keyvals_n,
-                      selectLab = NA,
-                      legendLabSize = 10,
-                      legendIconSize = 5.0,    
-                      drawConnectors = TRUE,
-                      widthConnectors = 0.75)
+names(keyvals_n)[keyvals_n == 'cyan'] <- 'up'
+names(keyvals_n)[keyvals_n == 'magenta'] <- 'down'
+names(keyvals_n)[keyvals_n == 'grey'] <- 'nonsig'
 
-p1
+p1.3<-EnhancedVolcano(res_nasal,
+                    lab = rownames(res_nasal),
+                    title='Nasal DEG',
+                    subtitle = '~ blood AEC + batch',
+                    x = 'log2FoldChange',
+                    y = 'padj',
+                    xlab = bquote(~Log[2]~ 'fold change'),
+                    xlim=c(-10,8),
+                    ylim=c(0,3.5),
+                    pCutoff = 5e-2,
+                    FCcutoff = 1,
+                    cutoffLineType = 'twodash',
+                    cutoffLineWidth = 0.8,
+                    pointSize = 4.0,
+                    labSize = 3,
+                    colAlpha = 0.4,
+                    selectLab = rownames(res_nasal)[which(names(keyvals_n)%in%c('up','down'))],
+                    colCustom = keyvals_n,
+                    legendLabels=c('Not sig.','Log (base 2) FC','p-value',
+                                   'p-adj (<0.05) & Log (base 2) FC'),
+                    legendPosition = 'right',
+                    legendLabSize = 10,
+                    legendIconSize = 5.0,    
+                    drawConnectors = TRUE,
+                    widthConnectors = 0.75)
 p1.3
+
 
 p2<-EnhancedVolcano(res_bronch,
                 lab = rownames(res_bronch),
