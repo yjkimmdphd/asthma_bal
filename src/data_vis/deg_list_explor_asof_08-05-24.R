@@ -109,7 +109,7 @@ spread_data <- clustering_data %>%
 
 design_list<-c("Bronchial . BAL ANC, >0 (continuous) + batch(12346)",
                "Bronchial . BAL Eos% > 3% vs <3% + batch(12346)",
-               "Nasal . Blood AEC, >0 (continuous) + batch(1234)",
+               "Nasal . Blood AEC, >0 (continuous) + batch(1234)",f
                "Bronchial . BAL AEC >1 vs <1 + batch(12346)")
 
 # Prepare the matrix for pheatmap

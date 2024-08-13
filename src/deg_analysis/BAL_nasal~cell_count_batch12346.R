@@ -44,7 +44,7 @@ source.cell<-c(
   "blood_neut_p",
   "blood_wbc")
 
-var_dichot_bal<-c("bal_AEC_more_0","bal_AEC_more_1.15","bal_Eos_p_more_0",
+var_dichot_bal<-c("bal_AEC_more_0","bal_AEC_more_1","bal_Eos_p_more_0",
               "bal_Eos_p_more_1","bal_Eos_p_more_3","bal_ANC_more_0",
               "bal_ANC_more_5","bal_ANC_more_13","bal_neut_p_more_0",
               "bal_neut_p_more_2","bal_neut_p_more_5")
@@ -81,10 +81,11 @@ nphen<-phenotype[phenotype$ID%in%substring(nsample,2),] # phenotype table with n
 
 nphen<-mutate(nphen, SampleID=nsample)%>%relocate(SampleID, .before=1) # include sample ID for nasal RNAseq samples
 
-nphen<-nphen%>%mutate(bld_AEC_more_0 = blood_eos>0,
-               bld_AEC_more_100 = blood_eos>100,
-               bld_AEC_more_300 = blood_eos>300,
-               bld_AEC_more_400 = blood_eos>400)
+nphen<-nphen%>%mutate(bal_AEC_more_1 = BAL_eos_ct>1,
+                      bld_AEC_more_0 = blood_eos>0,
+                      bld_AEC_more_100 = blood_eos>100,
+                      bld_AEC_more_300 = blood_eos>300,
+                      bld_AEC_more_400 = blood_eos>400)
 ###################################
 # custom functions for DEG analysis
 ###################################
@@ -104,9 +105,9 @@ phen<-nphen  # If bronchial analysis, use this
 
 
 ############ select variables to test for all non-NA values. cell count >=0
-var_to_test<-c(source.cell.log,var_dichot_blood)
+var_to_test<-c(source.cell.log,var_dichot_bal[2],var_dichot_blood)
 var_to_test_bld<-var_to_test[c(grep("blood",var_to_test),grep("bld",var_to_test))]
-var_to_test_res<-c(source.cell.log,paste(var_dichot_blood,"TRUE",sep=""))
+var_to_test_res<-c(source.cell.log,paste(c(var_dichot_bal[2],var_dichot_blood),"TRUE",sep=""))
 
 # make a list of the phenotype colData that will be used for DESeq2
 pi<-lapply(phen[,var_to_test],function(data){a<-!is.na(data);return(a)})
@@ -186,20 +187,58 @@ if(dir.exists(deg.dir)){
     write.csv(b,row.names=TRUE,file.path(deg.dir,paste("deg","nasal","res_all",i,deg.design[[i]],Sys.Date(),".csv",sep="_")))
   }
 }
-## summarize the data input 
-
-if(dir.exists(deg.dir)){
-  a<-generate_DEG_input_summary_table()
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg",unique(phen$Type),"allcells","cellcount+batch","analysis_input",Sys.Date(),".csv",sep="_")))
-}
-
-## summary table of the DEG analysis
-
-if(dir.exists(deg.dir)){
-  a<-generate_DEG_summary_table()
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds",unique(phen$Type),"allcells","cellcount+batch","res_summary",Sys.Date(),".csv",sep="_")))
-}
-
+# ## summarize the data input 
+# 
+# if(dir.exists(deg.dir)){
+#   a<-generate_DEG_input_summary_table()
+#   write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg",unique(phen$Type),"allcells","cellcount+batch","analysis_input",Sys.Date(),".csv",sep="_")))
+# }
+# 
+# ## summary table of the DEG analysis
+# 
+# if(dir.exists(deg.dir)){
+#   a<-generate_DEG_summary_table()
+#   write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds",unique(phen$Type),"allcells","cellcount+batch","res_summary",Sys.Date(),".csv",sep="_")))
+# }
+# 
+# 
+# ## summarize the data input 
+# 
+# generate_DEG_input_summary_table<-function(original_ct,filtered_ct,dds,res,des){
+#   filter_method<-"TMM normalized LCPM cutoff"
+#   n_filtered_genes<-paste("analyzed n_genes:", nrow(filtered_ct),",","filtered n_genes:",nrow(original_ct)-nrow(filtered_ct))
+#   samples<-sapply(dds, function(d){colData(d)$SampleID%>%paste(collapse = ",")})
+#   dds<-paste("dds", assay_index,sep="")
+#   results<-paste("res",assay_index,sep="")
+#   design<-des
+#   df<-data.frame(dds=dds,results=results,design=design,samples=samples,filter_method=filter_method,n_filtered_genes=n_filtered_genes)
+#   return(df)
+# }
+# 
+# 
+# if(dir.exists(deg.dir)){
+#   a<-generate_DEG_input_summary_table(bronch.counts[,cols],ct,dds,res,deg.design)
+#   write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg","nasal","continuous_and_dich","all_cells","analysis_input","cellcount+Batch12346",Sys.Date(),".csv",sep="_")))
+# }
+# 
+# ## summary table of the DEG analysis
+# generate_DEG_summary_table<-function(results_significant,deg_design,variable){
+#   res.sig<-results_significant
+#   deg.design<-deg_design
+#   var<-variable
+#   
+#   reslist<-paste("res.sig",assay_index,sep="")
+#   n_sig_deg<-unlist(sapply(res.sig,nrow))
+#   design<-deg.design
+#   
+#   df<-data.frame(type="nasal",results=reslist,n_sig_deg=n_sig_deg,design=design,variable=var, row.names = NULL)
+#   return(df)
+# }
+# 
+# if(dir.exists(deg.dir)){
+#   a<-generate_DEG_summary_table(res.sig,deg.design,source.cell.log)
+#   write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds","nasal","continuous_and_dich","res_summary","cellcount+Batch12346",Sys.Date(),".csv",sep="_")))
+# }
 
 ## summarize the data input 
 
@@ -213,45 +252,6 @@ generate_DEG_input_summary_table<-function(original_ct,filtered_ct,dds,res,des){
   df<-data.frame(dds=dds,results=results,design=design,samples=samples,filter_method=filter_method,n_filtered_genes=n_filtered_genes)
   return(df)
 }
-
-
-if(dir.exists(deg.dir)){
-  a<-generate_DEG_input_summary_table(bronch.counts[,cols],ct,dds,res,deg.design)
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg","nasal","continuous_and_dich","analysis_input","cellcount+Batch12346",Sys.Date(),".csv",sep="_")))
-}
-
-## summary table of the DEG analysis
-generate_DEG_summary_table<-function(results_significant,deg_design,variable){
-  res.sig<-results_significant
-  deg.design<-deg_design
-  var<-variable
-  
-  reslist<-paste("res.sig",assay_index,sep="")
-  n_sig_deg<-unlist(sapply(res.sig,nrow))
-  design<-deg.design
-  
-  df<-data.frame(type="nasal",results=reslist,n_sig_deg=n_sig_deg,design=design,variable=var, row.names = NULL)
-  return(df)
-}
-
-if(dir.exists(deg.dir)){
-  a<-generate_DEG_summary_table(res.sig,deg.design,source.cell.log)
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds","nasal","continuous_and_dich","res_summary","cellcount+Batch12346",Sys.Date(),".csv",sep="_")))
-}
-
-## summarize the data input 
-
-generate_DEG_input_summary_table<-function(original_ct,filtered_ct,dds,res,des){
-  filter_method<-"TMM normalized LCPM cutoff"
-  n_filtered_genes<-paste("analyzed n_genes:", nrow(filtered_ct),",","filtered n_genes:",nrow(original_ct)-nrow(filtered_ct))
-  samples<-sapply(dds, function(d){colData(d)$SampleID%>%paste(collapse = ",")})
-  dds<-paste("dds", assay_index,sep="")
-  results<-paste("res",assay_index,sep="")
-  design<-des
-  df<-data.frame(dds=dds,results=results,design=design,samples=samples,filter_method=filter_method,n_filtered_genes=n_filtered_genes)
-  return(df)
-}
-
 
 if(dir.exists(deg.dir)){
   a<-generate_DEG_input_summary_table(ncounts[,cols],ct,dds,res,deg.design)
