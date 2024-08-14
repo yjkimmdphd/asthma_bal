@@ -4,8 +4,13 @@ output:
   html_document:
     df_print: paged
 ---
-```{r}
+```{r, prepare the packages}
 getwd()
+library(dplyr)
+library(EnhancedVolcano)
+library(pheatmap)
+library(gridExtra)
+library(grid)
 ```
 
 Previously, DEG was performed and several models showed signficant DEG 
@@ -21,7 +26,7 @@ design_list<-c("Bronchial . BAL Eos%, all (continuous) + batch(12346)",
 K means clustering was performed. Some interesting clusters were identified. 
 
 these are the files. 
-```{r}
+```{r, echo =FALSE}
 d1<-"./reports/local_only/deg_bronch~bal_cell(continuous)+batch12346/gene_list_sig_results/deg_bronch_continuous_allcell+batch12346_res_sig_2_~ BAL_eos_p_log + Batch_2024-08-02_.csv"
 
 file.exists(d1)
@@ -55,11 +60,7 @@ d8<-read.csv(d8)
 
 DEG nasal ~ blood AEC +batch
 ```{r}
-library(dplyr)
-library(EnhancedVolcano)
-library(pheatmap)
-library(gridExtra)
-library(grid)
+
 nasal_data_folder<-file.path("./reports/local_only/deg_nasal-bronch~bal-blood_cell(continuous)+batch/deg_gene_list")
 ####################################################################
 # data exploration of DEG analysis using nasal rnaseq data
@@ -216,6 +217,8 @@ p<-EnhancedVolcano(res,
                     widthConnectors = 0.75)
 print(p)
 ```
+
+
 ## bronch ~ BAL Eos% > 3% + batch 12346
 ```{r}
 library(dplyr)
@@ -270,6 +273,7 @@ p<-EnhancedVolcano(res,
 print(p)
 ```
 
+
 ## bronch ~ BAL Eos P continuous + batch 12346
 ```{r}
 library(dplyr)
@@ -301,7 +305,7 @@ names(keyvals_n)[keyvals_n == 'black'] <- 'NA'
 p<-EnhancedVolcano(res,
                     lab = NA,
                     title='Bronchial DEG',
-                    subtitle = '~ BAL ANC (>0,continuous) + batch12346',
+                    subtitle = '~ BAL Eos% (continuous) + batch12346',
                     x = 'log2FoldChange',
                     y = 'padj',
                     xlab = bquote(~Log[2]~ 'fold change'),
@@ -340,7 +344,7 @@ analysis_list<-c("./reports/local_only/deg_nasal-bronch~bal-blood_cell(continuou
 res_list<-lapply(analysis_list,function(list)read.csv(list,row.names = 1))
 n_deg<-sapply(res_list,function(list)list%>%filter(abs(log2FoldChange)>0.585,padj<0.05)%>%summarize(n_deg=length(padj)))
 names(n_deg)<-c("nasal~blood_AEC","bronch~bal_ANC","bronch~bal_AEC_mt1", "bronch~bal_eos_p_mt3","bronch~bal_eos_p_continuous_allcells")
-print(n_deg)
+# print(n_deg)
 
 ```
 
@@ -349,7 +353,7 @@ print(n_deg)
 
 ## DEG of bronch~ BAL ANC 
 upregulated DEG had GO that looked like this:
-```{r}
+```{r, GO DEG of bronch~ BAL ANC }
 library(stringr)
 go_deg_folder<-file.path("./reports/local_only/deg_bronch~bal_cell(continuous)+batch12346/GO")
 go_deg_filelist<-if(file.exists(go_deg_folder)){list.files(path=go_deg_folder)}
@@ -357,7 +361,7 @@ go_deg_filelist<-if(file.exists(go_deg_folder)){list.files(path=go_deg_folder)}
 # Subset elements that end with ".txt"
 go_files <- c("GO_down_bronch~bal-neut-ct_pos+batch12346_l2fc_mt0-58.txt", "GO_up_bronch~bal-neut-ct_pos+batch12346_l2fc_mt0-58.txt")
 ###
-# 1. GO term for  DEG ~ BAL+batch12346 
+# 1. GO term for  DEG ~ BAL ANC+batch12346 
 ###
 
 go_deg_terms<-lapply(file.path(go_deg_folder,go_files),read.table,sep="\t",header=TRUE)
@@ -397,10 +401,10 @@ for(i in 1:length(go_deg_terms)){
     scale_fill_gradient(low = "blue", high = "red") +  # Adjust color gradient as needed
     labs(x = "Fold Enrichment", y = "Gene Ontology Term", fill = "-log10(FDR)", title = names(go_deg_terms[i])) +
     theme(axis.text.x = element_text(size = 10),  # Change size of x-axis labels
-        axis.text.y = element_text(size = 15),
-        axis.title= element_text(size=15),
+        axis.text.y = element_text(size=12),
+        axis.title= element_text(size=12),
         legend.title=element_text(size=10),
-        title = element_text(size=15))+  # Adjust y-axis label size for better readability
+        title = element_text(size=12))+  # Adjust y-axis label size for better readability
     scale_y_discrete(labels=wrapped_label[[i]])+
     xlim(0,60)
     
@@ -410,39 +414,45 @@ grobs<-list(a1,a2)
 # Arrange the plots in a 2x4 grid
 grid.arrange(grobs = grobs[1:2], nrow = 2)
 ```
+
+
+
+
 LILRB genes are often expressed on granulocytes, so these might just be capturing the immune cells. (PMID: 37038910)
 
 Downregulated DEG bronch ~ BAL ANC do not have any GO term enrichment
 
 
-# Lets look at DEG bronch ~ dichotomous cell counts 
+
+
+# GO terms for DEG bronch ~ Eos (blood or bal), dichot
 
 complement: https://david.ncifcrf.gov/kegg.jsp?path=hsa04610$Complement%20and%20coagulation%20cascades&termId=520075482&source=kegg
-```{r}
+```{r, GO terms for DEG bronch ~ Eos (blood or bal), dichot}
 
 go_deg_folder<-file.path("./reports/local_only/deg_bronch~bal_cell(dichot)+batch12346/GO")
+
 go_deg_filelist<-if(file.exists(go_deg_folder)){list.files(path=go_deg_folder)}
 
 # Subset elements that end with ".txt"
 txt_files <- go_deg_filelist[grep("\\.txt$", go_deg_filelist)]
+txt_files<-txt_files[!grepl("revigo",txt_files)]
 print(txt_files)
 
 go_deg_filelist<-txt_files
-go_deg_filelist<-go_deg_filelist[c(3,6,7)]
+go_deg_filelist<-go_deg_filelist[1:length(go_deg_filelist)]
 print(go_deg_filelist)
 print(file.exists(file.path(go_deg_folder,go_deg_filelist)))
 ###
-# 1. GO term for  DEG ~ BAL+batch12346 
+# 1. load and plot GO terms  
 ###
 
 go_deg_terms<-lapply(file.path(go_deg_folder,go_deg_filelist),read.table,sep="\t",header=TRUE)
 
-lapply(go_deg_terms,colnames)
-
 # select relevant columns
 go_deg_terms<-lapply(go_deg_terms,
                      function(d){
-                       d[,c(2,3,6,10,13)]%>%
+                       d[,c("Term","X","Genes","Fold.Enrichment", "FDR")]%>%
                          filter(FDR<0.05)%>%
                          arrange(desc(Fold.Enrichment))})
 
@@ -465,22 +475,93 @@ wrapped_label<-lapply(go_deg_terms,
 library(grid)
 library(gridExtra)
 for(i in 1:length(go_deg_terms)){
-  p<-ggplot(go_deg_terms[[i]][1:10,], aes(x = Fold.Enrichment, y = X, fill = -log10(FDR))) + # show only top 15
+  p<-ggplot(go_deg_terms[[i]][1:10,], aes(x = Fold.Enrichment, y = X, fill = -log10(FDR))) + # show only top 10
     geom_bar(stat = "identity") +
     geom_label(aes(label = round(-log10(FDR), 1)), fill="white",nudge_y=0.3, hjust = -0.1, size = 3, color = "black") +  # Add text labels for log10(FDR)
     scale_fill_gradient(low = "blue", high = "red") +  # Adjust color gradient as needed
     labs(x = "Fold Enrichment", y = "Gene Ontology Term", fill = "-log10(FDR)", title = names(go_deg_terms[i])) +
     theme(axis.text.x = element_text(size = 10),  # Change size of x-axis labels
         axis.text.y = element_text(size = 12),
-        axis.title= element_text(size=15),
+        axis.title= element_text(size=12),
         legend.title=element_text(size=10),
-        title = element_text(size=15))+  # Adjust y-axis label size for better readability
+        title = element_text(size=12))+  # Adjust y-axis label size for better readability
     scale_y_discrete(labels=wrapped_label[[i]])
   assign(paste("a", i, sep = ""), p)
 }
-grobs<-list(a1,a2,a3)
-# Arrange the plots in a 2x4 grid
-grid.arrange(grobs = grobs[1:3], nrow = 3)
+grobs_names<-paste0("a",seq(1,length(go_deg_terms),by=1))
+grobs<-lapply(grobs_names,get)
+lapply(grobs,print)
+
+```
+
+
+
+# GO terms bronch ~ Eos/ANC (blood, BAL), continuous
+```{r,GO terms bronch ~ Eos/ANC (blood, BAL), continuous }
+go_deg_folder<-file.path("./reports/local_only/deg_bronch~bal_cell(continuous)+batch12346/GO")
+
+go_deg_filelist<-if(file.exists(go_deg_folder)){list.files(path=go_deg_folder)}
+
+# Subset elements that end with ".txt"
+txt_files <- go_deg_filelist[grep("\\.txt$", go_deg_filelist)]
+txt_files<-txt_files[!grepl("revigo",txt_files)]
+print(txt_files)
+
+go_deg_filelist<-txt_files
+go_deg_filelist<-go_deg_filelist[1:length(go_deg_filelist)]
+print(go_deg_filelist)
+print(file.exists(file.path(go_deg_folder,go_deg_filelist)))
+###
+# 1. GO term for  DEG ~ BAL/blood cell count +batch12346 
+###
+
+go_deg_terms<-lapply(file.path(go_deg_folder,go_deg_filelist),read.table,sep="\t",header=TRUE)
+
+lapply(go_deg_terms,colnames)
+
+# select relevant columns
+go_deg_terms<-lapply(go_deg_terms,
+                     function(d){
+                       d[,colnames(d)%in%c("Category.1","Term","X","Genes","Fold.Enrichment","FDR")]%>%
+                         filter(FDR<0.05)%>%
+                         arrange(desc(Fold.Enrichment))})
+
+names(go_deg_terms)<-gsub("\\+batch12346", "", substr(go_deg_filelist, 1, nchar(go_deg_filelist) - 4))
+
+gt<-lapply(go_deg_terms,
+       function(data){
+         gt<-factor(data$X,levels=data$X)
+       })
+
+for(i in 1:length(go_deg_terms)){
+  go_deg_terms[[i]]$X<-gt[[i]]
+}
+
+wrapped_label<-lapply(go_deg_terms,
+                      function(data){
+                        go_term<-data$X
+                        str_wrap(go_term, width=40)})
+# Plot
+library(grid)
+library(gridExtra)
+for(i in 1:length(go_deg_terms)){
+  p<-ggplot(go_deg_terms[[i]][1:10,], aes(x = Fold.Enrichment, y = X, fill = -log10(FDR))) + # show only top 10
+    geom_bar(stat = "identity") +
+    geom_label(aes(label = round(-log10(FDR), 1)), fill="white",nudge_y=0.3, hjust = -0.1, size = 3, color = "black") +  # Add text labels for log10(FDR)
+    scale_fill_gradient(low = "blue", high = "red") +  # Adjust color gradient as needed
+    labs(x = "Fold Enrichment", y = "Gene Ontology Term", fill = "-log10(FDR)", title = names(go_deg_terms[i])) +
+    theme(axis.text.x = element_text(size = 10),  # Change size of x-axis labels
+        axis.text.y = element_text(size = 12),
+        axis.title= element_text(size=12),
+        legend.title=element_text(size=10),
+        title = element_text(size=12))+  # Adjust y-axis label size for better readability
+    scale_y_discrete(labels=wrapped_label[[i]])
+  assign(paste("a", i, sep = ""), p)
+}
+grobs_names<-paste0("a",seq(1,length(go_deg_terms),by=1))
+grobs<-lapply(grobs_names,get)
+
+lapply(grobs,print)
 
 ```
 

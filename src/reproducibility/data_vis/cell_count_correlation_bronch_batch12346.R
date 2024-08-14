@@ -89,7 +89,7 @@ cell_count_cor_heatmap<-corrplot::corrplot(cor_matrix, type = "upper", order = "
                    tl.col = "black", tl.srt = 45, 
                    method = "ellipse", addCoef.col = "black",
                    diag= FALSE,
-                   title="Correlation Matrix, blood-bal sampling date difference < 30d, no significance",
+                   title="Correlation Matrix, sampling difference < 30d, no significance",
                    mar=c(5,5,5,5))
 
 

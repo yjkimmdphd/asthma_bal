@@ -1,5 +1,5 @@
 
-## reanalysis of nasal ~ cell count 
+## reanalysis of nasal ~ cell count + batch 12346
 
 
 library(tidyverse)
@@ -7,11 +7,9 @@ library(DESeq2)
 library(limma)
 library(edgeR)
 
-# load count table 
+# load count data
 countdata<-file.path("./resources/raw_data/MS_asthma/MS_asthma.batch12346.GRCh38.geneID_readcount.all_samples.QCed_final.txt")
 counts<-if(file.exists(countdata)){read.delim(countdata, check.names = FALSE)}
-
-# set rownames as gene names
 rownames(counts)<-counts[,"SampleID"]
 
 # remove f/u samples
@@ -71,8 +69,10 @@ colnames(sampling_date_diff)[1:3]<-c("ID","sampling_date_comp","sampling_date_di
 
 phenotype<-left_join(phenotype,sampling_date_diff,by="ID")
 
+
+
 ###########################################################################################
-## subset phenotype data for which the samples exist for nasal/bronchial RNAseq experiments   
+## subset phenotype data for which the samples exist for nasal RNAseq experiments   
 ###########################################################################################
 
 nID<-phenotype$SampleID
@@ -104,33 +104,36 @@ nphen<-nphen%>%mutate(bal_AEC_more_1 = BAL_eos_ct>1,
 
 source("./src/function/deg_custom_functions.R")
 
+########################################
+# further prepare the colData for DESeq2
+########################################
+phen<-nphen  
 
-phen<-nphen  # If bronchial analysis, use this
-
-
-
-############ select variables to test for all non-NA values. cell count >=0
-var_to_test<-c(source.cell.log,var_dichot_bal[2],var_dichot_blood)
+############ select variables to test for all non-NA values. cell count >0
+var_to_test<-c(source.cell.log)
 var_to_test_bld<-var_to_test[c(grep("blood",var_to_test),grep("bld",var_to_test))]
-var_to_test_res<-c(source.cell.log,paste(c(var_dichot_bal[2],var_dichot_blood),"TRUE",sep=""))
+var_to_test_res<-c(source.cell.log)
 
+# all cell count >0
+pi.pos<-lapply(phen[,source.cell],function(data){a<-which(data>0);return(a)})
 # make a list of the phenotype colData that will be used for DESeq2
-pi<-lapply(phen[,var_to_test],function(data){a<-!is.na(data);return(a)})
-df<-vector("list",length(var_to_test)) # list of data framese used as an input for deseq2. all cell counts
-names(df)<-paste(var_to_test,"all",sep="_")
-for(i in 1:length(var_to_test)){
+pi<-pi.pos
+df<-vector("list",length(source.cell)) # list of data framese used as an input for deseq2. all cell counts
+names(df)<-paste(var_to_test[1:10],"mt0",sep="_")
+for(i in 1:length(source.cell)){
   df[[i]]<-phen[pi[[i]],c("SampleID",var_to_test[i], "Batch")]
 }
+
 print(sapply(df,dim)[1,])
 
 # identify the samples for which cbc information will be used as a variable. sampling_date_diff_days should be less than a year 
 cbc_sampleID<-nphen%>%filter(!is.na(vars(var_to_test_bld)),abs(sampling_date_diff_days)<365)%>%pull(SampleID)
-blood_df<-df[paste(var_to_test_bld,"all",sep="_")]
+blood_df<-df[names(df)%in%paste(var_to_test_bld,"mt0",sep="_")]
 blood_df_filtered<-lapply(blood_df,function(df)filter(df,SampleID%in%cbc_sampleID))
 sapply(blood_df,dim)[1,] # samples before filtering
 sapply(blood_df_filtered,dim)[1,] # samples before filtering
 
-df[paste(var_to_test_bld,"all",sep="_")]<-blood_df_filtered
+df[names(df)%in%paste(var_to_test_bld,"mt0",sep="_")]<-blood_df_filtered
 
 #################################################################
 # nasal expression ~ cellcount + Batch
@@ -152,7 +155,7 @@ genes<-rownames(ct)
 c2<-filter_low_expressed_genes_method2(ct,round(length(id)*0.1,0))
 
 
-## design: Batches. all cell counts 
+## prepare dataframe for analysis design and results, then count table for each analysis design. 
 
 deg.design<-paste("~",var_to_test,"+ Batch")
 ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered 
@@ -160,14 +163,14 @@ ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered
 print(deg.design)
 count.table<-lapply(df.input,function(df){d<-df; ct<-ct[,colnames(ct)%in%d$SampleID]; return(ct)}) # list of subsetted count table. Each element is a count table with samples for each of the experimental design. 
 
-dds<-vector("list",length=length(var_to_test))
+dds<-vector("list",length=length(var_to_test)) 
 res<-vector("list",length=length(var_to_test))
 res.sig<-vector("list",length=length(var_to_test))
 
 names(res)<-deg.design
 names(res.sig)<-deg.design
 
-# at this time, testing only the nasal ~ blood AEC 
+# 
 assay_index<-seq_along(deg.design)
 for(i in assay_index){
   dds[[i]]<-run_deseq2_DEG_analysis(count.table[[i]], df.input[[i]], deg.design[i],deg.design[i])
@@ -192,6 +195,7 @@ if(dir.exists(deg.dir)){
     write.csv(b,row.names=TRUE,file.path(deg.dir,paste("deg","nasal","res_all",i,deg.design[[i]],Sys.Date(),".csv",sep="_")))
   }
 }
+
 
 ## summarize the data input 
 
@@ -228,4 +232,129 @@ generate_DEG_summary_table<-function(results_significant,deg_design,variable){
 if(dir.exists(deg.dir)){
   a<-generate_DEG_summary_table(res.sig,deg.design,var_to_test)
   write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds","nasal","continuous_all_and_dich","res_summary","cellcount+Batch12346",Sys.Date(),".csv",sep="_")))
+}
+
+#################select variables to test 
+var_to_pos<-c(source.cell)
+var_to_test<-c(source.cell.log)
+var_to_test_bld<-var_to_test[c(grep("blood",var_to_test),grep("bld",var_to_test))]
+var_to_test_res<-c(source.cell.log)
+
+
+# all cell count >0
+pi.pos<-lapply(phen[,var_to_pos],function(data){a<-which(data>0);return(a)})
+df.pos<-vector("list",length=length(var_to_test)) # list of data framese used as an input for deseq2. subset cell count > 0
+names(df.pos)<-paste(var_to_test,"pos",sep = "_")
+for(i in 1:length(var_to_test)){
+  df.pos[[i]]<-phen[pi.pos[[i]],c("SampleID",var_to_test[i], "Batch")]
+}
+print(sapply(df.pos,dim)[1,])
+
+# identify the samples for which cbc information will be used as a variable. sampling_date_diff_days should be less than a year 
+cbc_sampleID<-nphen%>%filter(!is.na(vars(var_to_test_bld)),abs(sampling_date_diff_days)<365)%>%pull(SampleID)
+blood_df.pos<-df.pos[paste(var_to_test_bld,"pos",sep="_")]
+blood_df.pos_filtered<-lapply(blood_df.pos,function(df)filter(df,SampleID%in%cbc_sampleID))
+sapply(blood_df.pos,dim)[1,] # samples before filtering
+sapply(blood_df.pos_filtered,dim)[1,] # samples before filtering
+
+df.pos[paste(var_to_test_bld,"pos",sep="_")]<-blood_df.pos_filtered
+
+
+#################################################################
+# nasal expression ~ log(cell count>0) + Batch
+#################################################################
+# coldata for DESeq2
+df.input<-df.pos
+
+# filtering counts table to remove low expressed genes
+
+## select RNAseq counts
+id<-phen$SampleID
+cols<-colnames(ncounts)%in%id
+ct<-ncounts[,cols] # First column is actually gene name 
+genes<-rownames(ct)
+
+
+## Filter counts (readcount table for nasal sample
+c2<-filter_low_expressed_genes_method2(ct,round(length(id)*0.1,0))
+
+## design: Batches. cell counts >0
+
+deg.design<-paste("~",var_to_test,"+ Batch")
+ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered 
+
+print(deg.design)
+count.table<-lapply(df.input,function(df){d<-df; ct<-ct[,colnames(ct)%in%d$SampleID]; return(ct)}) # list of subsetted count table. Each element is a count table with samples for each of the experimental design. 
+
+dds<-vector("list",length=length(var_to_test))
+res<-vector("list",length=length(var_to_test))
+res.sig<-vector("list",length=length(var_to_test))
+
+names(res)<-deg.design
+names(res.sig)<-deg.design
+
+
+# at this time, testing only the nasal ~ blood AEC 
+assay_index<-c(1:length(var_to_test))
+
+for(i in assay_index){
+  dds[[i]]<-run_deseq2_DEG_analysis(count.table[[i]], df.input[[i]], deg.design[i],deg.design[i])
+  res[[i]]<-get_DEG_results(dds[[i]], var_to_test_res[i])
+  res.sig[[i]]<-res[[i]][which(res[[i]]$padj<=0.05),]
+  head(res.sig[[i]])
+  
+}
+
+## writing the significant (res_sig) and all (res_all) results 
+deg.dir<-file.path(paste("./reports/temporary/deg",Sys.Date(),sep="_"))
+if(!dir.exists(deg.dir)){
+  dir.create(deg.dir)
+}
+
+if(dir.exists(deg.dir)){
+  for(i in assay_index){
+    a<-res.sig[[i]]
+    b<-res[[i]]
+    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg","nasal","res_sig",i,deg.design[[i]],"cont_mt0_dich",Sys.Date(),".csv",sep="_")))
+    write.csv(b,row.names=TRUE,file.path(deg.dir,paste("deg","nasal","res_all",i,deg.design[[i]],"cont_mt0_dich",Sys.Date(),".csv",sep="_")))
+  }
+}
+
+
+## summarize the data input 
+
+generate_DEG_input_summary_table<-function(original_ct,filtered_ct,dds,res,des){
+  filter_method<-"TMM normalized LCPM cutoff"
+  n_filtered_genes<-paste("analyzed n_genes:", nrow(filtered_ct),",","filtered n_genes:",nrow(original_ct)-nrow(filtered_ct))
+  samples<-sapply(dds, function(d){colData(d)$SampleID%>%paste(collapse = ",")})
+  dds<-paste("dds", assay_index,sep="")
+  results<-paste("res",assay_index,sep="")
+  design<-des
+  df<-data.frame(dds=dds,results=results,design=design,samples=samples,filter_method=filter_method,n_filtered_genes=n_filtered_genes)
+  return(df)
+}
+
+
+if(dir.exists(deg.dir)){
+  a<-generate_DEG_input_summary_table(ncounts[,cols],ct,dds,res,deg.design)
+  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg","nasal","continuous_mt0","analysis_input","cellcount+Batch12346",Sys.Date(),".csv",sep="_")))
+}
+
+## summary table of the DEG analysis
+generate_DEG_summary_table<-function(results_significant,deg_design,variable){
+  res.sig<-results_significant
+  deg.design<-deg_design
+  var<-variable
+  
+  reslist<-paste("res.sig",assay_index,sep="")
+  n_sig_deg<-unlist(sapply(res.sig,nrow))
+  design<-deg.design
+  
+  df<-data.frame(type="nasal",results=reslist,n_sig_deg=n_sig_deg,design=design,variable=var, row.names = NULL)
+  return(df)
+}
+
+if(dir.exists(deg.dir)){
+  a<-generate_DEG_summary_table(res.sig,deg.design,source.cell.log)
+  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds","nasal","continuous_mt0","res_summary","cellcount+Batch12346",Sys.Date(),".csv",sep="_")))
 }

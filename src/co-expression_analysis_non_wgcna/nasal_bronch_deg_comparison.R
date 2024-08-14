@@ -114,29 +114,38 @@ go_folder<-file.path(deg_folder,"go")
 go_folder_files<-list.files(go_folder)
 go_files<-file.path(go_folder,go_folder_files[grep(".txt",go_folder_files)])
 go_deg_terms<-lapply(go_files,read.table,sep="\t",header=TRUE)
+
+# Filter each element of go_deg_terms to remove rows where Category is "GOTERM_CC_DIRECT"
+go_deg_terms_filtered <- lapply(go_deg_terms, function(df) {
+  df %>% filter(Category != "GOTERM_CC_DIRECT")
+})
+
 lapply(go_deg_terms,head)
 lapply(go_deg_terms,colnames)
 
-go_analysis<-c("GO-sig-bronch-deg~bal_AEC_mt_1.2_down",
-               "GO-sig-bronch-deg~bal_AEC_mt_1.2_up",
-               "GO-sig-bronch-deg~bal_AEC_mt_1_down",
-               "GO-sig-bronch-deg~bal_AEC_mt_1_up",
-               "GO-sig-bronch-deg~bal_Eos_p_more_1_down",
-               "GO-sig-bronch-deg~bal_Eos_p_more_1_up(1)",
-               "GO-sig-bronch-deg~bal_Eos_p_more_3_down",
-               "GO-sig-bronch-deg~bal_Eos_p_more_3_up(1)",
-               "GO-sig-bronch-deg~bld_AEC_more_300_down",
-               "GO-sig-bronch-deg~bld_AEC_more_300_up",
-               "GO-sig-nasal-deg~blood_Eos_p_cont_down",
-               "GO-sig-nasal-deg~blood_Eos_p_cont_up",
-               "GO-sig_bronch~deg_bal_ANCmt0_cont_down",
-               "GO-sig_bronch~deg_bal_ANCmt0_cont_up",
-               "GO-wgcna-bronch_magenta_module-overlap_br-bal-eosp-mt1",
-               "GO-wgcna-bronch_magenta_module",
-               "go_nasal~bld_AEC_mt100_down",
-               "go_nasal~bld_AEC_mt100_up",  
-               "go_sig_bronch_deg~bal_anc_mt13_down_none",
-               "go_sig_bronch_deg~bal_anc_mt13_up_none")
+go_analysis<-c(
+  "GO-01_sig-bronch-deg~bal_AEC_mt_1.2_down",
+  "GO-02_sig-bronch-deg~bal_AEC_mt_1.2_up",
+  "GO-03_sig-bronch-deg~bal_AEC_mt_1_down",
+  "GO-04_sig-bronch-deg~bal_AEC_mt_1_up",
+  "GO-05_sig-bronch-deg~bal_Eos_p_more_1_down",
+  "GO-06_sig-bronch-deg~bal_Eos_p_more_1_up",
+  "GO-07_sig-bronch-deg~bal_Eos_p_more_3_down",
+  "GO-08_sig-bronch-deg~bal_Eos_p_more_3_up",
+  "GO-09_sig-bronch-deg~bld_AEC_more_300_down",
+  "GO-10_sig-bronch-deg~bld_AEC_more_300_up",
+  "GO-11_sig-nasal-deg~blood_Eos_p_cont_down",
+  "GO-12_sig-nasal-deg~blood_Eos_p_cont_up",
+  "GO-13_sig_bronch~deg_bal_ANCmt0_cont_down",
+  "GO-14_sig_bronch~deg_bal_ANCmt0_cont_up",
+  "GO-15_wgcna-bronch_magenta_module-overlap_br-bal-eosp-mt1",
+  "GO-16_wgcna-bronch_magenta_module",
+  "GO-17_nasal~bld_AEC_mt100_down",
+  "GO-18_nasal~bld_AEC_mt100_up",
+  "GO-19_sig_bronch_deg~bal_anc_mt13_down_none",
+  "GO-20_sig_bronch_deg~bal_anc_mt13_up_none",
+  "GO-21_overlap-sig-nasal~bld_AEC_mt100_down-bronch~bal_eos_p_mt1_down"
+)
 
 
 names(go_deg_terms)<-go_analysis
@@ -193,7 +202,7 @@ names(go_deg_terms)<-go_analysis
   go_deg_terms<-lapply(go_deg_terms,function(d){
     d[,c("X","Genes","Fold.Enrichment","FDR")]%>%
       filter(FDR<0.05)%>%
-      arrange(desc(Fold.Enrichment))})
+      arrange(FDR)})
   
   gt<-lapply(go_deg_terms,
              function(data){
@@ -208,12 +217,12 @@ names(go_deg_terms)<-go_analysis
                         function(data){
                           go_term<-data$X
                           str_wrap(go_term, width=40)})
-  # Plot
+# Plot
   
   for(i in seq_along(go_deg_terms)){
     p<-ggplot(go_deg_terms[[i]][1:10,], aes(x = Fold.Enrichment, y = X, fill = -log10(FDR))) + # show only top 15
       geom_bar(stat = "identity") +
-      geom_label(aes(label = round(-log10(FDR), 1)), fill="white",nudge_y=0.3, hjust = -0.1, size = 3, color = "black") +  # Add text labels for log10(FDR)
+      #geom_label(aes(label = round(-log10(FDR), 1)), fill="white",nudge_y=0.3, hjust = -0.1, size = 3, color = "black") +  # Add text labels for log10(FDR)
       scale_fill_gradient(low = "blue", high = "red") +  # Adjust color gradient as needed
       labs(x = "Fold Enrichment", y = "Gene Ontology Term", fill = "-log10(FDR)", title = names(go_deg_terms[i])) +
       theme(axis.text.x = element_text(size = 10),  # Change size of x-axis labels
@@ -224,9 +233,10 @@ names(go_deg_terms)<-go_analysis
       scale_y_discrete(labels=wrapped_label[[i]])+
       xlim(0,max(go_deg_terms[[i]]$Fold.Enrichment,na.rm=TRUE)+5)
     
-    assign(paste("GO", i, sep = "_"), p)
+    assign(paste("GO", i,"by_FE", sep = "_"), p)
   }
-  grobs<-lapply(paste("GO", seq_along(go_deg_terms), sep = "_"),get)
+  
+  grobs<-lapply(paste("GO", seq_along(go_deg_terms),"by_FE",  sep = "_"),get)
   # Arrange the plots in a 2x4 grid
   gp_1<-grid.arrange(grobs = grobs[1:2], nrow = 2)
   gp_2<-grid.arrange(grobs = grobs[3:4], nrow = 2)
@@ -236,88 +246,62 @@ names(go_deg_terms)<-go_analysis
   gp_6<-grid.arrange(grobs = grobs[11:12], nrow = 2)
   gp_7<-grid.arrange(grobs = grobs[13:14], nrow = 2)
   gp_8<-grid.arrange(grobs = grobs[15:16], nrow = 2)
-  gp_8<-grid.arrange(grobs = grobs[17:18], nrow = 2)
-  gp_9<-grid.arrange(grobs = grobs[19:20], nrow = 2)
-
-  go_enrich_plot<-lapply(paste("gp", 1:8, sep = "_"),get)
+  gp_9<-grid.arrange(grobs = grobs[17:18], nrow = 2)
+  gp_10<-grid.arrange(grobs = grobs[19:20], nrow = 2)
+  gp_11<-grid.arrange(grobs = grobs[21], nrow = 2)
   
-  go_plot_folder<-file.path(go_folder,"go_plots")
-  # Check if the directory exists, and create it if it doesn't
-  if (!dir.exists(go_plot_folder)) {
-    dir.create(go_plot_folder, recursive = TRUE)
-  }
-  
-  # Save each grob as a PNG file
-  for (i in seq_along(go_enrich_plot)) {
-    # Create a filename for each grob
-    filename <- file.path(go_plot_folder,paste0("go_enrichment_plot",i, ".png"))
+# plot FDR vs ontology (fill by FC)
+  for(i in seq_along(go_deg_terms)){
+    p<-ggplot(go_deg_terms[[i]][1:10,], aes(fill = Fold.Enrichment, y = X, x = -log10(FDR))) + # show only top 15
+      geom_bar(stat = "identity") +
+      #geom_label(aes(label = round(Fold.Enrichment, 1)), fill="white",nudge_y=0.3, hjust = -0.1, size = 3, color = "black") +  # Add text labels for log10(FDR)
+      scale_fill_gradient(low = "blue", high = "red") +  # Adjust color gradient as needed
+      labs(fill = "Fold Enrichment", y = "Gene Ontology Term", x = "-log10(FDR)", title = names(go_deg_terms[i])) +
+      theme(axis.text.x = element_text(size = 10),  # Change size of x-axis labels
+            axis.text.y = element_text(size=12),
+            axis.title= element_text(size=12),
+            legend.title=element_text(size=10),
+            title = element_text(size=12))+  # Adjust y-axis label size for better readability
+      scale_y_discrete(labels=wrapped_label[[i]])+
+      xlim(0,max(-log(go_deg_terms[[i]]$FDR,10),na.rm=TRUE))
     
-    # Save the grob to a PNG file
-    ggsave(
-      filename = filename,
-      plot = grid.draw(go_enrich_plot[[i]]),
-      device = "png",
-      width = 6, height = 6, units = "in"
-    )
-  } 
-  
-
-############
-source("./src/function/deg_custom_functions.R")
-
-countdata<-file.path("./resources/raw_data/MS_asthma/MS_asthma.batch12346.GRCh38.geneID_readcount.all_samples.QCed_final.txt")
-counts<-if(file.exists(countdata)){read.delim(countdata, check.names = FALSE)}
-rownames(counts)<-counts[,"SampleID"]
-bronch.samples<-grepl("^B",colnames(counts))
-bronch.samples<-which(bronch.samples==TRUE)
-bronch.counts<-counts[,c(1,bronch.samples)]
-colnames(bronch.counts)[bronch.samples]<-substr(colnames(bronch.counts)[bronch.samples],1,4)
-head(bronch.counts)
-
-filtered_samples<-counts[,!nchar(colnames(counts))>4]
-filtered_ID<-grepl("^N",colnames(filtered_samples))
-ncounts<-filtered_samples[,filtered_ID]
-
-bronch_sid<-colnames(bronch.counts)[-1]
-nasal_sid<-colnames(ncounts)
-
-bronch_sid_filtered<-bronch_sid[substr(bronch_sid,2,4)%in%substr(nasal_sid,2,4)]
-nasal_sid_filtered<-nasal_sid[substr(nasal_sid,2,4)%in%substr(bronch_sid,2,4)]
-BAL_samples<-data.frame(bronch_sid_filtered,nasal_sid_filtered)
-
-ct_n<-ncounts[,BAL_samples$nasal_sid_filtered]
-ct_b<-bronch.counts[,BAL_samples$bronch_sid_filtered]
-
-# normalize counts
-
-norm_ct<-function(readcounts){
-  # normalize counts LCPM
-  x<-readcounts
-  ### normalize counts with TMM
-  norm.factor<-calcNormFactors(x, method = "TMM")
-  sample.size<-length(colnames(x))
-  for(i in 1:sample.size){
-    x[,i]<-x[,i]/norm.factor[i]
+    assign(paste("GO", i,"by_FDR", sep = "_"), p)
   }
-  ### calculate lcpm based on TMM normalized counts 
-  lcpm.x<-cpm(x,log=TRUE)
-  return(lcpm.x)
-}
-ct_n<-norm_ct(ct_n)
-ct_b<-norm_ct(ct_b)
-
-ct_n_cxcr<-ct_n[c(which(rownames(ct_n)=="CXCR1"),which(rownames(ct_n)=="CXCR2"),which(rownames(ct_n)=="CXCR4")),]
-ct_b_cxcr<-ct_b[c(which(rownames(ct_b)=="CXCR1"),which(rownames(ct_b)=="CXCR2"),which(rownames(ct_b)=="CXCR4")),]
-
-
-
-
-cor(unlist(ct_n_cxcr[1,]),unlist(ct_b_cxcr[1,]))
-cor(unlist(ct_n_cxcr[2,]),unlist(ct_b_cxcr[2,]))
-cor(unlist(ct_n_cxcr[3,]),unlist(ct_b_cxcr[3,]))
-
-plot(unlist(ct_n_cxcr[1,]),unlist(ct_b_cxcr[1,]))
-
-plot(unlist(ct_n_cxcr[2,]),unlist(ct_b_cxcr[2,]))
-
-plot(unlist(ct_n_cxcr[3,]),unlist(ct_b_cxcr[3,]))
+  grobs<-lapply(paste("GO", seq_along(go_deg_terms), "by_FDR",sep = "_"),get)
+  # Arrange the plots in a 2x4 grid
+  gp_1<-grid.arrange(grobs = grobs[1:2], nrow = 2)
+  gp_2<-grid.arrange(grobs = grobs[3:4], nrow = 2)
+  gp_3<-grid.arrange(grobs = grobs[5:6], nrow = 2)
+  gp_4<-grid.arrange(grobs = grobs[7:8], nrow = 2)
+  gp_5<-grid.arrange(grobs = grobs[9:10], nrow = 2)
+  gp_6<-grid.arrange(grobs = grobs[11:12], nrow = 2)
+  gp_7<-grid.arrange(grobs = grobs[13:14], nrow = 2)
+  gp_8<-grid.arrange(grobs = grobs[15:16], nrow = 2)
+  gp_9<-grid.arrange(grobs = grobs[17:18], nrow = 2)
+  gp_10<-grid.arrange(grobs = grobs[19:20], nrow = 2)
+  gp_11<-grid.arrange(grobs = grobs[21], nrow = 2)
+  
+  # 
+  # 
+  # go_enrich_plot<-lapply(paste("gp", 1:8, sep = "_"),get)
+  # 
+  # go_plot_folder<-file.path(go_folder,"go_plots")
+  # # Check if the directory exists, and create it if it doesn't
+  # if (!dir.exists(go_plot_folder)) {
+  #   dir.create(go_plot_folder, recursive = TRUE)
+  # }
+  # 
+  # # Save each grob as a PNG file
+  # for (i in seq_along(go_enrich_plot)) {
+  #   # Create a filename for each grob
+  #   filename <- file.path(go_plot_folder,paste0("go_enrichment_plot",i, ".png"))
+  #   
+  #   # Save the grob to a PNG file
+  #   ggsave(
+  #     filename = filename,
+  #     plot = grid.draw(go_enrich_plot[[i]]),
+  #     device = "png",
+  #     width = 6, height = 6, units = "in"
+  #   )
+  # } 
+  # 
