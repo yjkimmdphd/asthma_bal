@@ -56,7 +56,7 @@ var_dichot_bal<-c("bal_AEC_more_0","bal_AEC_more_1","bal_Eos_p_more_0",
 var_dichot_blood<-c("bld_AEC_more_0",
               "bld_AEC_more_100",
               "bld_AEC_more_300",
-              "bld_AEC_more_400")
+              "bld_AEC_more_500")
 
 # asthma biomarker phenotype file saved in  'phenotype'
 phenotype<-file.path("./resources/processed_data/scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_20240731.csv")
@@ -90,7 +90,7 @@ nphen<-nphen%>%mutate(bal_AEC_more_1 = BAL_eos_ct>1,
                       bld_AEC_more_0 = blood_eos>0,
                       bld_AEC_more_100 = blood_eos>100,
                       bld_AEC_more_300 = blood_eos>300,
-                      bld_AEC_more_400 = blood_eos>400)
+                      bld_AEC_more_500 = blood_eos>500)
 ###################################
 # custom functions for DEG analysis
 ###################################
@@ -102,7 +102,7 @@ nphen<-nphen%>%mutate(bal_AEC_more_1 = BAL_eos_ct>1,
 ## generate_DEG_input_summary_table: makes a table of input information
 ## generate_DEG_summary_table: makes results summary (i.e., # of DEG for each analysis)
 
-source("./src/function/deg_custom_functions.R")
+source("./src/function/deg_custom_functions_v2.R")
 
 
 phen<-nphen  # If bronchial analysis, use this
@@ -169,6 +169,7 @@ names(res.sig)<-deg.design
 
 # at this time, testing only the nasal ~ blood AEC 
 assay_index<-seq_along(deg.design)
+
 for(i in assay_index){
   dds[[i]]<-run_deseq2_DEG_analysis(count.table[[i]], df.input[[i]], deg.design[i],deg.design[i])
   res[[i]]<-get_DEG_results(dds[[i]], var_to_test_res[i])
