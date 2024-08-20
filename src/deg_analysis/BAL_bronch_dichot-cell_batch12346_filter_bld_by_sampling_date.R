@@ -68,7 +68,7 @@ phenotype<-left_join(phenotype,sampling_date_diff,by="ID")
 #####################################################################################
 bexist<-phenotype$SampleID%in%counts.ID # find which subjects s/p BAL and had bronchial sample RNAseq completed 
 bphen<-phenotype[bexist,]
-bphen<-mutate_at(bphen,vars(all_of(source.cell.log)),scale)
+
 
 ###################################
 # custom functions for DEG analysis
@@ -113,7 +113,7 @@ bphen<-bphen%>%mutate(bal_AEC_more_0=BAL_eos_ct>0,
                       bld_AEC_more_0 = blood_eos>0,
                       bld_AEC_more_100 = blood_eos>100,
                       bld_AEC_more_300 = blood_eos>300,
-                      bld_AEC_more_400 = blood_eos>400)
+                      bld_AEC_more_500 = blood_eos>500)
 
 # these are categorical variables to test using BAL cell counts 
 
@@ -126,7 +126,7 @@ var_dichot_bal<-c("bal_AEC_more_0","bal_AEC_more_1","bal_AEC_more_1.2","bal_Eos_
 var_dichot_blood<-c("bld_AEC_more_0",
                     "bld_AEC_more_100",
                     "bld_AEC_more_300",
-                    "bld_AEC_more_400")
+                    "bld_AEC_more_500")
 ##############################################################
 #set colData (phenotype data) for bronchial RNAseq experiments
 ##############################################################
