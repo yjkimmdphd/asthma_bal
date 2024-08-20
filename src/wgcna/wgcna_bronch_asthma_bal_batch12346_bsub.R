@@ -1,5 +1,5 @@
 ##
-# WGCNA of nasal rna expression 
+# WGCNA of bronchial rna expression 
 # reference tutorial: https://fuzzyatelin.github.io/bioanth-stats/module-F21-Group1/module-F21-Group1.html
 ## 
 library(limma)
@@ -25,15 +25,18 @@ source("./src/function/deg_custom_functions.R")
 ## load readcount data
 ######################
 
-countdata<-file.path("./resources/raw_data/MS_asthma/MS_asthma.batch12346.GRCh38.geneID_readcount.all_samples.QCed_final.txt")
-counts<-if(file.exists(countdata)){read.delim(countdata, check.names = FALSE)}
+# load cell count table
+normalized_count_table_path<-"./resources/processed_data/bronch_batch12346_normalized_ct.txt"
+counts<-if(file.exists(normalized_count_table_path)){read.delim(normalized_count_table_path, check.names = FALSE)}
+genes<-counts[,"name"]
+
+# select bronchial samples 
 bronch.samples<-grepl("^B",colnames(counts))
-bronch.samples<-which(bronch.samples==TRUE)
-bronch.counts<-counts[,c(1,bronch.samples)]
-colnames(bronch.counts)[bronch.samples]<-substr(colnames(bronch.counts)[bronch.samples],1,4)
+bronch.counts<-counts[,bronch.samples]
+
 head(bronch.counts)
 counts.ID<-colnames(bronch.counts)
-counts<-bronch.counts
+
 
 ################################
 ## load phenotype and batch data
@@ -64,76 +67,29 @@ source.cell<-c(
   "blood_neut_p",
   "blood_wbc")
 
-
-# asthma biomarker phenotype file saved in  'phenotype'
-phenotype<-file.path("./resources/processed_data/Nasal_Biomarkers_BAL_transformed.csv")
+# load biomarker phenotype file saved in  'phenotype'
+phenotype<-file.path("./resources/processed_data/scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_20240731.csv")
 phenotype<-if(file.exists(phenotype)){read.csv(phenotype, row.names = NULL)}
-numeric_id<-phenotype$ID
-phenotype$ID<-sprintf("%03d",numeric_id) # adds padded zeros in front of the subject ID numbers
-phenotype<-mutate(phenotype,pos_cellcount=phenotype[,source.cell]>0)%>%arrange(ID) # check which cell counts are positive. 
+
+# load data for sampling date differences 
+sampling_date_diff<-"./resources/processed_data/sampling_dates/swab-bal-cbc_differences_in_days.txt"
+sampling_date_diff<-if(file.exists(sampling_date_diff)){read.table(sampling_date_diff,row.names = NULL,header = TRUE)}
+sampling_date_diff<-sampling_date_diff%>%filter(Comparison=="blood_bal")
+colnames(sampling_date_diff)[1:3]<-c("ID","sampling_date_comp","sampling_date_diff_days")
+
+# left join sampling date data and phenotype data 
+phenotype<-left_join(phenotype,sampling_date_diff,by="ID")
 
 
-
-###########################################################################################
-## subset phenotype data for which the samples exist for nasal/bronchial RNAseq experiments   
-###########################################################################################
-bID<-paste0("B",phenotype$ID) # B*** indicates bronchial sample ID, sequence data is not available for all as of 2023-10-04
-bexist<-bID%in%counts.ID # find which subjects s/p BAL and had bronchial sample RNAseq completed 
-bsample<-bID[bexist] # bronchial sample ID in the readcount matrix (batch 1-4,6) that has BAL phenotype data
-bphen<-phenotype[phenotype$ID%in%substring(bsample,2),] # phenotype table with bsample
-bphen<-mutate(bphen, SampleID=bsample)%>%relocate(SampleID, .before=1) # include sample ID for bronchial RNAseq samples
-
-# left join batch info table with nasal/bronchial phenotype table  
-## get batch information
-batch<-file.path("./resources/raw_data/MS_asthma/MS_asthma_phenotype.batch12346.final.csv")
-batch.info<-if(file.exists(batch)){read.csv(batch)}
-bronch.batch.info<-batch.info[1:75,2:3]
-bronch.batch.info$SampleID<-substr(bronch.batch.info$SampleID,1,4)
-
-## define function join_phenotype_batch_info. p is phenotype table. b is batch info table. Factorize the batch info. 
-join_phenotype_batch_info<-function(p,b){
-  table<-left_join(p,b, by="SampleID")
-  table$Batch<-factor(table$Batch, levels=unique(table$Batch))
-  return(table)
-}
-bphen<-join_phenotype_batch_info(bphen,bronch.batch.info)
-bphen<-bphen%>%mutate(IsBatch4 = Batch == "batch4")
-# scale the cell count information 
-# Mike Love: I'd recommend however to center and scale the numeric covariates for model fitting improvement.
-# scale the columns named with source.cell.log
-
-bphen<-mutate_at(bphen,vars(all_of(source.cell.log)),scale) # scales and mutates all log-transformed cell counts 
-
-# decide which analysis to perform, then set the phenotype data as phen
-
-
-
-##########################################################
-#set colData (phenotype data) for bronchial RNAseq experiments
-##########################################################
-
+#####################################################################################
+## subset phenotype data for which the samples exist for bronchial RNAseq experiments   
+#####################################################################################
+bexist<-phenotype$SampleID%in%counts.ID # find which subjects s/p BAL and had bronchial sample RNAseq completed 
+bphen<-phenotype[bexist,]
 phen<-bphen
 
-# make df which is a list of sampleIDs which has non-NA values for each of the cell types (i.e., cell count >=0)
-pi<-lapply(phen[,source.cell.log],function(data){a<-!is.na(data);return(a)})
-df<-vector("list",length=10) # list of data framese used as an input for deseq2. all cell counts
-names(df)<-paste(source.cell.log,"all",sep="_")
-for(i in 1:10){
-  df[[i]]<-phen[pi[[i]],c("SampleID",source.cell.log[i], "Batch","IsBatch4")]
-}
-print(sapply(df,dim)[1,]) # shows number of 
+ct<-bronch.counts
 
-## select RNAseq counts
-id<-phen$SampleID
-cols<-colnames(bronch.counts)%in%id
-ct<-bronch.counts[,cols] # First column is actually gene name 
-genes<-bronch.counts$SampleID
-rownames(ct)<-genes
-
-## Filter counts
-c2<-filter_low_expressed_genes_method2(ct,8)
-ct<-c2
-genes<-rownames(ct)
 ###############
 #
 #### WGCNA ####
@@ -174,25 +130,25 @@ if (!gsg$allOK)
 ##
 sampleTree <- hclust(dist(expression), method = "average") #Clustering samples based on distance 
 
-#Setting the graphical parameters
-#par(cex = 0.6);
-#par(mar = c(0,4,2,0))
+# Setting the graphical parameters
+par(cex = 0.6);
+par(mar = c(0,4,2,0))
 
-#Plotting the cluster dendrogram
-#plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,
-#     cex.axis = 1.5, cex.main = 2)
+# Plotting the cluster dendrogram
+plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,
+     cex.axis = 1.5, cex.main = 2)
 
-#Setting the graphical parameters
-#par(cex = 0.6);
-#par(mar = c(0,4,2,0))
-#plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,
-#     cex.axis = 1.5, cex.main = 2)
+# Setting the graphical parameters
+par(cex = 0.6);
+par(mar = c(0,4,2,0))
+plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,
+     cex.axis = 1.5, cex.main = 2)
 
-#draw on line to show cutoff height
-#abline(h = 3e6, col = "red")
+# draw on line to show cutoff height
+abline(h = 3.5e6, col = "red")
 
-# height of 3e6 removes sample ID N277
-cut.sampleTree <- cutreeStatic(sampleTree, cutHeight = 3e6, minSize = 10) #returns numeric vector
+ # height of 3.5e6 removes sample ID B277 and B242
+cut.sampleTree <- cutreeStatic(sampleTree, cutHeight = 3.5e6, minSize = 7) #returns numeric vector
 #Remove outlier
 expression.data <- expression[cut.sampleTree==1, ]
 dim(expression)
