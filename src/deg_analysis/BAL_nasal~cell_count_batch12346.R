@@ -179,8 +179,8 @@ for(i in assay_index){
 }
 
 ## writing the significant and all results 
-deg.folder<-paste("deg",Sys.Date(),sep="_")
-deg.dir<-file.path("./reports",deg.folder)
+deg.folder<-paste("deg","nasal",Sys.Date(),sep="_")
+deg.dir<-file.path("./reports","temporary",deg.folder)
 if(!dir.exists(deg.dir)){
   dir.create(deg.dir)
 }
