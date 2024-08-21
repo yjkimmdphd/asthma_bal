@@ -252,3 +252,4 @@ if(dir.exists(deg.dir)){
   write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds","bronch","dichot","res_summary","cellcount_thr+Batch",Sys.Date(),".csv",sep="_")))
 }
 
+

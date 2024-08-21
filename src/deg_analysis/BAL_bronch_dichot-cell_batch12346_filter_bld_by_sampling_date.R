@@ -14,7 +14,7 @@ genes<-counts[,"SampleID"]
 # select bronchial samples 
 bronch.samples<-grepl("^B",colnames(counts))
 bronch.counts<-counts[,bronch.samples]
-
+rownames(bronch.counts)<-genes
 head(bronch.counts)
 counts.ID<-colnames(bronch.counts)
 
@@ -169,8 +169,6 @@ df.input<-df
 id<-phen$SampleID
 cols<-colnames(bronch.counts)%in%id
 ct<-bronch.counts[,cols] # First column is actually gene name 
-genes<-bronch.counts$SampleID
-rownames(ct)<-genes
 
 ## Filter counts (readcount table for nasal sample
 c2<-filter_low_expressed_genes_method2(ct,round(length(id)*0.1,0))
