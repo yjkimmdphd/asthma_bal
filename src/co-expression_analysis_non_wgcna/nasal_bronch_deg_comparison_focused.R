@@ -1,14 +1,16 @@
-# DEG and GO term visualization
+# DEG volcano plot and GO term visualization
 
 focused_list<-c("deg_bronch_res_sig_3_",
   "deg_bronch_res_sig_5_",
   "deg_nasal_res_sig_13_",
-  "deg_nasal_res_sig_7_")
+  "deg_nasal_res_sig_7_",
+  "deg_nasal_res_sig_15_")
 
 focused_list_all<-c("deg_bronch_res_all_3_",
                 "deg_bronch_res_all_5_",
                 "deg_nasal_res_all_13_",
-                "deg_nasal_res_all_7_")
+                "deg_nasal_res_all_7_",
+                "deg_nasal_res_all_15_")
 
 library(tidyverse)
 library(EnhancedVolcano)
@@ -30,6 +32,7 @@ all_deg_file<-matching_files
 analysis_list<-c("br.bal.aec.mt1.2",
                  "br.bal.eosp.mt1",
                  "n.bld.aec.mt100",
+                 "n.bld.aec.mt500",
                  "n.bld.eosp.cont")
 
 # Tables containing the gene names, l2fc, padj of only DEGs in each analysis
@@ -37,8 +40,11 @@ deg_file_call_df<-data.frame(ananlysis=analysis_list,file=deg_file)
 deg_list<-lapply(file.path(deg_folder,deg_file),function(d)read.csv(d,header=TRUE,row.names = 1))
 names(deg_list)<-deg_file_call_df$ananlysis
 
-# Find # of DEGs abs(log2FC) > 0.585 (1.5fold increase) and Padj < 0.05
+# Find # of DEGs abs(log2FC) > 0.585 (1.5fold difference) and Padj < 0.05
 print(lapply(deg_list,function(d)filter(d,abs(log2FoldChange)>0.585)%>%dim))
+
+# Find # of DEGs abs(log2FC) > 1 (2 fold difference) and Padj < 0.05
+print(lapply(deg_list,function(d)filter(d,abs(log2FoldChange)>1)%>%dim))
 
 # Tables containing the gene names, l2fc, padj of all genes analyzed in each analysis
 all_deg_file_call_df<-data.frame(ananlysis=analysis_list,file=all_deg_file)
@@ -77,7 +83,8 @@ names(all_deg_list)<-all_deg_file_call_df$ananlysis
   print(pairwise_results)
   
   # $Comparison_2_vs_3 is essentially comparing down-regulated genes in bronchial ~ BAL-Eos%>1% (True/false, br.bal.eosp.mt1) and nasal ~ blood AEC > 100 (True/false, n.bld.aec.mt100)
-
+  # Comparison_2_vs_4, FDR <0.05 |L2FC|>1, comparing bronchial ~ BAL-Eos%>1% (True/false, br.bal.eosp.mt1) and nasal ~ blood AEC > 500 (True/false, n.bld.aec.mt500)
+  # [1] "CHI3L1"   "CSF3R"    "LILRB3"   "C10orf55" "CXCL2"    "EGR3"     "FFAR2"   
 
 # volcano plots
 for(i in seq_along(all_deg_list)){
@@ -162,6 +169,13 @@ go_folder<-file.path(deg_folder,"go")
 go_folder_files<-list.files(go_folder)
 go_files<-file.path(go_folder,go_folder_files[grep(".txt",go_folder_files)])
 go_deg_terms<-lapply(go_files,read.table,sep="\t",header=TRUE)
+# Extract the file names from the paths
+file_names <- basename(go_files)
+
+# Remove the '.txt' extension
+go_analysis <- sub("\\.txt$", "", file_names)
+# Print the results
+print(go_analysis)
 
 # Filter each element of go_deg_terms to remove rows where Category is "GOTERM_CC_DIRECT"
 go_deg_terms_filtered <- lapply(go_deg_terms, function(df) {
@@ -171,29 +185,6 @@ go_deg_terms_filtered <- lapply(go_deg_terms, function(df) {
 lapply(go_deg_terms,head)
 lapply(go_deg_terms,colnames)
 
-go_analysis<-c(
-  "GO-01_sig-bronch-deg~bal_AEC_mt_1.2_down",
-  "GO-02_sig-bronch-deg~bal_AEC_mt_1.2_up",
-  "GO-03_sig-bronch-deg~bal_AEC_mt_1_down",
-  "GO-04_sig-bronch-deg~bal_AEC_mt_1_up",
-  "GO-05_sig-bronch-deg~bal_Eos_p_more_1_down",
-  "GO-06_sig-bronch-deg~bal_Eos_p_more_1_up",
-  "GO-07_sig-bronch-deg~bal_Eos_p_more_3_down",
-  "GO-08_sig-bronch-deg~bal_Eos_p_more_3_up",
-  "GO-09_sig-bronch-deg~bld_AEC_more_300_down",
-  "GO-10_sig-bronch-deg~bld_AEC_more_300_up",
-  "GO-11_sig-nasal-deg~blood_Eos_p_cont_down",
-  "GO-12_sig-nasal-deg~blood_Eos_p_cont_up",
-  "GO-13_sig_bronch~deg_bal_ANCmt0_cont_down",
-  "GO-14_sig_bronch~deg_bal_ANCmt0_cont_up",
-  "GO-15_wgcna-bronch_magenta_module-overlap_br-bal-eosp-mt1",
-  "GO-16_wgcna-bronch_magenta_module",
-  "GO-17_nasal~bld_AEC_mt100_down",
-  "GO-18_nasal~bld_AEC_mt100_up",
-  "GO-19_sig_bronch_deg~bal_anc_mt13_down_none",
-  "GO-20_sig_bronch_deg~bal_anc_mt13_up_none",
-  "GO-21_overlap-sig-nasal~bld_AEC_mt100_down-bronch~bal_eos_p_mt1_down"
-)
 names(go_deg_terms)<-go_analysis
 
 # select relevant columns column 'X' contains the descriptive GO terms. Then filter and arranged based on FDR
@@ -239,8 +230,33 @@ for(i in seq_along(go_deg_terms)){
 
 # Arrange the plots in a 2x1 grid
 grobs<-lapply(paste("GO", seq_along(go_deg_terms), "by_FDR",sep = "_"),get)
+names(grobs)<- names(go_deg_terms)
+# examine the go plots of interest
+grid.arrange(grobs = grobs[5:6], nrow = 2)
+grid.arrange(grobs = grobs[13:14], nrow = 2)
+grid.arrange(grobs = grobs[19:20], nrow = 2)
+grid.arrange(grobs = grobs[27], nrow = 2)
 
-gp_3<-grid.arrange(grobs = grobs[5:6], nrow = 2)
-gp_6<-grid.arrange(grobs = grobs[11:12], nrow = 2)
-gp_9<-grid.arrange(grobs = grobs[17:18], nrow = 2)
-gp_11<-grid.arrange(grobs = grobs[21], nrow = 2)
+# select GO plot index 
+go_plot_index<-c(5,6,13,14,19,20,27)
+
+# make dir for GO plots
+go_plot_folder<-file.path(deg_folder,"go_plot")
+# Check if the directory exists, and create it if it doesn't
+if (!dir.exists(go_plot_folder)) {
+  dir.create(go_plot_folder, recursive = TRUE)
+}
+
+# Save each grob as a PNG file
+for (i in go_plot_index) {
+  # Create a filename for each grob
+  filename <- file.path(go_plot_folder,paste0("GO_plot", names(grobs)[i], ".png"))
+  
+  # Save the grob to a PNG file
+  ggsave(
+    filename = filename,
+    plot = grid.draw(grobs[[i]]),
+    device = "png",
+    width = 10, height = 6, units = "in"
+  )
+} 
