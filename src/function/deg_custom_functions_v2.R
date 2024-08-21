@@ -16,7 +16,7 @@ filter_low_expressed_genes_method2<-function(readcounts, n_sample){
   x<-readcounts
   L<-mean(colSums(x))*1e-6 # mean library size
   M<-median(colSums(x))*1e-6 # median library size
-  lcpm.cutoff <- log2(5/M + 1/L) # lcpm cutoff for filtering genes with very low counts
+  lcpm.cutoff <- log2(1/M + 1/L) # lcpm cutoff for filtering genes with very low counts
   
   ### normalize counts with TMM
   lib_size<-colSums(x)*1e-6
