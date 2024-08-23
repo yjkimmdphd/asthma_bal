@@ -82,6 +82,7 @@ source("./src/function/deg_custom_functions_v2.R")
 
 ############ select variables to test for all non-NA values. cell count >=0
 var_to_test<-source.cell.log
+var_to_test_res<-var_to_test
 
 # make a list of the phenotype colData that will be used for DESeq2
 pi<-lapply(phen[,var_to_test],function(data){a<-!is.na(data);return(a)})
