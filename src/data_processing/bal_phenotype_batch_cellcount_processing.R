@@ -59,17 +59,18 @@ source("./src/function/deg_custom_functions_v2.R")
 
 ################ prepare normalized gene count table for bronchial data######################
 phen<-bphen
+ct_inuse<-bronch.counts
 # filtering counts table to remove low expressed genes
 
 ## select RNAseq counts
 id<-phen$SampleID
-cols<-colnames(bronch.counts)%in%id
-ct<-bronch.counts[,cols] # First column is actually gene name 
+cols<-colnames(ct_inuse)%in%id
+ct<-ct_inuse[,cols] # First column is actually gene name 
 genes<-rownames(ct)
 
 
 ## Filter counts with low gene counts 
-c2<-filter_low_expressed_genes_method2(ct,round(length(id)*0.1,0)) # CPM cut off is 10/M + 2/L, M is median library size, and L is mean lib size, in million. if M and L are 50 million each, cut off would be 0.2 + 0.04=0.24 CPM in 10% of samples 
+c2<-filter_low_expressed_genes_method2(ct,round(length(id)*0.1,0)) # CPM cut off is 1/M + 1/L, M is median library size, and L is mean lib size, in million. if M and L are 50 million each, cut off would be 0.2 + 0.04=0.24 CPM in 10% of samples 
 ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered 
 
 ### normalize counts DESEq2
@@ -81,3 +82,24 @@ write.table(vsd,normalized_count_table_path,row.names = FALSE,sep = "\t")
 
 
 ################ prepare normalized gene count table for nasal data######################
+phen<-nphen
+ct_inuse<-nasal.counts
+# filtering counts table to remove low expressed genes
+
+## select RNAseq counts
+id<-phen$SampleID
+cols<-colnames(ct_inuse)%in%id
+ct<-ct_inuse[,cols] # First column is actually gene name 
+genes<-rownames(ct)
+
+
+## Filter counts with low gene counts 
+c2<-filter_low_expressed_genes_method2(ct,round(length(id)*0.1,0)) # CPM cut off is 1/M + 1/L, M is median library size, and L is mean lib size, in million. if M and L are 50 million each, cut off would be 0.2 + 0.04=0.24 CPM in 10% of samples 
+ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered 
+
+### normalize counts DESEq2
+x<-as.matrix(ct)
+vsd<-varianceStabilizingTransformation(x,blind=TRUE)
+boxplot(x,main="")
+normalized_count_table_path<-"./resources/processed_data/nasal_batch12346_normalized_ct.txt"
+write.table(vsd,normalized_count_table_path,row.names = FALSE,sep = "\t")

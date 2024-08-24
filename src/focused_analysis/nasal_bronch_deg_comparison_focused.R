@@ -29,9 +29,7 @@ matching_files <- all_deg_file[sapply(all_deg_file, function(file) any(sapply(fo
 all_deg_file<-matching_files
 
 
-analysis_list<-c("br.bal.aec.mt1.2",
-                 "br.bal.eosp.mt1",
-                 "n.bld.aec.mt100",
+analysis_list<-c("br.bal.eosp.mt1",
                  "n.bld.aec.mt500",
                  "n.bld.eosp.cont")
 
@@ -40,8 +38,8 @@ deg_file_call_df<-data.frame(ananlysis=analysis_list,file=deg_file)
 deg_list<-lapply(file.path(deg_folder,deg_file),function(d)read.csv(d,header=TRUE,row.names = 1))
 names(deg_list)<-deg_file_call_df$ananlysis
 
-# Find # of DEGs abs(log2FC) > 0.585 (1.5fold difference) and Padj < 0.05
-print(lapply(deg_list,function(d)filter(d,abs(log2FoldChange)>0.585)%>%dim))
+# # Find # of DEGs abs(log2FC) > 0.585 (1.5fold difference) and Padj < 0.05
+# print(lapply(deg_list,function(d)filter(d,abs(log2FoldChange)>0.585)%>%dim))
 
 # Find # of DEGs abs(log2FC) > 1 (2 fold difference) and Padj < 0.05
 print(lapply(deg_list,function(d)filter(d,abs(log2FoldChange)>1)%>%dim))
@@ -156,14 +154,6 @@ for (i in seq_along(vp)) {
 
 
 # GO term visualization
-# for AAAAI abstract, focus on the following:
-### "GO-05_sig-bronch-deg~bal_Eos_p_more_1_down",
-### "GO-06_sig-bronch-deg~bal_Eos_p_more_1_up",
-### "GO-11_sig-nasal-deg~blood_Eos_p_cont_down",
-### "GO-12_sig-nasal-deg~blood_Eos_p_cont_up",
-### "GO-17_nasal~bld_AEC_mt100_down",
-### "GO-18_nasal~bld_AEC_mt100_up",
-### "GO-21_overlap-sig-nasal~bld_AEC_mt100_down-bronch~bal_eos_p_mt1_down"
 
 go_folder<-file.path(deg_folder,"go")
 go_folder_files<-list.files(go_folder)
