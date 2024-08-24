@@ -129,15 +129,6 @@ for(i in 1:length(var_to_test)){
 }
 print(sapply(df,dim)[1,])
 
-# make df for cell counts > 0
-pi.pos<-lapply(phen[,var_to_test],function(data){a<-which(data>0);return(a)})
-df.pos<-vector("list",length(var_to_test)) # list of data framese used as an input for deseq2. subset cell count > 0
-names(df.pos)<-paste(var_to_test,"pos",sep = "_")
-for(i in seq_along(var_to_test)){
-  df.pos[[i]]<-phen[pi.pos[[i]],c("SampleID",var_to_test[i], "Batch")]
-}
-print(sapply(df.pos,dim)[1,])
-
 
 #################################################################
 # bronchial expression ~ log(cell count>=0) + Batch12346
@@ -183,7 +174,6 @@ for(i in assay_index){
   res[[i]]<-get_DEG_results(dds_temp, var_to_test_res[i])
   res.sig[[i]]<-res[[i]][which(res[[i]]$padj<=0.05),]
   head(res.sig[[i]])
-  
 }
 
 ## writing the significant and all results 
@@ -237,97 +227,4 @@ generate_DEG_summary_table<-function(results_significant,deg_design,variable){
 if(dir.exists(deg.dir)){
   a<-generate_DEG_summary_table(res.sig,deg.design,var_to_test)
   write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds","bronch","res_summary","cellcount_cont_ge0+Batch",Sys.Date(),".csv",sep="_")))
-}
-#################################################################
-# bronchial expression ~ log(cell count>0) + Batch
-#################################################################
-# coldata for DESeq2
-df.input<-df.pos
-
-
-# filtering counts table to remove low expressed genes
-
-## select RNAseq counts
-id<-phen$SampleID
-cols<-colnames(bronch.counts)%in%id
-ct<-bronch.counts[,cols] # First column is actually gene name 
-
-## Filter counts (readcount table for nasal sample
-c2<-filter_low_expressed_genes_method2(ct,round(length(id)*0.1,0))
-ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered 
-count.table<-lapply(df.input,function(df){d<-df; ct<-ct[,colnames(ct)%in%d$SampleID]; return(ct)}) # list of subsetted count table. Each element is a count table with samples for each of the experimental design. 
-
-# design: gene expression ~ is_cellcount_threshold + Batch
-deg.design<-paste("~",var_to_test,"+ Batch") 
-print(deg.design)
-
-# make empty lists for deg analysis, analysis result, and significant results
-dds<-vector("list",length=length(var_to_test))
-res<-vector("list",length=length(var_to_test))
-res.sig<-vector("list",length=length(var_to_test))
-
-names(res)<-deg.design
-names(res.sig)<-deg.design
-
-# start running DESeq2
-assay_index<-seq_along(deg.design)
-for(i in assay_index){
-  dds[[i]]<-run_deseq2_DEG_analysis(count.table[[i]], df.input[[i]], deg.design[i],deg.design[i])
-  res[[i]]<-get_DEG_results(dds[[i]], var_to_test_res[i])
-  res.sig[[i]]<-res[[i]][which(res[[i]]$padj<=0.05),]
-  head(res.sig[[i]])
-  
-}
-
-## writing the significant and all results 
-deg.folder<-paste("deg","temporary","cont_mt0",Sys.Date(),sep="_")
-deg.dir<-file.path("./reports",deg.folder)
-if(!dir.exists(deg.dir)){
-  dir.create(deg.dir)
-}
-
-if(dir.exists(deg.dir)){
-  for(i in assay_index){
-    a<-res.sig[[i]]
-    b<-res[[i]]
-    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg","bronch","res_sig",i,deg.design[[i]],Sys.Date(),".csv",sep="_")))
-    write.csv(b,row.names=TRUE,file.path(deg.dir,paste("deg","bronch","res_all",i,deg.design[[i]],Sys.Date(),".csv",sep="_")))
-  }
-}
-## summarize the data input 
-
-generate_DEG_input_summary_table<-function(original_ct,filtered_ct,dds,res,des){
-  filter_method<-"TMM normalized LCPM cutoff"
-  n_filtered_genes<-paste("analyzed n_genes:", nrow(filtered_ct),",","filtered n_genes:",nrow(original_ct)-nrow(filtered_ct))
-  samples<-sapply(dds, function(d){colData(d)$SampleID%>%paste(collapse = ",")})
-  dds<-paste("dds",1:length(dds),sep="")
-  results<-paste("res",1:length(res),sep="")
-  design<-des
-  df<-data.frame(dds=dds,results=results,design=design,samples=samples,filter_method=filter_method,n_filtered_genes=n_filtered_genes)
-  return(df)
-}
-
-
-if(dir.exists(deg.dir)){
-  a<-generate_DEG_input_summary_table(bronch.counts[,cols],ct,dds,res,deg.design)
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("deg","bronch","analysis_input","cellcount_cont_mt0_+Batch",Sys.Date(),".csv",sep="_")))
-}
-
-## summary table of the DEG analysis
-generate_DEG_summary_table<-function(results_significant,deg_design,variable){
-  res.sig<-results_significant
-  deg.design<-deg_design
-  var<-variable
-  
-  reslist<-paste("res.sig",1:length(res.sig),sep="")
-  n_sig_deg<-unlist(sapply(res.sig,nrow))
-  design<-deg.design
-  
-  df<-data.frame(type="bronch",results=reslist,n_sig_deg=n_sig_deg,design=design,variable=var, row.names = NULL)
-  return(df)
-}
-
-if(dir.exists(deg.dir)){
-  a<-generate_DEG_summary_table(res.sig,deg.design,var_to_test)
-  write.csv(a,row.names=FALSE,file.path(deg.dir,paste("dds","bronch","res_summary","cellcount_cont_mt0+Batch",Sys.Date(),".csv",sep="_")))
 }
