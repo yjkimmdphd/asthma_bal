@@ -145,21 +145,20 @@ df.input<-df
 id<-phen$SampleID
 cols<-colnames(ncounts)%in%id
 ct<-ncounts[,cols] # First column is actually gene name 
-genes<-rownames(ct)
+
+## previous stringet filtering: 
+# c2<-filter_low_expressed_genes_method2(ct,round(length(id)*0.1,0))
+# ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered 
+
+count.table<-lapply(df.input,function(df){d<-df; ct<-ct[,colnames(ct)%in%d$SampleID]; return(ct)}) # list of subsetted count table. Each element is a count table with samples for each of the experimental design.
 
 
-## Filter counts (readcount table for nasal sample
-c2<-filter_low_expressed_genes_method2(ct,round(length(id)*0.1,0))
 
-
-## design: Batches. all cell counts 
-
-deg.design<-paste("~",var_to_test,"+ Batch")
-ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered 
-
+# design: gene expression ~ is_cellcount_threshold + Batch
+deg.design<-paste("~",var_to_test,"+ Batch") 
 print(deg.design)
-count.table<-lapply(df.input,function(df){d<-df; ct<-ct[,colnames(ct)%in%d$SampleID]; return(ct)}) # list of subsetted count table. Each element is a count table with samples for each of the experimental design. 
 
+# make empty lists for deg analysis, analysis result, and significant results
 dds<-vector("list",length=length(var_to_test))
 res<-vector("list",length=length(var_to_test))
 res.sig<-vector("list",length=length(var_to_test))
@@ -167,12 +166,15 @@ res.sig<-vector("list",length=length(var_to_test))
 names(res)<-deg.design
 names(res.sig)<-deg.design
 
-# at this time, testing only the nasal ~ blood AEC 
+# start running DESeq2
+# filter genes that have less than 10 counts across all samples 
 assay_index<-seq_along(deg.design)
-
 for(i in assay_index){
   dds[[i]]<-run_deseq2_DEG_analysis(count.table[[i]], df.input[[i]], deg.design[i],deg.design[i])
-  res[[i]]<-get_DEG_results(dds[[i]], var_to_test_res[i])
+  dds_temp<-dds[[i]]
+  keep <- rowSums(counts(dds_temp)) >= 10
+  dds_temp <- dds_temp[keep,]
+  res[[i]]<-get_DEG_results(dds_temp, var_to_test_res[i])
   res.sig[[i]]<-res[[i]][which(res[[i]]$padj<=0.05),]
   head(res.sig[[i]])
   
