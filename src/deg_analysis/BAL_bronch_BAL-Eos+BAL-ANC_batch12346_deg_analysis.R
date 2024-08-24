@@ -27,15 +27,7 @@ counts.ID<-colnames(bronch.counts)
 
 source.cell.log<-c(
   "BAL_eos_ct_log",
-  "BAL_eos_p_log",
-  "BAL_neut_ct_log",
-  "BAL_neut_p_log",
-  "BAL_wbc_log",
-  "blood_eos_log",
-  "blood_eos_p_log",
-  "blood_neut_log",
-  "blood_neut_p_log",
-  "blood_wbc_log")
+  "BAL_eos_p_log")
 source.cell<-c(
   "BAL_eos_ct",
   "BAL_eos_p",
@@ -53,23 +45,12 @@ phenotype<-file.path("./resources/processed_data/scaled_phenotype_studyID_asthma
 phenotype<-if(file.exists(phenotype)){read.csv(phenotype, row.names = NULL)}
 phenotype<-phenotype%>%filter(grepl("^B",SampleID))
 
-# to the phenotype data left join data for blood-BAL sampling date differences 
-sampling_date_diff<-"./resources/processed_data/sampling_dates/swab-bal-cbc_differences_in_days.txt"
-sampling_date_diff<-if(file.exists(sampling_date_diff)){read.table(sampling_date_diff,row.names = NULL,header = TRUE)}
-sampling_date_diff<-sampling_date_diff%>%filter(Comparison=="blood_bal")
-colnames(sampling_date_diff)[1:3]<-c("ID","sampling_date_comp","sampling_date_diff_days")
-
-phenotype<-left_join(phenotype,sampling_date_diff,by="ID")
 
 #####################################################################################
 ## subset phenotype data for which the samples exist for bronchial RNAseq experiments   
 #####################################################################################
 bexist<-phenotype$SampleID%in%counts.ID # find which subjects s/p BAL and had bronchial sample RNAseq completed 
 bphen<-phenotype[bexist,]
-
-# the model will be cell count + BAL-ANC + batch, so filter for rows that has values for BAL ANC 
-phen<-bphen%>%filter(!is.na(BAL_neut_ct_log))
-
 
 ###################################
 # custom functions for DEG analysis
@@ -86,57 +67,39 @@ source("./src/function/deg_custom_functions_v2.R")
 
 
 
-# new. 
 bphen<-bphen%>%mutate(bal_AEC_more_0=BAL_eos_ct>0,
                       bal_AEC_more_1=BAL_eos_ct>1,
                       bal_AEC_more_1.2=BAL_eos_ct>1.2,
+                      bal_AEC_more_3=BAL_eos_ct>3,
+                      bal_AEC_more_5=BAL_eos_ct>5,
                       bal_Eos_p_more_0 = BAL_eos_p>0,
                       bal_Eos_p_more_1 = BAL_eos_p>1,
                       bal_Eos_p_more_3 = BAL_eos_p>3,
-                      bal_ANC_more_0=BAL_neut_ct>0,
-                      bal_ANC_more_5=BAL_neut_ct>5,
-                      bal_ANC_more_13=BAL_neut_ct>13,
-                      bal_neut_p_more_0 = BAL_neut_p>0,
-                      bal_neut_p_more_2 = BAL_neut_p>2,
-                      bal_neut_p_more_5 = BAL_neut_p>5,
-                      bld_AEC_more_0 = blood_eos>0,
-                      bld_AEC_more_100 = blood_eos>100,
-                      bld_AEC_more_300 = blood_eos>300,
-                      bld_AEC_more_500 = blood_eos>500)
+                      bal_Eos_p_more_5 = BAL_eos_p>5)
 
 
-var_dichot_bal<-c("bal_AEC_more_0","bal_AEC_more_1","bal_AEC_more_1.2","bal_Eos_p_more_0",
-                  "bal_Eos_p_more_1","bal_Eos_p_more_3","bal_ANC_more_0",
-                  "bal_ANC_more_5","bal_ANC_more_13","bal_neut_p_more_0",
-                  "bal_neut_p_more_2","bal_neut_p_more_5")
-var_dichot_blood<-c("bld_AEC_more_0",
-                    "bld_AEC_more_100",
-                    "bld_AEC_more_300",
-                    "bld_AEC_more_500")
+var_dichot_bal<-c("bal_AEC_more_0","bal_AEC_more_1","bal_AEC_more_1.2","bal_AEC_more_3",
+                  "bal_AEC_more_5","bal_Eos_p_more_0","bal_Eos_p_more_1","bal_Eos_p_more_3","bal_Eos_p_more_5")
 
+
+
+# the model will be BAL Eos % or count + BAL-ANC + batch, so filter for rows that has values for BAL ANC 
+phen<-bphen%>%filter(!is.na(BAL_neut_p_log))
 
 ############ select variables to test for all non-NA values. cell count >=0
-var_to_test<-c(source.cell.log,var_dichot_bal,var_dichot_blood)
-var_to_test_bld<-var_to_test[c(grep("blood",var_to_test),grep("bld",var_to_test))]
-var_to_test_res<-c(var_to_test,paste(c(var_dichot_bal,var_dichot_blood),"TRUE",sep=""))
+var_to_test<-c(source.cell.log,var_dichot_bal)
+
+var_to_test_res<-c(source.cell.log,paste(c(var_dichot_bal),"TRUE",sep=""))
 
 # make a list of the phenotype colData that will be used for DESeq2
 pi<-lapply(phen[,var_to_test],function(data){a<-!is.na(data);return(a)})
 df<-vector("list",length(var_to_test)) # list of data framese used as an input for deseq2. all cell counts
 names(df)<-paste(var_to_test,"all",sep="_")
 for(i in 1:length(var_to_test)){
-  df[[i]]<-phen[pi[[i]],c("SampleID",var_to_test[i], "BAL_neut_ct_log", "Batch")]
+  df[[i]]<-phen[pi[[i]],c("SampleID",var_to_test[i], "BAL_neut_p_log", "Batch")]
 }
 print(sapply(df,dim)[1,])
 
-# identify the samples for which cbc information will be used as a variable. sampling_date_diff_days should be less than a year 
-cbc_sampleID<-phen%>%filter(!is.na(vars(var_to_test_bld)),abs(sampling_date_diff_days)<365)%>%pull(SampleID)
-blood_df<-df[paste(var_to_test_bld,"all",sep="_")]
-blood_df_filtered<-lapply(blood_df,function(df)filter(df,SampleID%in%cbc_sampleID))
-sapply(blood_df,dim)[1,] # samples before filtering
-sapply(blood_df_filtered,dim)[1,] # samples before filtering
-
-df[paste(var_to_test_bld,"all",sep="_")]<-blood_df_filtered
 
 #################################################################
 # bronchial expression ~ cellcount (dichotomous) + Batch
@@ -151,8 +114,6 @@ df.input<-df
 id<-phen$SampleID
 cols<-colnames(bronch.counts)%in%id
 ct<-bronch.counts[,cols] # First column is actually gene name 
-genes<-bronch.counts$SampleID
-rownames(ct)<-genes
 
 ## Filter counts (readcount table for nasal sample
 c2<-filter_low_expressed_genes_method2(ct,round(length(id)*0.1,0))
@@ -160,7 +121,7 @@ c2<-filter_low_expressed_genes_method2(ct,round(length(id)*0.1,0))
 ## design: gene expression ~ is_cellcount_threshold + Batch
 
 
-deg.design<-paste("~",var_to_test,"+BAL_neut_ct_log + Batch")
+deg.design<-paste("~",var_to_test,"+BAL_neut_p_log + Batch")
 ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered 
 
 print(deg.design)
@@ -183,9 +144,10 @@ for(i in assay_index){
   
 }
 
+
 ## writing the significant and all results 
 deg.folder<-paste("deg",Sys.Date(),sep="_")
-deg.dir<-file.path("./reports",deg.folder)
+deg.dir<-file.path("./reports","temporary",deg.folder)
 if(!dir.exists(deg.dir)){
   dir.create(deg.dir)
 }
