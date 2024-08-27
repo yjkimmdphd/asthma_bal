@@ -1,7 +1,16 @@
 the working directory should be /hpc/users/kimy56/yj_asthma-allergy/asthma_bal
 phenotype and count tables in few different places in the './resources' folder. Paths are specified in the codes. 
 
-'data_processing' folder contains the codes that I used to generate the phenotype table. 
-'deg_analysis' folder contains the codes I used to run DESeq2
-'data_vis' colder contains the codes I used to explore the results of the analyses. 
- 
+phenotype related codes:
+- making_phenotype_dataframe_with_batch_asthma_phenotype_cell_count.R: phenotype data making
+- ashtma-exacerbation-rate.R: calculate exacerbation rate
+- asthma-ACT~cellcount.R: compare ACT scores of BAL Eos% >1% vs <1%
+- cell_count_correlation_bronch_batch12346.R: Correlation plot of cell counts vs cell counts
+
+DEG analysisa
+- BAL_nasal~cell_count_batch12346.R: nasal DEG
+- BAL_bronch~cell_cont_dich_batch12346_deg_analysis.R: bronchial DEG
+- deg_custom_functions_v2.R: custom fx used in the DEG codes
+
+Data visualization
+- nasal_bronch_deg_comparison_focused_light_filtering.R: makes volcano plot and GO term bar plots

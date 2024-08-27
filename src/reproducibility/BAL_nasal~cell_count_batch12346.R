@@ -56,14 +56,14 @@ var_dichot_bal<-c("bal_AEC_more_0","bal_AEC_more_1","bal_Eos_p_more_0",
 var_dichot_blood<-c("bld_AEC_more_0",
               "bld_AEC_more_100",
               "bld_AEC_more_300",
-              "bld_AEC_more_400")
+              "bld_AEC_more_500")
 
 # asthma biomarker phenotype file saved in  'phenotype'
 phenotype<-file.path("./resources/processed_data/scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_20240731.csv")
 phenotype<-if(file.exists(phenotype)){read.csv(phenotype, row.names = NULL)}
 phenotype<-phenotype%>%filter(grepl("^N",SampleID))%>%filter(!grepl("F",SampleID))
 
-# to the phenotype data left join data for sampling date differences 
+# add sampling date differences to the phenotype data
 sampling_date_diff<-"./resources/processed_data/sampling_dates/swab-bal-cbc_differences_in_days.txt"
 sampling_date_diff<-if(file.exists(sampling_date_diff)){read.table(sampling_date_diff,row.names = NULL,header = TRUE)}
 sampling_date_diff<-sampling_date_diff%>%filter(Comparison=="blood_nasal")
@@ -90,7 +90,7 @@ nphen<-nphen%>%mutate(bal_AEC_more_1 = BAL_eos_ct>1,
                       bld_AEC_more_0 = blood_eos>0,
                       bld_AEC_more_100 = blood_eos>100,
                       bld_AEC_more_300 = blood_eos>300,
-                      bld_AEC_more_400 = blood_eos>400)
+                      bld_AEC_more_500 = blood_eos>500)
 ###################################
 # custom functions for DEG analysis
 ###################################
@@ -102,7 +102,7 @@ nphen<-nphen%>%mutate(bal_AEC_more_1 = BAL_eos_ct>1,
 ## generate_DEG_input_summary_table: makes a table of input information
 ## generate_DEG_summary_table: makes results summary (i.e., # of DEG for each analysis)
 
-source("./src/function/deg_custom_functions.R")
+source("./src/function/deg_custom_functions_v2.R")
 
 
 phen<-nphen  # If bronchial analysis, use this
@@ -145,21 +145,20 @@ df.input<-df
 id<-phen$SampleID
 cols<-colnames(ncounts)%in%id
 ct<-ncounts[,cols] # First column is actually gene name 
-genes<-rownames(ct)
+
+## previous stringet filtering: 
+# c2<-filter_low_expressed_genes_method2(ct,round(length(id)*0.1,0))
+# ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered 
+
+count.table<-lapply(df.input,function(df){d<-df; ct<-ct[,colnames(ct)%in%d$SampleID]; return(ct)}) # list of subsetted count table. Each element is a count table with samples for each of the experimental design.
 
 
-## Filter counts (readcount table for nasal sample
-c2<-filter_low_expressed_genes_method2(ct,round(length(id)*0.1,0))
 
-
-## design: Batches. all cell counts 
-
-deg.design<-paste("~",var_to_test,"+ Batch")
-ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered 
-
+# design: gene expression ~ is_cellcount_threshold + Batch
+deg.design<-paste("~",var_to_test,"+ Batch") 
 print(deg.design)
-count.table<-lapply(df.input,function(df){d<-df; ct<-ct[,colnames(ct)%in%d$SampleID]; return(ct)}) # list of subsetted count table. Each element is a count table with samples for each of the experimental design. 
 
+# make empty lists for deg analysis, analysis result, and significant results
 dds<-vector("list",length=length(var_to_test))
 res<-vector("list",length=length(var_to_test))
 res.sig<-vector("list",length=length(var_to_test))
@@ -167,19 +166,23 @@ res.sig<-vector("list",length=length(var_to_test))
 names(res)<-deg.design
 names(res.sig)<-deg.design
 
-# at this time, testing only the nasal ~ blood AEC 
+# start running DESeq2
+# filter genes that have less than 10 counts across all samples 
 assay_index<-seq_along(deg.design)
 for(i in assay_index){
   dds[[i]]<-run_deseq2_DEG_analysis(count.table[[i]], df.input[[i]], deg.design[i],deg.design[i])
-  res[[i]]<-get_DEG_results(dds[[i]], var_to_test_res[i])
+  dds_temp<-dds[[i]]
+  keep <- rowSums(counts(dds_temp)) >= 10
+  dds_temp <- dds_temp[keep,]
+  res[[i]]<-get_DEG_results(dds_temp, var_to_test_res[i])
   res.sig[[i]]<-res[[i]][which(res[[i]]$padj<=0.05),]
   head(res.sig[[i]])
   
 }
 
 ## writing the significant and all results 
-deg.folder<-paste("deg",Sys.Date(),sep="_")
-deg.dir<-file.path("./reports",deg.folder)
+deg.folder<-paste("deg","nasal",Sys.Date(),sep="_")
+deg.dir<-file.path("./reports","temporary",deg.folder)
 if(!dir.exists(deg.dir)){
   dir.create(deg.dir)
 }
