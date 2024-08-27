@@ -35,7 +35,7 @@ phenotype<-if(file.exists(phenotype)){read.csv(phenotype, row.names = NULL)}
 # to the phenotype data left join data for sampling date differences 
 sampling_date_diff<-"./resources/processed_data/sampling_dates/swab-bal-cbc_differences_in_days.txt"
 sampling_date_diff<-if(file.exists(sampling_date_diff)){read.table(sampling_date_diff,row.names = NULL,header = TRUE)}
-sampling_date_diff<-sampling_date_diff%>%filter(Comparison=="blood_nasal")
+sampling_date_diff<-sampling_date_diff%>%filter(Comparison=="blood_bal")
 colnames(sampling_date_diff)[1:3]<-c("ID","sampling_date_comp","sampling_date_diff_days")
 
 phenotype<-left_join(phenotype,sampling_date_diff,by="ID")
