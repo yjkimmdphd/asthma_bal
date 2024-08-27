@@ -32,6 +32,13 @@ phenotype<-file.path("./resources/processed_data/scaled_phenotype_studyID_asthma
 phenotype<-if(file.exists(phenotype)){read.csv(phenotype, row.names = NULL)}
 
 
+# to the phenotype data left join data for sampling date differences 
+sampling_date_diff<-"./resources/processed_data/sampling_dates/swab-bal-cbc_differences_in_days.txt"
+sampling_date_diff<-if(file.exists(sampling_date_diff)){read.table(sampling_date_diff,row.names = NULL,header = TRUE)}
+sampling_date_diff<-sampling_date_diff%>%filter(Comparison=="blood_nasal")
+colnames(sampling_date_diff)[1:3]<-c("ID","sampling_date_comp","sampling_date_diff_days")
+
+phenotype<-left_join(phenotype,sampling_date_diff,by="ID")
 #####################################################################################
 ## subset phenotype data for which the samples exist for bronchial RNAseq experiments   
 #####################################################################################
@@ -129,6 +136,14 @@ for(i in 1:length(var_to_test)){
 }
 print(sapply(df,dim)[1,])
 
+# identify the samples for which cbc information will be used as a variable. sampling_date_diff_days should be less than a year 
+cbc_sampleID<-bphen%>%filter(!is.na(vars(var_to_test_bld)),abs(sampling_date_diff_days)<365)%>%pull(SampleID)
+blood_df<-df[paste(var_to_test_bld,"all",sep="_")]
+blood_df_filtered<-lapply(blood_df,function(df)filter(df,SampleID%in%cbc_sampleID))
+sapply(blood_df,dim)[1,] # samples before filtering
+sapply(blood_df_filtered,dim)[1,] # samples before filtering
+
+df[paste(var_to_test_bld,"all",sep="_")]<-blood_df_filtered # save the filtered colData 
 
 #################################################################
 # bronchial expression ~ log(cell count>=0) + Batch12346
