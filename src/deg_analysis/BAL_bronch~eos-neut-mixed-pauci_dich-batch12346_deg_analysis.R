@@ -174,6 +174,8 @@ dds<-vector("list",length=length(var_to_test))
 # Initialize the list
 res <- list()
 
+assay_index<-seq_along(deg.design)
+
 # Loop over the indices in assay_index
 for(i in assay_index){
   # Initialize an inner list for res[[i]]
