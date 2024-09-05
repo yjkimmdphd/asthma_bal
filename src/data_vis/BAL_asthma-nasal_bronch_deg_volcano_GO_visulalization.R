@@ -6,6 +6,9 @@ library(grid)
 data.folder<-file.path("./reports/local_only/deg_nasal-bronch~bal-blood_cell(continuous)+batch/deg_gene_list")
 ####################################################################
 # data exploration of DEG analysis using nasal/bronchial rnaseq data
+# rnasesq batch 1234
+# After KDA
+# no filtering samples based on blood-nasal swab sampling dates 
 # model: "Nasal DEG ~ blood AEC (>0) + Batch
 # model: "Bronch DEG ~ BAL ANC(>0) + Batch
 ####################################################################
