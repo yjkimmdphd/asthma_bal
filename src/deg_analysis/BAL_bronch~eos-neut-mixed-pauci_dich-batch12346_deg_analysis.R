@@ -119,18 +119,18 @@ var_dichot_bal<-c("bal_Eos_p_more_1","bal_Eos_p_more_3","bal_ANC_more_0",
 ############ select variables to test for all non-NA values
 var_to_test<-c("type1","type2","type3","type4") # select continuous and categorical variables 
 var_to_test_res<-list()
-var_to_test_res[[1]]<-c("type_mixed_vs_pauci",
-                   "type_neut_vs_pauci",
-                   "type_eos_vs_pauci") 
-var_to_test_res[[2]]<-c("type_mixed_vs_neut",
-                        "type_eos_vs_neut",
-                        "type_pauci_vs_neut") 
-var_to_test_res[[3]]<-c("type_eos_vs_mixed",
-                        "type_neut_vs_mixed",
-                        "type_pauci_vs_mixed") 
-var_to_test_res[[4]]<-c("type_mixed_vs_eos",
-                        "type_neut_vs_eos",
-                        "type_pauci_vs_eos") 
+var_to_test_res[[1]]<-c("type1_mixed_vs_pauci",
+                   "type1_neut_vs_pauci",
+                   "type1_eos_vs_pauci") 
+var_to_test_res[[2]]<-c("type2_eos_vs_neut",
+                        "type2_eos_vs_neut",
+                        "type2_pauci_vs_neut") 
+var_to_test_res[[3]]<-c("type3_eos_vs_mixed",
+                        "type3_neut_vs_mixed",
+                        "type3_pauci_vs_mixed") 
+var_to_test_res[[4]]<-c("type4_mixed_vs_eos",
+                        "type4_neut_vs_eos",
+                        "type4_pauci_vs_eos") 
 
 
 
@@ -171,28 +171,51 @@ print(deg.design)
 
 # make empty lists for deg analysis, analysis result, and significant results
 dds<-vector("list",length=length(var_to_test))
-res<-vector("list",length=length(unlist(var_to_test_res)))
-res.sig<-vector("list",length=length(unlist(var_to_test_res)))
+# Initialize the list
+res <- list()
 
-names(res)<-paste(deg.design,unlist(var_to_test_res),sep="-")
-names(res.sig)<-paste(deg.design,unlist(var_to_test_res),sep="-")
+# Loop over the indices in assay_index
+for(i in assay_index){
+  # Initialize an inner list for res[[i]]
+  res[[i]] <- list()
+  
+  # Loop to create 3 elements within each res[[i]]
+  for(j in 1:3){
+    res[[i]][[j]] <- NA
+  }
+}
+
+res.sig<-list()
+for(i in assay_index){
+  # Initialize an inner list for res[[i]]
+  res.sig[[i]] <- list()
+  
+  # Loop to create 3 elements within each res[[i]]
+  for(j in 1:3){
+    res.sig[[i]][[j]] <- NA
+  }
+}
+
 
 # start running DESeq2
 # filter genes that have less than 10 counts across all samples 
 assay_index<-seq_along(deg.design)
 for(i in assay_index){
   dds[[i]]<-run_deseq2_DEG_analysis(count.table[[i]], df.input[[i]], deg.design[i],deg.design[i])
-  for(j in seq_along(var_to_test_res)){
-    dds_temp<-dds[[i]]
-    keep <- rowSums(counts(dds_temp)) >= 10
-    dds_temp <- dds_temp[keep,]
-    res[[i*j]]<-get_DEG_results(dds_temp, var_to_test_res[i*j])
-    res.sig[[i*j]]<-res[[i*j]][which(res[[i*j]]$padj<=0.05),]
-    head(res.sig[[i*j]])
-    
-  }
 }
 
+
+for (i in assay_index) {
+  for (j in 1:3) {
+    dds_temp <- dds[[i]]
+    keep <- rowSums(counts(dds_temp)) >= 10
+    dds_temp <- dds_temp[keep, ]
+    res[[i]][[j]] <- get_DEG_results(dds_temp, var_to_test_res[[i]][j])
+    res.sig[[i]][[j]] <- res[[i]][[j]][which(res[[i]][[j]]$padj <= 0.05), ]
+    head(res.sig[[i]][[j]])
+
+  }
+}
 
 ## writing the significant and all results 
 deg.folder<-paste("deg","eos-neut-mixed-pauci",Sys.Date(),sep="_")
