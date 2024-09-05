@@ -18,7 +18,7 @@ eos_p_1<-bphen%>%mutate(BAL_eos_p_m_1 = BAL_eos_p>1)%>%group_by(BAL_eos_p_m_1)
 eos_p_1<-eos_p_1%>%arrange(by=BAL_eos_p_m_1)%>%select(SampleID,BAL_eos_p_m_1,asthma_phen_ACT.score,sex,Race)
 
 t_result<-t.test(asthma_phen_ACT.score~BAL_eos_p_m_1, data =eos_p_1)
-boxplot(asthma_phen_ACT.score~BAL_eos_p_m_1,data=eos_p_1,
+boxplot(asthma_phen_ACT.score~BAL_eos_p_m_1+sex,data=eos_p_1,
         xlab="BAL Eos% >1",
         ylab="ACT score",
         main=paste("ACT ~ BAL Eos% >1; t-test p-value",signif(t_result$p.value, digits=2),sep=":"))
