@@ -3,102 +3,247 @@
 ########
 library(dplyr)
 # load biomarker phenotype file saved in  'phenotype'
-phenotype<-file.path("./resources/processed_data/scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_20240731.csv")
-phenotype_big<-file.path("./resources/processed_data/Nasal_Biomarkers_BAL_transformed_with_raceinfo.csv")
-phen<-if(file.exists(phenotype)){read.csv(phenotype, row.names = NULL)}
-phen_big<-if(file.exists(phenotype_big)){read.csv(phenotype_big, row.names = NULL)}%>%select("ID","Age_at_visit","sex","ethnicity","Race")
-phen<-left_join(phen,phen_big,by="ID")
-bphen<-phen%>%filter(grepl("^B",SampleID))
-
-# BAL Eos% 1% cutoff
-## t-test
-bphen_more_than_1<-bphen$BAL_eos_p>1
-
-eos_p_1<-bphen%>%mutate(BAL_eos_p_m_1 = BAL_eos_p>1)%>%group_by(BAL_eos_p_m_1)
-eos_p_1<-eos_p_1%>%arrange(by=BAL_eos_p_m_1)%>%select(SampleID,BAL_eos_p_m_1,asthma_phen_ACT.score,sex,Race)
-
-t_result<-t.test(asthma_phen_ACT.score~BAL_eos_p_m_1, data =eos_p_1)
-boxplot(asthma_phen_ACT.score~BAL_eos_p_m_1+sex,data=eos_p_1,
-        xlab="BAL Eos% >1",
-        ylab="ACT score",
-        main=paste("ACT ~ BAL Eos% >1; t-test p-value",signif(t_result$p.value, digits=2),sep=":"))
-
-eos_p_1 %>%
-  dplyr::summarize(median_ACT = median(asthma_phen_ACT.score, na.rm = TRUE))
-
-## linear model
-lm_result<-lm(asthma_phen_ACT.score~BAL_eos_p_m_1+sex+Race, data =eos_p_1) # lm controlling for sex and race  
-summary(lm_result)
-
-# BAL Eos% 3% cutoff
-## t-test 
-bphen_more_than_3<-bphen$BAL_eos_p>3
-
-eos_p_3<-bphen%>%mutate(BAL_eos_p_m_3 = BAL_eos_p>3)%>%group_by(BAL_eos_p_m_3)
-eos_p_3<-eos_p_3%>%arrange(by=BAL_eos_p_m_3)%>%select(SampleID,BAL_eos_p_m_3,asthma_phen_ACT.score,sex,Race)
-
-t_result<-t.test(asthma_phen_ACT.score~BAL_eos_p_m_3,data=eos_p_3)
-boxplot(asthma_phen_ACT.score~BAL_eos_p_m_3,data=eos_p_3,
-        xlab="BAL Eos% >3",
-        ylab="ACT score",
-        main=paste("ACT ~ BAL Eos% >3; t-test p-value",signif(t_result$p.value, digits=2),sep=":"))
-
-eos_p_3%>%
-  dplyr::summarize(median_ACT = median(asthma_phen_ACT.score, na.rm = TRUE))
-
-## linear model
-lm_result<-lm(asthma_phen_ACT.score~BAL_eos_p_m_3+sex+Race, data =eos_p_3) # lm controlling for sex and race  
-summary(lm_result)
-
-# ACT~BAL AEC 1 above or below
-## t-test
-eos_aec_1<-bphen%>%mutate(BAL_eos_aec_m_1 = BAL_eos_ct>1)%>%group_by(BAL_eos_aec_m_1)
-eos_aec_1<-eos_aec_1%>%arrange(by=BAL_eos_aec_m_1)%>%select(SampleID,BAL_eos_aec_m_1,asthma_phen_ACT.score,sex,Race)
-
-t_result<-t.test(asthma_phen_ACT.score~BAL_eos_aec_m_1,data=eos_aec_1)
-boxplot(asthma_phen_ACT.score~BAL_eos_aec_m_1,data=eos_aec_1,
-        xlab="BAL AEC >1",
-        ylab="ACT score",
-        main=paste("ACT ~ BAL AEC above 1; t-test p-value",signif(t_result$p.value, digits=2),sep=":"))
-
-eos_aec_1%>%
-  dplyr::summarize(median_ACT = median(asthma_phen_ACT.score, na.rm = TRUE))
+phenotype <-
+  file.path(
+    "./resources/processed_data/scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_20240731.csv"
+  )
+phenotype_big <-
+  file.path(
+    "./resources/processed_data/Nasal_Biomarkers_BAL_transformed_with_raceinfo.csv"
+  )
+phen <-
+  if (file.exists(phenotype)) {
+    read.csv(phenotype, row.names = NULL)
+  }
+phen_big <-
+  if (file.exists(phenotype_big)) {
+    read.csv(phenotype_big, row.names = NULL)
+  } %>% select("ID", "Age_at_visit", "sex", "ethnicity", "Race")
+phen <- left_join(phen, phen_big, by = "ID")
+bphen <- phen %>% filter(grepl("^B", SampleID))
 
 
-## linear model
-lm_result<-lm(asthma_phen_ACT.score~BAL_eos_aec_m_1+sex+Race, data =eos_aec_1) # lm controlling for sex and race  
-summary(lm_result)
+# Load necessary libraries
+library(dplyr)
+library(ggplot2)
 
-# ACT~BAL ANC 1 above or below
-## t-test
-neut_anc_1<-bphen%>%mutate(BAL_neut_anc_m_1 = BAL_neut_ct>1)%>%group_by(BAL_neut_anc_m_1)
-neut_anc_1<-neut_anc_1%>%arrange(by=BAL_neut_anc_m_1)%>%select(SampleID,BAL_neut_anc_m_1,asthma_phen_ACT.score,sex,Race)
-
-t_result<-t.test(asthma_phen_ACT.score~BAL_neut_anc_m_1,data=neut_anc_1)
-boxplot(asthma_phen_ACT.score~BAL_neut_anc_m_1,data=neut_anc_1,
-        xlab="BAL ANC >1",
-        ylab="ACT score",
-        main=paste("ACT ~ BAL ANC above 1; t-test p-value",signif(t_result$p.value, digits=2),sep=":"))
-## linear model
-lm_result<-lm(asthma_phen_ACT.score~BAL_neut_anc_m_1+sex+Race, data =neut_anc_1) # lm controlling for sex and race  
-summary(lm_result)
-
-# Add the p-value to the plot
-text(x = 1.5, 
-     y = max(neut_anc_1$asthma_phen_ACT.score) * 0.9, 
-     labels = paste("p-value =", format(t_result$p.value, digits = 2)), 
-     pos = 4, 
-     col = "red")
-neut_anc_1%>%
-  dplyr::summarize(median_ACT = median(asthma_phen_ACT.score, na.rm = TRUE))
-
-
+# ACT 
+# Define function to perform t-test, plot, and summarize data
+perform_analysis <- function(data, cutoff, eos_var, label, lm_vars = c("sex", "Race")) {
+  # Create a new variable indicating above/below cutoff
+  data <- data %>%
+    mutate(above_cutoff = get(eos_var) > cutoff) %>%
+    group_by(above_cutoff) %>%
+    arrange(above_cutoff) %>%
+    select(SampleID, above_cutoff, asthma_phen_ACT.score, sex, Race)
   
+  # Perform t-test
+  t_result <- t.test(asthma_phen_ACT.score ~ above_cutoff, data = data)
   
+  # Plot boxplot with t-test p-value
+  boxplot(
+    asthma_phen_ACT.score ~ above_cutoff,
+    data = data,
+    xlab = label,
+    ylab = "ACT score",
+    main = paste(
+      "ACT ~", label, "; t-test p-value",
+      signif(t_result$p.value, digits = 2)
+    )
+  )
   
+  # Median summary
+  data %>%
+    dplyr::summarize(median_ACT = median(asthma_phen_ACT.score, na.rm = TRUE)) %>%
+    print()
   
+  # Linear model controlling for additional variables
+  lm_formula <- as.formula(paste("asthma_phen_ACT.score ~ above_cutoff +", paste(lm_vars, collapse = " + ")))
+  lm_result <- lm(lm_formula, data = data)
+  print(summary(lm_result))
+}
+
+# Apply analysis for different cutoffs
+par(mfrow=c(2,3))
+perform_analysis(bphen, 1, "BAL_eos_p", "BAL Eos% > 1%")
+perform_analysis(bphen, 3, "BAL_eos_p", "BAL Eos% > 3%")
+perform_analysis(bphen, 1, "BAL_eos_ct", "BAL AEC > 1")
+perform_analysis(bphen, 1, "BAL_neut_ct", "BAL ANC > 1")
+perform_analysis(bphen, 4, "BAL_neut_p", "BAL neut % > 4%")
+perform_analysis(bphen, 6, "BAL_neut_p", "BAL neut % > 6%")
+perform_analysis(bphen, 100, "blood_eos", "Blood AEC > 100")
+perform_analysis(bphen, 300, "blood_eos", "Blood AEC > 300")
+perform_analysis(bphen, 500, "blood_eos", "Blood AEC > 500")
+
+# FEV1perc
+# Define function to perform t-test, plot, and summarize data
+perform_analysis <- function(data, cutoff, eos_var, label, lm_vars = c("sex", "Race")) {
+  # Create a new variable indicating above/below cutoff
+  data <- data %>%
+    mutate(above_cutoff = get(eos_var) > cutoff) %>%
+    group_by(above_cutoff) %>%
+    arrange(above_cutoff) %>%
+    select(SampleID, above_cutoff, asthma_phen_FEV1_perc, sex, Race)
   
+  # Perform t-test
+  t_result <- t.test(asthma_phen_FEV1_perc ~ above_cutoff, data = data)
   
+  # Plot boxplot with t-test p-value
+  boxplot(
+    asthma_phen_FEV1_perc ~ above_cutoff,
+    data = data,
+    xlab = label,
+    ylab = "FEV1perc",
+    main = paste(
+      "FEV1perc ~", label, "; t-test p-value",
+      signif(t_result$p.value, digits = 2)
+    )
+  )
   
+  # Median summary
+  data %>%
+    dplyr::summarize(median_ACT = median(asthma_phen_FEV1_perc, na.rm = TRUE)) %>%
+    print()
   
+  # Linear model controlling for additional variables
+  lm_formula <- as.formula(paste("asthma_phen_FEV1_perc ~ above_cutoff +", paste(lm_vars, collapse = " + ")))
+  lm_result <- lm(lm_formula, data = data)
+  print(summary(lm_result))
+}
+# Apply analysis for different cutoffs
+par(mfrow=c(2,3))
+perform_analysis(bphen, 1, "BAL_eos_p", "BAL Eos% > 1%")
+perform_analysis(bphen, 3, "BAL_eos_p", "BAL Eos% > 3%")
+perform_analysis(bphen, 1, "BAL_eos_ct", "BAL AEC > 1")
+perform_analysis(bphen, 1, "BAL_neut_ct", "BAL ANC > 1")
+perform_analysis(bphen, 4, "BAL_neut_p", "BAL neut % > 4%")
+perform_analysis(bphen, 6, "BAL_neut_p", "BAL neut % > 6%")
+perform_analysis(bphen, 100, "blood_eos", "Blood AEC > 100")
+perform_analysis(bphen, 300, "blood_eos", "Blood AEC > 300")
+perform_analysis(bphen, 500, "blood_eos", "Blood AEC > 500")
+
+hist(bphen$asthma_phen_FEV1_perc,breaks=seq(0,150,by=10))
+
+# ACT ~ mixed cell profiles 
+# Load necessary libraries
+library(ggplot2)
+library(gridExtra)
+library(dplyr)
+
+## Initialize lists to store results and plots
+thresholds <- 1:9
+lm_result_list <- vector("list", length(thresholds))
+plot_list <- vector("list", length(thresholds))
+
+## Define function to handle threshold-based analysis, save boxplot, and add sample counts
+analyze_threshold <- function(threshold) {
+  # Filter out NA values for the ACT score to avoid issues with missing data
+  mixed <- bphen %>%
+    filter(BAL_eos_p >= 0 & BAL_neut_p >= 0, !is.na(asthma_phen_ACT.score)) %>%
+    mutate(type1 = factor(case_when(
+      BAL_eos_p > 1 & BAL_neut_p > threshold ~ "mixed",
+      BAL_eos_p > 1 & BAL_neut_p <= threshold ~ "eos",
+      BAL_eos_p <= 1 & BAL_neut_p > threshold ~ "neut",
+      BAL_eos_p <= 1 & BAL_neut_p <= threshold ~ "pauci"
+    ), levels = c("pauci", "neut", "mixed", "eos")))
   
+  # Calculate sample counts per level
+  sample_counts <- mixed %>%
+    group_by(type1) %>%
+    summarise(count = n())
+  
+  # Dynamically position sample count labels within the y-axis range
+  max_score <- max(mixed$asthma_phen_ACT.score, na.rm = TRUE) * 0.95
+  
+  # Generate boxplot with sample count annotations
+  plot_list[[threshold]] <<- ggplot(mixed, aes(x = type1, y = asthma_phen_ACT.score)) +
+    geom_boxplot(na.rm = TRUE) +
+    geom_text(data = sample_counts, aes(x = type1, y = max_score, label = paste("n =", count)),
+              color = "blue", size = 3, vjust = -0.5) +  # Position near top of plot
+    labs(
+      x = "Cell profile types",
+      y = "ACT score",
+      title = paste("ACT ~ BAL profile types; \nThreshold - BAL Eos% 1%, Neut", threshold, "%")
+    ) +
+    theme_minimal()
+  
+  # Linear model and save summary
+  lm_model <- lm(asthma_phen_ACT.score ~ type1, data = mixed)
+  lm_result_list[[threshold]] <<- summary(lm_model)
+  
+}
+
+## Apply function for thresholds 1 to 9
+lapply(thresholds, analyze_threshold)
+
+## Create a 3x3 multi-panel plot using grid.arrange
+multi_panel_plot <- grid.arrange(
+  grobs = plot_list,
+  ncol = 3,  # 3 columns
+  nrow = 3   # 3 rows
+)
+
+multi_panel_plot  # Display the 3x3 panel plot
+
+summary(lm(asthma_phen_ACT.score ~  BAL_eos_p_log + BAL_neut_p_log   , data = bphen))
+
+# FEV ~ mixed cell
+
+
+## Initialize lists to store results and plots
+lm_result_list <- vector("list", length(thresholds))
+plot_list <- vector("list", length(thresholds))
+thresholds <- 1:9
+## Define function to handle threshold-based analysis, save boxplot, and add sample counts
+analyze_threshold <- function(threshold) {
+  # Filter out NA values for the ACT score to avoid issues with missing data
+  mixed <- bphen %>%
+    filter(BAL_eos_p >= 0 & BAL_neut_p >= 0, !is.na(asthma_phen_FEV1_perc )) %>%
+    mutate(type1 = factor(case_when(
+      BAL_eos_p > 1 & BAL_neut_p > threshold ~ "mixed",
+      BAL_eos_p > 1 & BAL_neut_p <= threshold ~ "eos",
+      BAL_eos_p <= 1 & BAL_neut_p > threshold ~ "neut",
+      BAL_eos_p <= 1 & BAL_neut_p <= threshold ~ "pauci"
+    ), levels = c("pauci", "neut", "mixed", "eos")))
+  
+  # Calculate sample counts per level
+  sample_counts <- mixed %>%
+    group_by(type1) %>%
+    summarise(count = n())
+  
+  # Dynamically position sample count labels within the y-axis range
+  max_score <- max(mixed$asthma_phen_FEV1_perc , na.rm = TRUE) * 0.95
+  
+  # Generate boxplot with sample count annotations
+  plot_list[[threshold]] <<- ggplot(mixed, aes(x = type1, y = asthma_phen_FEV1_perc )) +
+    geom_boxplot(na.rm = TRUE) +
+    geom_text(data = sample_counts, aes(x = type1, y = max_score, label = paste("n =", count)),
+              color = "blue", size = 3, vjust = -0.5) +  # Position near top of plot
+    labs(
+      x = "Cell profile types",
+      y = "FEV1",
+      title = paste("FEV1perc ~ BAL profile types; \nThreshold - BAL Eos% 1%, Neut", threshold, "%")
+    ) +
+    theme_minimal()
+  
+  # Linear model and save summary
+  lm_model <- lm(asthma_phen_FEV1_perc  ~ type1, data = mixed)
+  lm_result_list[[threshold]] <<- summary(lm_model)
+}
+
+## Apply function for thresholds 1 to 9
+
+lapply(thresholds, analyze_threshold)
+
+## Create a 3x3 multi-panel plot using grid.arrange
+multi_panel_plot <- grid.arrange(
+  grobs = plot_list,
+  ncol = 3,  # 3 columns
+  nrow = 3   # 3 rows
+)
+
+multi_panel_plot  # Display the 3x3 panel plot
+bphen%>%mutate(fev1_lt_80=factor(case_when(asthma_phen_FEV1_perc<80 ~ "lt_80",asthma_phen_FEV1_perc>=80 ~ "ge_80"),levels=c("lt_80","ge_80")))
+
+summary(lm(BAL_neut_p_log     ~ fev1_lt_80 , data = bphen%>%mutate(fev1_lt_80=factor(case_when(asthma_phen_FEV1_perc<80 ~ "lt_80",asthma_phen_FEV1_perc>=80 ~ "ge_80"),levels=c("lt_80","ge_80")))))
+

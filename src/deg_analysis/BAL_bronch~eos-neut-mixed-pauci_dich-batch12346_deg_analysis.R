@@ -45,23 +45,31 @@ bexist<-phenotype$SampleID%in%counts.ID # find which subjects s/p BAL and had br
 bphen<-phenotype[bexist,]
 
 # make categorical variables that will be used for DEG based on various thresholds
+## there are 4 levels to the categorical variable being tested
+## based on BAL Eos% threshold of 1% and Neut% threshold of 6, cells are either mixed, eos-dominant (Eos), neut-dominant (neut), or paucigranulocytic (pauci)
+## the models used for the DESeq2 are ~ type + batch
+## the categorical variables are factors, and the levels are set differently for each type (i.e., type1, type2, type3, type4) for different contrasts 
+## comp 1 will compare vs pauci
+## comp 2 will compare vs neut
+## comp 3 will compare vs mixed
+## comp 4 will compare vs eos 
 bphen <- bphen %>% filter(BAL_eos_p >= 0 & BAL_neut_p >= 0) %>%
-  mutate(type1 = factor(case_when(BAL_eos_p > 1 & BAL_neut_p > 6 ~ "mixed",
-                                  BAL_eos_p > 1 & BAL_neut_p <= 6 ~ "eos",
-                                  BAL_eos_p <= 1 & BAL_neut_p > 6 ~ "neut",
-                                  BAL_eos_p <= 1 & BAL_neut_p <= 6 ~ "pauci"), levels = c("pauci", "neut", "mixed", "eos")),
-         type2 = factor(case_when(BAL_eos_p > 1 & BAL_neut_p > 6 ~ "mixed",
-                                  BAL_eos_p > 1 & BAL_neut_p <= 6 ~ "eos",
-                                  BAL_eos_p <= 1 & BAL_neut_p > 6 ~ "neut",
-                                  BAL_eos_p <= 1 & BAL_neut_p <= 6 ~ "pauci"), levels = c("neut", "pauci", "mixed", "eos")),
-         type3 = factor(case_when(BAL_eos_p > 1 & BAL_neut_p > 6 ~ "mixed",
-                                  BAL_eos_p > 1 & BAL_neut_p <= 6 ~ "eos",
-                                  BAL_eos_p <= 1 & BAL_neut_p > 6 ~ "neut",
-                                  BAL_eos_p <= 1 & BAL_neut_p <= 6 ~ "pauci"), levels = c("mixed", "pauci", "neut", "eos")),
-         type4 = factor(case_when(BAL_eos_p > 1 & BAL_neut_p > 6 ~ "mixed",
-                                  BAL_eos_p > 1 & BAL_neut_p <= 6 ~ "eos",
-                                  BAL_eos_p <= 1 & BAL_neut_p > 6 ~ "neut",
-                                  BAL_eos_p <= 1 & BAL_neut_p <= 6 ~ "pauci"), levels = c("eos", "pauci", "neut", "mixed")),
+  mutate(comp1 = factor(case_when(BAL_eos_p > 1 & BAL_neut_p > 4 ~ "mixed",
+                                  BAL_eos_p > 1 & BAL_neut_p <= 4 ~ "eos",
+                                  BAL_eos_p <= 1 & BAL_neut_p > 4 ~ "neut",
+                                  BAL_eos_p <= 1 & BAL_neut_p <= 4 ~ "pauci"), levels = c("pauci", "neut", "mixed", "eos")),
+         comp2 = factor(case_when(BAL_eos_p > 1 & BAL_neut_p > 4 ~ "mixed",
+                                  BAL_eos_p > 1 & BAL_neut_p <= 4 ~ "eos",
+                                  BAL_eos_p <= 1 & BAL_neut_p > 4 ~ "neut",
+                                  BAL_eos_p <= 1 & BAL_neut_p <= 4 ~ "pauci"), levels = c("neut", "pauci", "mixed", "eos")),
+         comp3 = factor(case_when(BAL_eos_p > 1 & BAL_neut_p > 4 ~ "mixed",
+                                  BAL_eos_p > 1 & BAL_neut_p <= 4 ~ "eos",
+                                  BAL_eos_p <= 1 & BAL_neut_p > 4 ~ "neut",
+                                  BAL_eos_p <= 1 & BAL_neut_p <= 4 ~ "pauci"), levels = c("mixed", "pauci", "neut", "eos")),
+         comp4 = factor(case_when(BAL_eos_p > 1 & BAL_neut_p > 4 ~ "mixed",
+                                  BAL_eos_p > 1 & BAL_neut_p <= 4 ~ "eos",
+                                  BAL_eos_p <= 1 & BAL_neut_p > 4 ~ "neut",
+                                  BAL_eos_p <= 1 & BAL_neut_p <= 4 ~ "pauci"), levels = c("eos", "pauci", "neut", "mixed")),
     )
 phen<-bphen
 
@@ -79,65 +87,28 @@ phen<-bphen
 source("./src/function/deg_custom_functions_v2.R")
 
 
-## source.cell.log is log-transformed, scaled, and centered cell counts. 
-## source.cell is the original BAL/blood cell counts 
-source.cell.log<-c(
-  "BAL_eos_ct_log",
-  "BAL_eos_p_log",
-  "BAL_neut_ct_log",
-  "BAL_neut_p_log",
-  "BAL_wbc_log",
-  "blood_eos_log",
-  "blood_eos_p_log",
-  "blood_neut_log",
-  "blood_neut_p_log",
-  "blood_wbc_log")
-
-source.cell<-c(
-  "BAL_eos_ct",
-  "BAL_eos_p",
-  "BAL_neut_ct",
-  "BAL_neut_p",
-  "BAL_wbc",
-  "blood_eos",
-  "blood_eos_p",
-  "blood_neut",
-  "blood_neut_p",
-  "blood_wbc")
-
-
-# these are categorical variables to test using BAL cell counts 
-
-var_dichot_bal<-c("bal_Eos_p_more_1","bal_Eos_p_more_3","bal_ANC_more_0",
-                  "bal_ANC_more_5","bal_ANC_more_13","bal_neut_p_more_0",
-                  "bal_neut_p_more_2","bal_neut_p_more_5")
-
-
-
-
-
 ############ select variables to test for all non-NA values
-var_to_test<-c("type1","type2","type3","type4") # select continuous and categorical variables 
+var_to_test<-c("comp1","comp2","comp3","comp4") # select continuous and categorical variables 
 var_to_test_res<-list()
-var_to_test_res[[1]]<-c("type1_mixed_vs_pauci",
-                   "type1_neut_vs_pauci",
-                   "type1_eos_vs_pauci") 
-var_to_test_res[[2]]<-c("type2_eos_vs_neut",
-                        "type2_eos_vs_neut",
-                        "type2_pauci_vs_neut") 
-var_to_test_res[[3]]<-c("type3_eos_vs_mixed",
-                        "type3_neut_vs_mixed",
-                        "type3_pauci_vs_mixed") 
-var_to_test_res[[4]]<-c("type4_mixed_vs_eos",
-                        "type4_neut_vs_eos",
-                        "type4_pauci_vs_eos") 
+var_to_test_res[[1]]<-c("comp1_mixed_vs_pauci",
+                   "comp1_neut_vs_pauci",
+                   "comp1_eos_vs_pauci") 
+var_to_test_res[[2]]<-c("comp2_eos_vs_neut",
+                        "comp2_mixed_vs_neut",
+                        "comp2_pauci_vs_neut") 
+var_to_test_res[[3]]<-c("comp3_eos_vs_mixed",
+                        "comp3_neut_vs_mixed",
+                        "comp3_pauci_vs_mixed") 
+var_to_test_res[[4]]<-c("comp4_mixed_vs_eos",
+                        "comp4_neut_vs_eos",
+                        "comp4_pauci_vs_eos") 
 
 
 
 # make a list of the phenotype colData that will be used for DESeq2
 pi<-lapply(phen[,var_to_test],function(data){a<-!is.na(data);return(a)})
 df<-vector("list",length(var_to_test)) # list of data framese used as an input for deseq2. all cell counts
-names(df)<-paste(var_to_test,"all",sep="_")
+names(df)<-paste(var_to_test)
 for(i in 1:length(var_to_test)){
   df[[i]]<-phen[pi[[i]],c("SampleID",var_to_test[i], "Batch")]
 }
@@ -150,18 +121,13 @@ print(sapply(df,dim)[1,])
 # coldata for DESeq2
 df.input<-df
 
-# filtering counts table to remove low expressed genes
+# select RNAseq counts
 
-## select RNAseq counts
 id<-phen$SampleID
 cols<-colnames(bronch.counts)%in%id
 ct<-bronch.counts[,cols] # First column is actually gene name 
 
-## previous stringet filtering: 
-# c2<-filter_low_expressed_genes_method2(ct,round(length(id)*0.1,0))
-# ct<-rowgenes_counttable(ct,c2) # low bcounts will be filtered 
-
-count.table<-lapply(df.input,function(df){d<-df; ct<-ct[,colnames(ct)%in%d$SampleID]; return(ct)}) # list of subsetted count table. Each element is a count table with samples for each of the experimental design.
+count.table<-lapply(df.input,function(df){d<-df; ct<-ct[,colnames(ct)%in%d$SampleID]; return(ct)}) # list of subsetted count table. Each element is a count table containing samples for each part of the experimental design.
 
 
 
@@ -177,6 +143,7 @@ res <- list()
 assay_index<-seq_along(deg.design)
 
 # Loop over the indices in assay_index
+
 for(i in assay_index){
   # Initialize an inner list for res[[i]]
   res[[i]] <- list()
@@ -228,17 +195,19 @@ if(!dir.exists(deg.dir)){
 
 if(dir.exists(deg.dir)){
   for(i in seq_along(var_to_test_res)){
-    a<-res.sig[[i]]
-    b<-res[[i]]
-    write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg","bronch","res_sig",i,var_to_test_res[[i]],Sys.Date(),".csv",sep="_")))
-    write.csv(b,row.names=TRUE,file.path(deg.dir,paste("deg","bronch","res_all",i,var_to_test_res[[i]],Sys.Date(),".csv",sep="_")))
+    for( j in 1:3){
+      a<-res.sig[[i]][[j]]
+      b<-res[[i]][[j]]
+      write.csv(a,row.names=TRUE,file.path(deg.dir,paste("deg","bronch","res_sig",i,j,var_to_test_res[[i]][j],Sys.Date(),".csv",sep="_")))
+      write.csv(b,row.names=TRUE,file.path(deg.dir,paste("deg","bronch","res_all",i,j,var_to_test_res[[i]][j],Sys.Date(),".csv",sep="_")))
+    }
   }
 }
 ## summarize the data input 
 
 generate_DEG_input_summary_table<-function(original_ct,filtered_ct,dds,res,des){
-  filter_method<-"TMM normalized LCPM cutoff"
-  n_filtered_genes<-paste("analyzed n_genes:", nrow(filtered_ct),",","filtered n_genes:",nrow(original_ct)-nrow(filtered_ct))
+  filter_method<-"at least 10 counts across samples, then DESeq2 automatic filter"
+  n_filtered_genes<-paste("analyzed n_genes:", mean(sapply(filtered_ct,nrow)),",","filtered n_genes:",mean(sapply(original_ct,nrow))-mean(sapply(filtered_ct,nrow)))
   samples<-sapply(dds, function(d){colData(d)$SampleID%>%paste(collapse = ",")})
   dds<-paste("dds",1:length(dds),sep="")
   results<-paste("res",1:length(res),sep="")
