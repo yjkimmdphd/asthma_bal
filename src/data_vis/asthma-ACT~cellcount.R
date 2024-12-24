@@ -74,7 +74,7 @@ perform_analysis(bphen, 6, "BAL_neut_p", "BAL neut % > 6%")
 perform_analysis(bphen, 100, "blood_eos", "Blood AEC > 100")
 perform_analysis(bphen, 300, "blood_eos", "Blood AEC > 300")
 perform_analysis(bphen, 500, "blood_eos", "Blood AEC > 500")
-
+######################################################################
 # FEV1perc
 # Define function to perform t-test, plot, and summarize data
 perform_analysis <- function(data, cutoff, eos_var, label, lm_vars = c("sex", "Race")) {
@@ -123,8 +123,9 @@ perform_analysis(bphen, 300, "blood_eos", "Blood AEC > 300")
 perform_analysis(bphen, 500, "blood_eos", "Blood AEC > 500")
 
 hist(bphen$asthma_phen_FEV1_perc,breaks=seq(0,150,by=10))
+######################################################################
+# lm ACT ~ mixed cell profiles # of note, LM is not appropriate because they are not necesssarily linear 
 
-# ACT ~ mixed cell profiles 
 # Load necessary libraries
 library(ggplot2)
 library(gridExtra)
@@ -176,29 +177,22 @@ analyze_threshold <- function(threshold) {
 ## Apply function for thresholds 1 to 9
 lapply(thresholds, analyze_threshold)
 
-## Create a 3x3 multi-panel plot using grid.arrange
-multi_panel_plot <- grid.arrange(
-  grobs = plot_list,
-  ncol = 3,  # 3 columns
-  nrow = 3   # 3 rows
-)
 
-multi_panel_plot  # Display the 3x3 panel plot
+#################################################################################
 
-summary(lm(asthma_phen_ACT.score ~  BAL_eos_p_log + BAL_neut_p_log   , data = bphen))
-
-# FEV ~ mixed cell
-
+# AOV with Dunnett's post test pauci vs neut, mixed, eos
 
 ## Initialize lists to store results and plots
-lm_result_list <- vector("list", length(thresholds))
-plot_list <- vector("list", length(thresholds))
 thresholds <- 1:9
+aov_result_list <- vector("list", length(thresholds))
+plot_list <- vector("list", length(thresholds))
+
 ## Define function to handle threshold-based analysis, save boxplot, and add sample counts
+library(multcomp)
 analyze_threshold <- function(threshold) {
   # Filter out NA values for the ACT score to avoid issues with missing data
   mixed <- bphen %>%
-    filter(BAL_eos_p >= 0 & BAL_neut_p >= 0, !is.na(asthma_phen_FEV1_perc )) %>%
+    filter(BAL_eos_p >= 0 & BAL_neut_p >= 0, !is.na(asthma_phen_ACT.score)) %>%
     mutate(type1 = factor(case_when(
       BAL_eos_p > 1 & BAL_neut_p > threshold ~ "mixed",
       BAL_eos_p > 1 & BAL_neut_p <= threshold ~ "eos",
@@ -212,27 +206,27 @@ analyze_threshold <- function(threshold) {
     summarise(count = n())
   
   # Dynamically position sample count labels within the y-axis range
-  max_score <- max(mixed$asthma_phen_FEV1_perc , na.rm = TRUE) * 0.95
+  max_score <- max(mixed$asthma_phen_ACT.score, na.rm = TRUE) * 0.95
   
   # Generate boxplot with sample count annotations
-  plot_list[[threshold]] <<- ggplot(mixed, aes(x = type1, y = asthma_phen_FEV1_perc )) +
+  plot_list[[threshold]] <<- ggplot(mixed, aes(x = type1, y = asthma_phen_ACT.score)) +
     geom_boxplot(na.rm = TRUE) +
     geom_text(data = sample_counts, aes(x = type1, y = max_score, label = paste("n =", count)),
               color = "blue", size = 3, vjust = -0.5) +  # Position near top of plot
     labs(
       x = "Cell profile types",
-      y = "FEV1",
-      title = paste("FEV1perc ~ BAL profile types; \nThreshold - BAL Eos% 1%, Neut", threshold, "%")
+      y = "ACT score",
+      title = paste("ACT ~ BAL profile types; \nThreshold - BAL Eos% 1%, Neut", threshold, "%")
     ) +
     theme_minimal()
   
-  # Linear model and save summary
-  lm_model <- lm(asthma_phen_FEV1_perc  ~ type1, data = mixed)
-  lm_result_list[[threshold]] <<- summary(lm_model)
+  # Analysis of variance with Dunnett's post hoc test
+  aov_model <- aov(asthma_phen_ACT.score ~ type1, data = mixed)
+  posthoc <- multcomp::glht(aov_model, linfct = multcomp::mcp(type1 = "Dunnett"))
+  aov_result_list[[threshold]] <<- summary(posthoc)
 }
 
 ## Apply function for thresholds 1 to 9
-
 lapply(thresholds, analyze_threshold)
 
 ## Create a 3x3 multi-panel plot using grid.arrange
@@ -243,7 +237,69 @@ multi_panel_plot <- grid.arrange(
 )
 
 multi_panel_plot  # Display the 3x3 panel plot
-bphen%>%mutate(fev1_lt_80=factor(case_when(asthma_phen_FEV1_perc<80 ~ "lt_80",asthma_phen_FEV1_perc>=80 ~ "ge_80"),levels=c("lt_80","ge_80")))
 
-summary(lm(BAL_neut_p_log     ~ fev1_lt_80 , data = bphen%>%mutate(fev1_lt_80=factor(case_when(asthma_phen_FEV1_perc<80 ~ "lt_80",asthma_phen_FEV1_perc>=80 ~ "ge_80"),levels=c("lt_80","ge_80")))))
+#################################################################################
+# AOV with Tukey's post test pauci, neut, mixed, eos
+
+## Initialize lists to store results and plots
+thresholds <- 1:9
+aov_result_list <- vector("list", length(thresholds))
+plot_list <- vector("list", length(thresholds))
+
+## Define function to handle threshold-based analysis, save boxplot, and add sample counts
+analyze_threshold <- function(threshold) {
+  # Filter out NA values for the ACT score to avoid issues with missing data
+  mixed <- bphen %>%
+    filter(BAL_eos_p >= 0 & BAL_neut_p >= 0, !is.na(asthma_phen_ACT.score)) %>%
+    mutate(type1 = factor(case_when(
+      BAL_eos_p > 1 & BAL_neut_p > threshold ~ "mixed",
+      BAL_eos_p > 1 & BAL_neut_p <= threshold ~ "eos",
+      BAL_eos_p <= 1 & BAL_neut_p > threshold ~ "neut",
+      BAL_eos_p <= 1 & BAL_neut_p <= threshold ~ "pauci"
+    ), levels = c("pauci", "neut", "mixed", "eos")))
+  
+  # Calculate sample counts per level
+  sample_counts <- mixed %>%
+    group_by(type1) %>%
+    summarise(count = n())
+  
+  # Dynamically position sample count labels within the y-axis range
+  max_score <- max(mixed$asthma_phen_ACT.score, na.rm = TRUE) * 0.95
+  
+  # Generate boxplot with sample count annotations
+  plot_list[[threshold]] <<- ggplot(mixed, aes(x = type1, y = asthma_phen_ACT.score)) +
+    geom_boxplot(na.rm = TRUE) +
+    geom_text(data = sample_counts, aes(x = type1, y = max_score, label = paste("n =", count)),
+              color = "blue", size = 3, vjust = -0.5) +  # Position near top of plot
+    labs(
+      x = "Cell profile types",
+      y = "ACT score",
+      title = paste("ACT ~ BAL profile types; \nThreshold - BAL Eos% 1%, Neut", threshold, "%")
+    ) +
+    theme_minimal()
+  
+  # Analysis of variance
+  aov_model <- aov(asthma_phen_ACT.score ~ type1, data = mixed)
+  
+  # Tukey's post hoc test
+  posthoc <- TukeyHSD(aov_model)
+  aov_result_list[[threshold]] <<- posthoc
+}
+
+## Apply function for thresholds 1 to 9
+lapply(thresholds, analyze_threshold)
+
+
+## Create a 3x3 multi-panel plot using grid.arrange
+multi_panel_plot <- grid.arrange(
+  grobs = plot_list,
+  ncol = 3,  # 3 columns
+  nrow = 3   # 3 rows
+)
+
+multi_panel_plot  # Display the 3x3 panel plot
+
+
+#################################################################################
+
 
