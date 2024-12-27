@@ -5,7 +5,7 @@ library(dplyr)
 # load biomarker phenotype file saved in  'phenotype'
 phenotype <-
   file.path(
-    "./resources/processed_data/scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_20240731.csv"
+    "./resources/processed_data/scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_2024-12-26.csv"
   )
 phenotype_big <-
   file.path(
@@ -18,7 +18,7 @@ phen <-
 phen_big <-
   if (file.exists(phenotype_big)) {
     read.csv(phenotype_big, row.names = NULL)
-  } %>% select("ID", "Age_at_visit", "sex", "ethnicity", "Race")
+  } %>% dplyr::select("ID", "Age_at_visit", "sex", "ethnicity", "Race")
 phen <- left_join(phen, phen_big, by = "ID")
 bphen <- phen %>% filter(grepl("^B", SampleID))
 
@@ -35,7 +35,7 @@ perform_analysis <- function(data, cutoff, eos_var, label, lm_vars = c("sex", "R
     mutate(above_cutoff = get(eos_var) > cutoff) %>%
     group_by(above_cutoff) %>%
     arrange(above_cutoff) %>%
-    select(SampleID, above_cutoff, asthma_phen_ACT.score, sex, Race)
+    dplyr::select(SampleID, above_cutoff, asthma_phen_ACT.score, sex, Race)
   
   # Perform t-test
   t_result <- t.test(asthma_phen_ACT.score ~ above_cutoff, data = data)
@@ -64,7 +64,7 @@ perform_analysis <- function(data, cutoff, eos_var, label, lm_vars = c("sex", "R
 }
 
 # Apply analysis for different cutoffs
-par(mfrow=c(2,3))
+par(mfrow=c(3,3))
 perform_analysis(bphen, 1, "BAL_eos_p", "BAL Eos% > 1%")
 perform_analysis(bphen, 3, "BAL_eos_p", "BAL Eos% > 3%")
 perform_analysis(bphen, 1, "BAL_eos_ct", "BAL AEC > 1")
@@ -83,7 +83,7 @@ perform_analysis <- function(data, cutoff, eos_var, label, lm_vars = c("sex", "R
     mutate(above_cutoff = get(eos_var) > cutoff) %>%
     group_by(above_cutoff) %>%
     arrange(above_cutoff) %>%
-    select(SampleID, above_cutoff, asthma_phen_FEV1_perc, sex, Race)
+    dplyr::select(SampleID, above_cutoff, asthma_phen_FEV1_perc, sex, Race)
   
   # Perform t-test
   t_result <- t.test(asthma_phen_FEV1_perc ~ above_cutoff, data = data)
@@ -124,7 +124,7 @@ perform_analysis(bphen, 500, "blood_eos", "Blood AEC > 500")
 
 hist(bphen$asthma_phen_FEV1_perc,breaks=seq(0,150,by=10))
 ######################################################################
-# lm ACT ~ mixed cell profiles # of note, LM is not appropriate because they are not necesssarily linear 
+# lm ACT ~ mixed cell profiles # of note, LM is not appropriate because
 
 # Load necessary libraries
 library(ggplot2)

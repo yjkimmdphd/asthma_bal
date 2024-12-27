@@ -28,7 +28,7 @@ counts.ID<-colnames(bronch.counts)
 
 # make vectors of variables for later use as an input for function 'run_deseq2_DEG_analysis'
 # load biomarker phenotype file saved in  'phenotype'
-phenotype<-file.path("./resources/processed_data/scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_20240731.csv")
+phenotype<-file.path("./resources/processed_data/scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_2024-12-26.csv")
 phenotype<-if(file.exists(phenotype)){read.csv(phenotype, row.names = NULL)}
 
 # to the phenotype data left join data for sampling date differences 
