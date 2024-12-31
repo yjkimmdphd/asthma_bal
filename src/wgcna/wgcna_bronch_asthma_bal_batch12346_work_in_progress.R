@@ -15,12 +15,12 @@ library(WGCNA)
 # Load cell count table
 normalized_count_table_path <- "./resources/processed_data/normalized_gene_count/normalized_gene_count_bronch_vsd_batch-corrected.txt"
 if (file.exists(normalized_count_table_path)) {
-  counts <- read.table(normalized_count_table_path, 
+  ct <- read.table(normalized_count_table_path, 
                        header = TRUE, 
                        row.names = 1, 
                        sep = "\t")
-}
-genes <- rownames(counts)
+}else(print("path doesn't exist"))
+genes <- rownames(ct)
 
 ###############
 ##   WGCNA   ##
@@ -30,7 +30,7 @@ options(allowParallel = TRUE)
 enableWGCNAThreads()
 
 # 1. Create a new format for expression data
-expression <- as.data.frame(t(counts))
+expression <- as.data.frame(t(ct))
 colnames(expression) <- genes
 
 # Check if genes/samples are good
