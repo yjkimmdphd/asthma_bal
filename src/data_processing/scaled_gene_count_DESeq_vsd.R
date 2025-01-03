@@ -140,7 +140,7 @@ head(counts_selected)
 library(DESeq2)
 library(vsn)
 countdata<-counts_selected
-coldata_cols<-c("comp1","Batch")
+coldata_cols<-c("comp1","Batch","comp2")
 coldata<-phen_input[,coldata_cols]
 rownames(coldata)<-sample_id
 
@@ -155,9 +155,14 @@ vsd <- vst(dds, blind=FALSE)
 
 meanSdPlot(assay(vsd))
 
+#------------------------------------------
 ## vsd with vs without batch effect removal 
+#------------------------------------------
 
-### vsd without batch effect removal 
+#-----------------------------------
+### vsd without batch effect removal
+#-----------------------------------
+
 normalized_counts <- assay(vsd)  # This is now your transformed expression matrix
 sampleDists <- dist(t(assay(vsd)))
 
@@ -173,8 +178,11 @@ pheatmap(sampleDistMatrix,
          col=colors)
 plotPCA(vsd, intgroup=c("Batch"))
 plotPCA(vsd, intgroup=c("comp1"))
+plotPCA(vsd, intgroup=c("comp2"))
 
+#------------------------------------------
 ### vsd with batch effect removed 
+#------------------------------------------
 library(limma)
 mat <- assay(vsd)
 mm <- model.matrix(~comp1, colData(vsd))
@@ -182,11 +190,11 @@ mat <- limma::removeBatchEffect(mat, batch=vsd$Batch, design=mm)
 assay(vsd) <- mat
 meanSdPlot(assay(vsd))
 
-normalized_counts <- assay(vsd)  # This is now your transformed expression matrix
-sampleDists <- dist(t(assay(vsd)))
+normalized_counts_batch_corrected <- assay(vsd)  # This is now your transformed expression matrix
+sampleDists_batch_corrected <- dist(t(assay(vsd)))
 
 library("RColorBrewer")
-sampleDistMatrix <- as.matrix(sampleDists)
+sampleDistMatrix <- as.matrix(sampleDists_batch_corrected)
 rownames(sampleDistMatrix) <- vsd$Batch
 colnames(sampleDistMatrix) <- NULL
 colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
@@ -196,15 +204,26 @@ pheatmap(sampleDistMatrix,
          col=colors)
 plotPCA(vsd, intgroup=c("Batch"))
 plotPCA(vsd, intgroup=c("comp1"))
+plotPCA(vsd, intgroup=c("comp2"))
 
 ### will only export vsd with batch effect removal
 
 # -----------------------------------------------------------------------------
-# 5) export normalized bronchial gene count table
+# 5) export normalized nasal gene count table
 # -----------------------------------------------------------------------------
 
+
 write.table(
-  assay(vsd),
+  normalized_counts,
+  "./resources/processed_data/normalized_gene_count/normalized_gene_count_nasal_vsd_no-batch-corrected.txt",
+  sep = "\t",
+  row.names = TRUE, 
+  col.names = NA
+)
+
+
+write.table(
+  normalized_counts_batch_corrected,
   "./resources/processed_data/normalized_gene_count/normalized_gene_count_nasal_vsd_batch-corrected.txt",
   sep = "\t",
   row.names = TRUE, 
