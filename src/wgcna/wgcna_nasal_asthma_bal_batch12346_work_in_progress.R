@@ -124,11 +124,11 @@ print("calculating TOM")
 TOM <- TOMsimilarity(adjacency)
 TOM.dissimilarity <- 1 - TOM
 
-if (!file.exists("./resources/processed_data/Rdata/wgcna_bronch_TOM_diss_batch12346.Rdata")) {
+if (!file.exists("./resources/processed_data/Rdata/wgcna_nasal_TOM_diss_batch12346.Rdata")) {
   save(TOM.dissimilarity, 
-       file = "./resources/processed_data/Rdata/wgcna_bronch_TOM_diss_batch12346.Rdata")
+       file = "./resources/processed_data/Rdata/wgcna_nasal_TOM_diss_batch12346.Rdata")
 }
 
-if (file.exists("./resources/processed_data/Rdata/wgcna_bronch_TOM_dissim_batch12346.Rdata")) {
-  load("./resources/processed_data/Rdata/wgcna_bronch_TOM_dissim_batch12346.Rdata")
+if (file.exists("./resources/processed_data/Rdata/wgcna_nasal_TOM_dissim_batch12346.Rdata")) {
+  load("./resources/processed_data/Rdata/wgcna_nasal_TOM_dissim_batch12346.Rdata")
 }
