@@ -73,7 +73,7 @@ abline(h = 250, col = "red")
 dev.off()
 
 # Remove outliers
-cut.sampleTree <- cutreeStatic(sampleTree, cutHeight = 300, minSize = 7)
+cut.sampleTree <- cutreeStatic(sampleTree, cutHeight = 250, minSize = 7)
 expression.data <- expression[cut.sampleTree == 1, ]
 
 dim(expression)
