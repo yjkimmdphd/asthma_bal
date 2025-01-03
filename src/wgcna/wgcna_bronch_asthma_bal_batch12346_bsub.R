@@ -8,236 +8,158 @@ library(tidyverse)
 library(DESeq2)
 library(WGCNA)
 
-###################################
-# custom functions for DEG analysis
-###################################
-# should load the following fx:
-## filter_low_expressed_genes_method2: Filters low counts genes using TMM normalized lcpm as a cutoff point. Requires 'limma'
-## rowgenes_counttable: changes the row names of the count table with gene names
-## run_deseq2_DEG_analysis: takes countdata,coldata,design,des as variables, and runs DEG on DESeq2
-## get_DEG_results: saves result of DESeq2 output, ordered in padj 
-## generate_DEG_input_summary_table: makes a table of input information
-## generate_DEG_summary_table: makes results summary (i.e., # of DEG for each analysis)
+########################
+## Load Readcount Data ##
+########################
 
-source("./src/function/deg_custom_functions.R")
-
-######################
-## load readcount data
-######################
-
-# load cell count table
-normalized_count_table_path<-"./resources/processed_data/bronch_batch12346_normalized_ct.txt"
-counts<-if(file.exists(normalized_count_table_path)){read.delim(normalized_count_table_path, check.names = FALSE)}
-genes<-counts[,"name"]
-
-# select bronchial samples 
-bronch.samples<-grepl("^B",colnames(counts))
-bronch.counts<-counts[,bronch.samples]
-
-head(bronch.counts)
-counts.ID<-colnames(bronch.counts)
-
-
-################################
-## load phenotype and batch data
-################################
-
-# make vectors of variables for later use as an input for function 'run_deseq2_DEG_analysis'
-
-source.cell.log<-c(
-  "BAL_eos_ct_log",
-  "BAL_eos_p_log",
-  "BAL_neut_ct_log",
-  "BAL_neut_p_log",
-  "BAL_wbc_log",
-  "blood_eos_log",
-  "blood_eos_p_log",
-  "blood_neut_log",
-  "blood_neut_p_log",
-  "blood_wbc_log")
-source.cell<-c(
-  "BAL_eos_ct",
-  "BAL_eos_p",
-  "BAL_neut_ct",
-  "BAL_neut_p",
-  "BAL_wbc",
-  "blood_eos",
-  "blood_eos_p",
-  "blood_neut",
-  "blood_neut_p",
-  "blood_wbc")
-
-# load biomarker phenotype file saved in  'phenotype'
-phenotype<-file.path("./resources/processed_data/scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_20240731.csv")
-phenotype<-if(file.exists(phenotype)){read.csv(phenotype, row.names = NULL)}
-
-# load data for sampling date differences 
-sampling_date_diff<-"./resources/processed_data/sampling_dates/swab-bal-cbc_differences_in_days.txt"
-sampling_date_diff<-if(file.exists(sampling_date_diff)){read.table(sampling_date_diff,row.names = NULL,header = TRUE)}
-sampling_date_diff<-sampling_date_diff%>%filter(Comparison=="blood_bal")
-colnames(sampling_date_diff)[1:3]<-c("ID","sampling_date_comp","sampling_date_diff_days")
-
-# left join sampling date data and phenotype data 
-phenotype<-left_join(phenotype,sampling_date_diff,by="ID")
-
-
-#####################################################################################
-## subset phenotype data for which the samples exist for bronchial RNAseq experiments   
-#####################################################################################
-bexist<-phenotype$SampleID%in%counts.ID # find which subjects s/p BAL and had bronchial sample RNAseq completed 
-bphen<-phenotype[bexist,]
-phen<-bphen
-
-ct<-bronch.counts
+# Load cell count table
+normalized_count_table_path <- "./resources/processed_data/normalized_gene_count/normalized_gene_count_bronch_vsd_batch-corrected.txt"
+if (file.exists(normalized_count_table_path)) {
+  counts <- read.table(normalized_count_table_path, 
+                       header = TRUE, 
+                       row.names = 1, 
+                       sep = "\t")
+}
+genes <- rownames(counts)
 
 ###############
-#
-#### WGCNA ####
-#
+##   WGCNA   ##
 ###############
 
-# Set the number of cores to a lower number than available
 options(allowParallel = TRUE)
-# If your machine has 8 cores, you might try using just 4 or even 2
 enableWGCNAThreads()
 
-##
-# 1. Create a new format expression data - remove gene name column
-##
-expression<-ct
-rownames(expression)<-NULL
-expression = as.data.frame(t(expression))
+# 1. Create a new format for expression data
+expression <- as.data.frame(t(counts))
+colnames(expression) <- genes
 
-#set col as gene names
-colnames(expression) = genes
+# Check if genes/samples are good
+gsg <- goodSamplesGenes(expression)
 
-# gene filter
-gsg <- goodSamplesGenes(expression) # gsg$allOK is false, needs some filtering
-
-##
-# 2. remove outlier genes
-##
-if (!gsg$allOK)
-{
-  if (sum(!gsg$goodGenes)>0) 
-    printFlush(paste("Removing genes:", paste(names(expression)[!gsg$goodGenes], collapse = ", "))); #Identifies and prints outlier genes
-  if (sum(!gsg$goodSamples)>0)
-    printFlush(paste("Removing samples:", paste(rownames(expression)[!gsg$goodSamples], collapse = ", "))); #Identifies and prints oulier samples
-  expression <- expression[gsg$goodSamples == TRUE, gsg$goodGenes == TRUE] # Removes the offending genes and samples from the data
+# 2. Remove outlier genes (and samples if necessary)
+if (!gsg$allOK) {
+  if (sum(!gsg$goodGenes) > 0) {
+    printFlush(
+      paste("Removing genes:", 
+            paste(names(expression)[!gsg$goodGenes], collapse = ", "))
+    )
+  }
+  
+  if (sum(!gsg$goodSamples) > 0) {
+    printFlush(
+      paste("Removing samples:", 
+            paste(rownames(expression)[!gsg$goodSamples], collapse = ", "))
+    )
+  }
+  
+  expression <- expression[gsg$goodSamples, gsg$goodGenes]
 }
-##
-# 3. Identifying outlier samples with dendrogram
-##
-sampleTree <- hclust(dist(expression), method = "average") #Clustering samples based on distance 
 
-# Setting the graphical parameters
-par(cex = 0.6);
-par(mar = c(0,4,2,0))
+# 3. Identify outlier samples using a dendrogram
+sampleTree <- hclust(dist(expression), method = "average")
 
-# Plotting the cluster dendrogram
-plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,
-     cex.axis = 1.5, cex.main = 2)
+png("./reports/local_only/wgcna/bronch/sampleTree_bronch.png", width = 800, height = 600)
+par(cex = 0.6)
+par(mar = c(0, 4, 2, 0))
+plot(
+  sampleTree,
+  main = "Sample clustering to detect outliers",
+  sub = "",
+  xlab = "",
+  cex.lab = 1.5,
+  cex.axis = 1.5,
+  cex.main = 2
+)
+abline(h = 160, col = "red")
+dev.off()
 
-# Setting the graphical parameters
-par(cex = 0.6);
-par(mar = c(0,4,2,0))
-plot(sampleTree, main = "Sample clustering to detect outliers", sub="", xlab="", cex.lab = 1.5,
-     cex.axis = 1.5, cex.main = 2)
+# Remove outliers
+cut.sampleTree <- cutreeStatic(sampleTree, cutHeight = 160, minSize = 7)
+expression.data <- expression[cut.sampleTree == 1, ]
 
-# draw on line to show cutoff height
-abline(h = 3.5e6, col = "red")
-
- # height of 3.5e6 removes sample ID B277 and B242
-cut.sampleTree <- cutreeStatic(sampleTree, cutHeight = 3.5e6, minSize = 7) #returns numeric vector
-#Remove outlier
-expression.data <- expression[cut.sampleTree==1, ]
 dim(expression)
 dim(expression.data)
 
-##
-# 4. network formulation
-##
+# 4. Network formulation
 
-# Determining the Soft Power Threshold
-spt <- pickSoftThreshold(expression.data) 
+# Pick soft threshold
+spt <- pickSoftThreshold(expression.data)
 
-# save spt as Rdata if not available already
-if(!file.exists("./resources/processed_data/Rdata/wgcna_bronch_spt_batch12346.Rdata")){
-  save(spt,file="./resources/processed_data/Rdata/wgcna_bronch_spt_batch12346.Rdata") # save the spt as Rdata
-}
+# Plot Scale Independence
+png("./reports/local_only/wgcna/bronch/bronch_spt.png", width = 800, height = 600)
+par(mar = c(1, 1, 1, 1))
+plot(
+  spt$fitIndices[, 1],
+  spt$fitIndices[, 2],
+  xlab = "Soft Threshold (power)",
+  ylab = "Scale Free Topology Model Fit, signed R^2",
+  type = "n",
+  main = "Scale independence"
+)
+text(spt$fitIndices[, 1], spt$fitIndices[, 2], col = "red")
+abline(h = 0.80, col = "red")
+dev.off()
 
-# load Spt data
-if(file.exists("./resources/processed_data/Rdata/wgcna_bronch_spt_batch12346.Rdata")){
-  load("./resources/processed_data/Rdata/wgcna_bronch_spt_batch12346.Rdata")
-}
+# Plot Mean Connectivity
+png("./reports/local_only/wgcna/bronch/bronch_spt_vs_connectivity.png", width = 800, height = 600)
+par(mar = c(1, 1, 1, 1))
+plot(
+  spt$fitIndices[, 1],
+  spt$fitIndices[, 5],
+  xlab = "Soft Threshold (power)",
+  ylab = "Mean Connectivity",
+  type = "n",
+  main = "Mean connectivity"
+)
+text(spt$fitIndices[, 1], spt$fitIndices[, 5], labels = spt$fitIndices[, 1], col = "red")
+dev.off()
 
-# Plot the R2 values as a function of the soft thresholds
-#par(mar=c(1,1,1,1))
-#plot(spt$fitIndices[,1],spt$fitIndices[,2],
-#     xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit,signed R^2",type="n",
-#     main = paste("Scale independence"))
-
-#text(spt$fitIndices[,1],spt$fitIndices[,2],col="red")
-##abline(h=0.80,col="red")
-
-#Plot mean connectivity as a function of soft thresholds
-#par(mar=c(1,1,1,1))
-#dev.off()
-#plot(spt$fitIndices[,1], spt$fitIndices[,5],
-#     xlab="Soft Threshold (power)",ylab="Mean Connectivity", type="n",
-#     main = paste("Mean connectivity"))
-
-#text(spt$fitIndices[,1], spt$fitIndices[,5], labels= spt$fitIndices[,1],col="red")
-
-
-# spt should be 4, since after it, the power is above 0.8, for a short period lol
-
-#calling the adjacency fx
+# Adjacency matrix
 softPower <- 4
 adjacency <- adjacency(expression.data, power = softPower)
 
-###
-# 5. module Construction
-### 
-# convert the adjacency matrix into a TOM similarity matrix we can call the WGCNA function 
-# this takes the longest and needs HPC 
+# 5. Module Construction
+
 print("calculating TOM")
 TOM <- TOMsimilarity(adjacency)
-TOM.dissimilarity <- 1-TOM
+TOM.dissimilarity <- 1 - TOM
 
-# save TOM.dissimilarity if not existing already
-if(!file.exists("./resources/processed_data/Rdata/wgcna_bronch_TOM_diss_batch12346.Rdata")){
-  save(TOM.dissimilarity,file="./resources/processed_data/Rdata/wgcna_bronch_TOM_diss_batch12346.Rdata") # save the TOM as Rdata
+if (!file.exists("./resources/processed_data/Rdata/wgcna_bronch_TOM_diss_batch12346.Rdata")) {
+  save(TOM.dissimilarity, 
+       file = "./resources/processed_data/Rdata/wgcna_bronch_TOM_diss_batch12346.Rdata")
 }
 
-# load TOM.dissimilarity if available
-if(file.exists("./resources/processed_data/Rdata/wgcna_bronch_TOM_dissim_batch12346.Rdata")){
-  load("./resources/processed_data/Rdata/wgcna_bronch_TOM_dissim_batch12346.Rdata")
-}
+if (file.exists("./resources/processed_data/Rdata/wgcna_bronch_TOM_diss_batch12346.Rdata")) {
+  load("./resources/processed_data/Rdata/wgcna_bronch_TOM_diss_batch12346.Rdata")
+}else{print("Rdata doesn't exist")}
+
 # Hierarchical Clustering Analysis
+geneTree <- hclust(as.dist(TOM.dissimilarity), method = "average")
 
-#creating the dendrogram 
-geneTree <- hclust(as.dist(TOM.dissimilarity), method = "average") 
+# Dynamic Tree Cutting
+Modules <- cutreeDynamic(
+  dendro = geneTree,
+  distM = TOM.dissimilarity,
+  deepSplit = 2,
+  pamRespectsDendro = FALSE,
+  minClusterSize = 30
+)
 
-#plotting the dendrogram
-sizeGrWindow(12,9)
-#plot(geneTree, xlab="", sub="", main = "Gene clustering on TOM-based dissimilarity", 
-#     labels = FALSE, hang = 0.04)
+table(Modules)
 
-Modules <- cutreeDynamic(dendro = geneTree, distM = TOM.dissimilarity, deepSplit = 2, pamRespectsDendro = FALSE, minClusterSize = 30)
+ModuleColors <- labels2colors(Modules)
+table(ModuleColors)
 
-table(Modules) #returns a table of the counts of factor levels in an object. In this case how many genes are assigned to each created module. 
-
-# plot the module assignment under the gene dendrogram for visualization.
-ModuleColors <- labels2colors(Modules) #assigns each module number a color
-table(ModuleColors) #returns the counts for each color (aka the number of genes within each module)
-
-#plots the gene dendrogram with the module colors
-plotDendroAndColors(geneTree, ModuleColors,"Module",
-                    dendroLabels = FALSE, hang = 0.03,
-                    addGuide = TRUE, guideHang = 0.05,
-                    main = "Gene dendrogram and module colors")
-
+plotDendroAndColors(
+  geneTree,
+  ModuleColors,
+  "Module",
+  dendroLabels = FALSE,
+  hang = 0.03,
+  addGuide = TRUE,
+  guideHang = 0.05,
+  main = "Gene dendrogram and module colors"
+)
 
 ###
 # 6. module eigengene identification
@@ -261,10 +183,9 @@ METree = hclust(as.dist(ME.dissimilarity), method = "average") #Clustering eigen
 par(mar = c(0,4,2,0)) #seting margin sizes
 par(cex = 0.6);#scaling the graphic
 plot(METree)
-abline(h=.10, col = "red") #a height of h corresponds to correlation of 1.00 - h (i.e.,  all of the modules which are more than 85% similar if h=0.15.)
+abline(h=0.25, col = "red")  #a height of h corresponds to correlation of 1.00 - h (i.e.,  all of the modules which are more than 85% similar if h=0.15.)
 
-######################################### check here 5/18/2024 progress ####################
-merge <- mergeCloseModules(expression.data, ModuleColors, cutHeight = .10) # merge the modules which are below the threshold
+merge <- mergeCloseModules(expression.data, ModuleColors, cutHeight = 0.25) # merge the modules which are below the threshold
 
 # The merged module colors, assigning one color to each module
 mergedColors = merge$colors
@@ -277,9 +198,49 @@ plotDendroAndColors(geneTree, cbind(ModuleColors, mergedColors),
                     dendroLabels = FALSE, hang = 0.03,
                     addGuide = TRUE, guideHang = 0.05,
                     main = "Gene dendrogram and module colors for original and merged modules")
-alltraits<-phen[phen$SampleID%in%rownames(mergedMEs),]
+
+# -----------------------------------------------------------------------------
+# Load phenotype data
+# -----------------------------------------------------------------------------
+phen_path <- file.path(
+  "./resources/processed_data",
+  "scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_2024-12-26.csv"
+)
+phen <- read.csv(phen_path)
+
+phen<-phen %>% filter(BAL_eos_p >= 0 & BAL_neut_p >= 0) %>%
+  mutate(comp1 = factor(case_when(BAL_eos_p > 1 & BAL_neut_p > 4 ~ 2, # "mixed"
+                                  BAL_eos_p > 1 & BAL_neut_p <= 4 ~ 3, # "eos"
+                                  BAL_eos_p <= 1 & BAL_neut_p > 4 ~ 1, # "neut"
+                                  BAL_eos_p <= 1 & BAL_neut_p <= 4 ~ 0), # "pauci"
+                        levels = c(0, 1, 2, 3)),
+         comp2 = factor(case_when(BAL_eos_p > 1 ~ 1 , #"high_eos"
+                                  BAL_eos_p <= 1 ~ 0 ),# "low_eos"
+                        levels = c(0,1)))
+phen$Batch<-factor(phen$Batch,levels=unique(phen$Batch))
+
+phen_bronch<-phen[grepl("^B",phen$SampleID),]
+phen_nasal<-phen[grepl("^N",phen$SampleID),]
+phen_nasal<-phen_nasal[-grep("F", phen_nasal$SampleID),]
+phen_input<-phen_bronch
+phen_input$SampleID <- gsub("-", ".", phen_input$SampleID)
+
+alltraits<-phen_input[phen_input$SampleID%in%rownames(mergedMEs),]
 rownames(alltraits)<-alltraits$SampleID
-alltraits<-alltraits[,3:12] # only select cell counts in the phenotype data
+
+source.cell.log<-c(
+  "BAL_eos_ct_log",
+  "BAL_eos_p_log",
+  "BAL_neut_ct_log",
+  "BAL_neut_p_log",
+  "BAL_wbc_log",
+  "blood_eos_log",
+  "blood_eos_p_log",
+  "blood_neut_log",
+  "blood_neut_p_log",
+  "blood_wbc_log")
+
+alltraits<-alltraits[,c("asthma_phen_ACT.score",source.cell.log, "comp1","comp2")] # only select cell counts in the phenotype data
 good<-!(sapply(alltraits,is.na)%>%rowSums()>0) # remove rows with at least one NA
 datTraits<-alltraits[good,]
 
@@ -301,7 +262,7 @@ module.trait.Pvalue = corPvalueStudent(module.trait.correlation, nSamples) #calc
 textMatrix = paste(signif(module.trait.correlation, 2), "\n(",
                    signif(module.trait.Pvalue, 1), ")", sep = "");
 dim(textMatrix) = dim(module.trait.correlation)
-par(mar = c(6, 8.5, 3, 1))
+par(mar = c(6, 6, 3, 1))
 # Display the correlation values within a heatmap plot
 labeledHeatmap(Matrix = module.trait.correlation,
                xLabels = names(datTraits),
@@ -320,9 +281,19 @@ labeledHeatmap(Matrix = module.trait.correlation,
 # 9. Target gene identification
 ### 
 
+# The module membership/intramodular connectivity is calculated as the
+# correlation of the eigengene and the gene expression profile. This quantifies
+# the similarity of all genes on the array to every module.
+
+# ----------------
+# for log(BAL Eos %)
+# ----------------
+
 # Define variable weight containing the weight column of datTrait
-blood_eos_log = as.data.frame(datTraits$blood_eos_log)
-names(blood_eos_log) = "blood_eos_log"
+BAL_eos_p_log = as.data.frame(datTraits$BAL_eos_p_log)
+names(BAL_eos_p_log) = "BAL_eos_p_log"
+
+phen_of_interest<-BAL_eos_p_log
 
 modNames = substring(names(mergedMEs), 3) #extract module names
 
@@ -333,15 +304,15 @@ names(geneModuleMembership) = paste("MM", modNames, sep="")
 names(MMPvalue) = paste("p.MM", modNames, sep="")
 
 #Calculate the gene significance and associated p-values
-geneTraitSignificance = as.data.frame(WGCNA::cor(expression.data, blood_eos_log, use = "p"))
+geneTraitSignificance = as.data.frame(WGCNA::cor(expression.data, phen_of_interest, use = "p"))
 GSPvalue = as.data.frame(corPvalueStudent(as.matrix(geneTraitSignificance), nSamples))
-names(geneTraitSignificance) = paste("GS.", names(blood_eos_log), sep="")
-names(GSPvalue) = paste("p.GS.", names(blood_eos_log), sep="")
+names(geneTraitSignificance) = paste("GS.", names(phen_of_interest), sep="")
+names(GSPvalue) = paste("p.GS.", names(phen_of_interest), sep="")
 head(GSPvalue)
 
 # scatter plot of gene significance vs. module membership in all the module
 
-par(mfrow=c(4,4))
+par(mfrow=c(6,4))
 for(mod in modNames){
   module = mod
   column = match(module, modNames)
@@ -354,17 +325,92 @@ for(mod in modNames){
                      cex.main = 1.2, cex.lab = 1.2, cex.axis = 1.2, col = module)
 }
 
+# ----------------
+# for BAL Eos % > 1 vs <=1
+# ----------------
+
+# Define variable weight containing the weight column of datTrait
+phen_of_interest<-as.data.frame(datTraits$comp2)
+
+modNames = substring(names(mergedMEs), 3) #extract module names
+
+#Calculate the module membership and the associated p-values
+geneModuleMembership = as.data.frame(WGCNA::cor(expression.data, mergedMEs, use = "p"))
+MMPvalue = as.data.frame(corPvalueStudent(as.matrix(geneModuleMembership), nSamples))
+names(geneModuleMembership) = paste("MM", modNames, sep="")
+names(MMPvalue) = paste("p.MM", modNames, sep="")
+
+#Calculate the gene significance and associated p-values
+geneTraitSignificance = as.data.frame(WGCNA::cor(expression.data, phen_of_interest, use = "p"))
+GSPvalue = as.data.frame(corPvalueStudent(as.matrix(geneTraitSignificance), nSamples))
+names(geneTraitSignificance) = paste("GS.", names(phen_of_interest), sep="")
+names(GSPvalue) = paste("p.GS.", names(phen_of_interest), sep="")
+head(GSPvalue)
+
+# scatter plot of gene significance vs. module membership in all the module
+par(mar = c(4,4,4,4),mfrow=c(6,4))
+for(mod in modNames){
+  module = mod
+  column = match(module, modNames)
+  moduleGenes = mergedColors==module
+  verboseScatterplot(abs(geneModuleMembership[moduleGenes,column]),
+                     abs(geneTraitSignificance[moduleGenes,1]),
+                     xlab = paste("Module Membership in", module, "module"),
+                     ylab = "Gene significance for eos mt1",
+                     main = paste("Module membership vs. gene significance\n"),
+                     cex.main = 1.2, cex.lab = 1.2, cex.axis = 1.2, col = module)
+}
+
+# ----------------
+# for BAL Eos % > 1 vs <=1 + BAL Neut % >4 vs <=4
+# ----------------
+
+# Define variable weight containing the weight column of datTrait
+phen_of_interest<-as.data.frame(datTraits$comp1)
+
+modNames = substring(names(mergedMEs), 3) #extract module names
+
+#Calculate the module membership and the associated p-values
+geneModuleMembership = as.data.frame(WGCNA::cor(expression.data, mergedMEs, use = "p"))
+MMPvalue = as.data.frame(corPvalueStudent(as.matrix(geneModuleMembership), nSamples))
+names(geneModuleMembership) = paste("MM", modNames, sep="")
+names(MMPvalue) = paste("p.MM", modNames, sep="")
+
+#Calculate the gene significance and associated p-values
+geneTraitSignificance = as.data.frame(WGCNA::cor(expression.data, phen_of_interest, use = "p"))
+GSPvalue = as.data.frame(corPvalueStudent(as.matrix(geneTraitSignificance), nSamples))
+names(geneTraitSignificance) = paste("GS.", names(phen_of_interest), sep="")
+names(GSPvalue) = paste("p.GS.", names(phen_of_interest), sep="")
+head(GSPvalue)
+
+# scatter plot of gene significance vs. module membership in all the module
+par(mar = c(4,4,4,4),mfrow=c(6,4))
+for(mod in modNames){
+  module = mod
+  column = match(module, modNames)
+  moduleGenes = mergedColors==module
+  verboseScatterplot(abs(geneModuleMembership[moduleGenes,column]),
+                     abs(geneTraitSignificance[moduleGenes,1]),
+                     xlab = paste("Module Membership in", module, "module"),
+                     ylab = "Gene significance for eos mt1",
+                     main = paste("Module membership vs. gene significance\n"),
+                     cex.main = 1.2, cex.lab = 1.2, cex.axis = 1.2, col = module)
+}
 
 ###
 # 10. Network Visualization of Eigengenes
 ### 
 
 # Isolate blood_eos_log from the clinical traits
+bal_mix=as.data.frame(datTraits$comp1);
+bal_eos_mt1=as.data.frame(datTraits$comp2);
 BAL_eos_ct_log = as.data.frame(datTraits$BAL_eos_ct_log);
 BAL_neut_ct_log = as.data.frame(datTraits$BAL_neut_ct_log)
 BAL_eos_p_log = as.data.frame(datTraits$BAL_eos_p_log);
 BAL_neut_p_log = as.data.frame(datTraits$BAL_neut_p_log)
 
+names(bal_mix) = "mixed_cell"
+names(bal_eos_mt1) = "eos_mt1"
 names(BAL_eos_ct_log) = "BAL_eos_ct_log"
 names(BAL_neut_ct_log) = "BAL_neut_ct_log"
 names(BAL_eos_p_log) = "BAL_eos_p_log"
@@ -373,8 +419,8 @@ names(BAL_neut_p_log) = "BAL_neut_p_log"
 
 
 # Add the BAL_eos_ct_log to existing module eigengenes
-MEs<-MEs[rownames(MEs)%in%rownames(datTraits),]
-MET = orderMEs(cbind(MEs, BAL_eos_ct_log, BAL_neut_ct_log, BAL_eos_p_log, BAL_neut_p_log ))
+mergedMEs<-mergedMEs[rownames(mergedMEs)%in%rownames(datTraits),]
+MET = orderMEs(cbind(mergedMEs, bal_mix, bal_eos_mt1, BAL_eos_ct_log, BAL_neut_ct_log, BAL_eos_p_log, BAL_neut_p_log ))
 # Plot the relationships among the eigengenes and the trait
 par(cex = 0.9)
 plotEigengeneNetworks(MET, "", marDendro = c(0,4,1,2), marHeatmap = c(5,4,1,2), cex.lab = 0.8, xLabelsAngle
@@ -419,7 +465,7 @@ df_genelist <- as.data.frame(genelist_padded)
 
 
 # Writing the data frame to a tab-delimited text file without column names
-output_folder<-file.path("./reports/wgcna/bronch")
+output_folder<-file.path("./reports/local_only/wgcna/bronch")
 write.table(df_genelist, file = file.path(output_folder,"bronch_wgcna_genelist_batch12346.txt"), sep = "\t", row.names = FALSE, col.names = TRUE, na = "", quote = FALSE)
 
 # Loop through each element in the list and write to a CSV file
