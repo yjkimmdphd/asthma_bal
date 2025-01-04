@@ -116,18 +116,12 @@ source.cell.log <- c(
   "blood_neut_p_log", "blood_wbc_log"
 )
 
-# Original counts
-source.cell <- c(
-  "BAL_eos_ct", "BAL_eos_p", "BAL_neut_ct", "BAL_neut_p", "BAL_wbc",
-  "blood_eos",  "blood_eos_p", "blood_neut", "blood_neut_p", "blood_wbc"
-)
-
 # Categorical variables to test (BAL)
 var_dichot_bal <- c(
   "bal_AEC_more_0", "bal_AEC_more_1", "bal_AEC_more_3", "bal_AEC_more_5",
   "bal_Eos_p_more_0", "bal_Eos_p_more_1", "bal_Eos_p_more_3",
   "bal_ANC_more_0", "bal_ANC_more_5", "bal_ANC_more_13",
-  "bal_neut_p_more_0", "bal_neut_p_more_2", "bal_neut_p_more_5","comp1"
+  "bal_neut_p_more_0", "bal_neut_p_more_2", "bal_neut_p_more_5"
 )
 
 # Categorical variables to test (Blood)
@@ -138,11 +132,6 @@ var_dichot_blood <- c(
 
 # Combine continuous (log counts) and categorical variables
 var_to_test <- c(source.cell.log, var_dichot_bal, var_dichot_blood)
-
-# Identify blood-related variables in var_to_test
-var_to_test_bld <- var_to_test[
-  c(grep("blood", var_to_test), grep("bld", var_to_test))
-]
 
 # Results variable names: continuous or "variableTRUE" for categorical
 var_to_test_res <- c(
@@ -215,7 +204,8 @@ for (i in assay_index) {
   
   # Get results and significant results
   res[[i]]     <- get_DEG_results(dds_temp, var_to_test_res[i])
-  res.sig[[i]] <- res[[i]][res[[i]]$padj <= 0.05, ]
+  # Remove rows with NA in padj and keep only padj <= 0.05
+  res.sig[[i]] <- res[[i]][!is.na(res[[i]]$padj) & res[[i]]$padj <= 0.05, ]
   
   head(res.sig[[i]])
 }
