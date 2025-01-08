@@ -56,15 +56,10 @@ perform_analysis <- function(data, cutoff, eos_var, label, lm_vars = c("sex", "R
   data %>%
     dplyr::summarize(median_ACT = median(asthma_phen_ACT.score, na.rm = TRUE)) %>%
     print()
-  
-  # Linear model controlling for additional variables
-  lm_formula <- as.formula(paste("asthma_phen_ACT.score ~ above_cutoff +", paste(lm_vars, collapse = " + ")))
-  lm_result <- lm(lm_formula, data = data)
-  print(summary(lm_result))
 }
 
 # Apply analysis for different cutoffs
-par(mfrow=c(3,3))
+par(mfrow=c(1,2))
 perform_analysis(bphen, 1, "BAL_eos_p", "BAL Eos% > 1%")
 perform_analysis(bphen, 3, "BAL_eos_p", "BAL Eos% > 3%")
 perform_analysis(bphen, 1, "BAL_eos_ct", "BAL AEC > 1")
