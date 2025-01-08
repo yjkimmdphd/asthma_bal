@@ -439,7 +439,7 @@ head(GSPvalue)
 
 par(mfrow=c(6,4))
 
-png(file.path(output_folder,"Module_membership_vs._gene_significance_log(BAL_Eos_%).png"), width = 1200, height = 1200)
+png(file.path(output_folder,"Module_membership_vs._gene_significance_log(BAL_Eos_p).png"), width = 1200, height = 1200)
 for(mod in modNames){
   module = mod
   column = match(module, modNames)
@@ -581,8 +581,11 @@ top_kWithin_by_module <- connectivity_allClusters %>%
 
 head(top_kWithin_by_module)
 
-df_assessed_only <- top_kWithin_by_module %>%
+top_kWithin_by_module_deg_overlap <- top_kWithin_by_module %>%
   filter(gene %in% deg_abs_lfc)
 
-head(df_assessed_only)
+head(top_kWithin_by_module_deg_overlap)
+
+write.table(top_kWithin_by_module_deg_overlap, file=file.path(output_folder,"top_kWithin_by_module_deg_overlap.txt"), quote=FALSE, row.names=FALSE, col.names=FALSE)
+
 
