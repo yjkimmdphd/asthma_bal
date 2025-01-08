@@ -597,4 +597,37 @@ write.table(top_kWithin_by_module_deg_overlap, file=file.path(output_folder,"top
             col.names = NA)
 
 
+###
+# 13. construct cytoscape info
+## 
+
+# Set a threshold for adjacency to filter significant edges
+threshold <- 0.1
+
+# Get the gene names
+genes <- rownames(adjacency)
+
+# Generate the edge list
+edge_list <- as.data.frame(which(adjacency > threshold, arr.ind = TRUE))
+edge_list <- edge_list[edge_list$row != edge_list$col, ] # Remove self-loops
+edge_list <- edge_list[!duplicated(t(apply(edge_list, 1, sort))), ] # Remove duplicates
+edge_list$weight <- adjacency[cbind(edge_list$row, edge_list$col)]
+edge_list <- edge_list %>% 
+  mutate(Source = genes[row], Target = genes[col]) %>%
+  select(Source, Target, weight)
+
+# Save edge list to a file
+write.table(edge_list, file.path(output_folder,"wgcna_bronch_edge_list.txt"), row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
+
+# Create the node attribute file
+node_attributes <- data.frame(
+  Gene = rownames(connectivity_allClusters),
+  Module = connectivity_allClusters$module,
+  Connectivity = connectivity_allClusters$kTotal
+)
+
+# Save node attributes to a file
+write.table(node_attributes, file.path(output_folder,"wgcna_bronch_node_attributes.txt"), row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
+
+
 
