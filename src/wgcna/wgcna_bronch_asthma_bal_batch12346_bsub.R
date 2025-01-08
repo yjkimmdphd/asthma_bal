@@ -180,6 +180,8 @@ table(Modules)
 ModuleColors <- labels2colors(Modules)
 table(ModuleColors)
 
+png(file.path(output_folder,"Gene_dendrogram_and_module_colors.png"), width = 800, height = 600)
+
 plotDendroAndColors(
   geneTree,
   ModuleColors,
@@ -190,6 +192,7 @@ plotDendroAndColors(
   guideHang = 0.05,
   main = "Gene dendrogram and module colors"
 )
+dev.off()
 
 ###
 # 6. module eigengene identification
@@ -212,8 +215,12 @@ ME.dissimilarity = 1-cor(MElist$eigengenes, use="complete") #Calculate eigengene
 METree = hclust(as.dist(ME.dissimilarity), method = "average") #Clustering eigengenes 
 par(mar = c(0,4,2,0)) #seting margin sizes
 par(cex = 0.6);#scaling the graphic
+
+png(file.path(output_folder,"METree.png"), width = 800, height = 600)
+
 plot(METree)
 abline(h=0.25, col = "red")  #a height of h corresponds to correlation of 1.00 - h (i.e.,  all of the modules which are more than 85% similar if h=0.15.)
+dev.off()
 
 merge <- mergeCloseModules(expression.data, ModuleColors, cutHeight = 0.25) # merge the modules which are below the threshold
 
@@ -223,11 +230,14 @@ mergedColors = merge$colors
 mergedMEs = merge$newMEs
 
 # plot dendrogram showing both the orginal and merged module colors
+
+png(file.path(output_folder,"Gene_dendrogram_and_module_colors_for_original_and_merged_modules.png"), width = 800, height = 600)
 plotDendroAndColors(geneTree, cbind(ModuleColors, mergedColors), 
                     c("Original Module", "Merged Module"),
                     dendroLabels = FALSE, hang = 0.03,
                     addGuide = TRUE, guideHang = 0.05,
                     main = "Gene dendrogram and module colors for original and merged modules")
+dev.off()
 
 write.table(mergedColors,file.path(output_folder,"mergedColors.txt"), sep="\t",quote=FALSE, row.names=TRUE, col.names=NA)
 write.table(mergedMEs,file.path(output_folder,"mergedMEs.txt"), sep="\t",quote=FALSE, row.names=TRUE, col.names=NA)
@@ -283,6 +293,52 @@ datTraits<-alltraits[good,]
 # 8. Module-Trait associations
 ###
 
+gene.module.table<-data.frame(genes=colnames(expression.data),modules=mergedColors)
+
+# Assuming list_of_dfs is your list of dataframes
+list_of_dfs <- split(gene.module.table, gene.module.table$module)
+genelist<-vector("list",length=length(list_of_dfs))
+names(genelist)<-names(list_of_dfs)
+
+for(i in 1:length(list_of_dfs)){
+  genelist[[i]]<-list_of_dfs[[i]]$genes
+}
+
+# Finding the maximum length of vectors in the list
+max_length <- max(sapply(genelist, length))
+
+# Padding shorter vectors with NA
+genelist_padded <- lapply(genelist, function(x) {
+  length(x) <- max_length  # Setting the length of each vector to the maximum
+  x
+})
+
+# Convert the list to a data frame
+df_genelist <- as.data.frame(genelist_padded)
+
+
+# Writing the data frame to a tab-delimited text file without column names
+# Check if the folder exists; if not, create it
+module_output_folder <- file.path("./reports/local_only/wgcna/bronch/output/module-gene_list")
+
+if (!dir.exists(module_output_folder)) {
+  dir.create(module_output_folder, recursive = TRUE)
+}
+
+write.table(df_genelist, file = file.path(output_folder,"bronch_wgcna_genelist_batch12346.txt"), sep = "\t", row.names = FALSE, col.names = TRUE, na = "", quote = FALSE)
+
+# Loop through each element in the list and write to a CSV file
+for (module_name in names(list_of_dfs)) {
+  # Extract the 'genes' column from each dataframe
+  gene_data <- list_of_dfs[[module_name]]$genes
+  
+  # Create a file path
+  file_path <- file.path(module_output_folder,paste0(module_name,"batch12346", ".txt"))
+  
+  # Write to a text file without row names or column names
+  write.table(gene_data, file=file_path, quote=FALSE, row.names=FALSE, col.names=FALSE)
+}
+
 # ----------------
 # proportion of module gene that overlaps with bronchial DEG for BAL Eos % > 1% vs <=1%
 # ----------------
@@ -292,7 +348,7 @@ deg<-read.csv(file.path(deg_folder,"deg_bronch_res_sig_16_~ bal_Eos_p_more_1 + B
 all_assessed_genes<-read.csv(file.path(deg_folder,"deg_bronch_res_all_16_~ bal_Eos_p_more_1 + Batch_2025-01-03_.csv"), row.names = 1)%>%rownames
 deg_abs_lfc<-deg%>%filter(abs(log2FoldChange)>1)%>%rownames
 
-wgcna_folder<-file.path("./reports/local_only/wgcna/bronch/module-gene_list")
+wgcna_folder<-module_output_folder
 
 module_list<-list.files(wgcna_folder)[grep(".txt",list.files(wgcna_folder))]
 
@@ -311,7 +367,7 @@ overlap_sum <- sapply(m_gene_list, function(x) {
 })
 
 overlap_df<-data.frame(overlap_proportion,overlap_sum)
-overlap_df<-overlap_df[order(-overlap_df$overlap_sum),]
+overlap_df<-overlap_df[order(-(overlap_df$overlap_sum)),]
 print(overlap_df)
 
 write.table(overlap_df,file.path(output_folder,"module-gene_deg-gene_overlap.txt"), sep="\t",quote=FALSE, row.names=TRUE, col.names=NA)
@@ -382,6 +438,8 @@ head(GSPvalue)
 # scatter plot of gene significance vs. module membership in all the module
 
 par(mfrow=c(6,4))
+
+png(file.path(output_folder,"Module_membership_vs._gene_significance_log(BAL_Eos_%).png"), width = 1200, height = 1200)
 for(mod in modNames){
   module = mod
   column = match(module, modNames)
@@ -394,6 +452,7 @@ for(mod in modNames){
                      cex.main = 1.2, cex.lab = 1.2, cex.axis = 1.2, col = module)
 }
 
+dev.off()
 
 # ----------------
 # for BAL Eos % > 1 vs <=1 + BAL Neut % >4 vs <=4
@@ -411,6 +470,8 @@ head(GSPvalue)
 
 # scatter plot of gene significance vs. module membership in all the module
 par(mar = c(4,4,4,4),mfrow=c(6,4))
+
+png(file.path(output_folder,"Module_membership_vs._gene_significance_mixed_cell.png"), width = 1200, height = 1200)
 for(mod in modNames){
   module = mod
   column = match(module, modNames)
@@ -422,7 +483,7 @@ for(mod in modNames){
                      main = paste("Module membership vs. gene significance\n"),
                      cex.main = 1.2, cex.lab = 1.2, cex.axis = 1.2, col = module)
 }
-
+dev.off()
 # ----------------
 # for BAL Eos % > 1 vs <=1
 # ----------------
@@ -440,6 +501,8 @@ head(GSPvalue)
 # scatter plot of gene significance vs. module membership in all the module
 # DEG are colored in red
 par(mar = c(4,4,4,4),mfrow=c(6,4))
+
+png(file.path(output_folder,"Module_membership_vs._gene_significance_eos-p_mt1.png"), width = 1200, height = 1200)
 for(mod in modNames){
   module = mod
   column = match(module, modNames)
@@ -455,7 +518,7 @@ for(mod in modNames){
                      main = paste("Module membership vs. gene significance\n"),
                      cex.main = 1.2, cex.lab = 1.2, cex.axis = 1.2, col =module_color)
 }
-
+dev.off()
 ###
 # 10. Network Visualization of Eigengenes
 ### 
@@ -492,45 +555,6 @@ plotEigengeneNetworks(MET, "Eigengene adjacency heatmap", marHeatmap = c(10,10,2
 ###
 # 11. find genes in each module that has high correlation and low p-val in gene significance vs. module membership
 ### 
-
-gene.module.table<-data.frame(genes=colnames(expression.data),modules=mergedColors)
-
-# Assuming list_of_dfs is your list of dataframes
-list_of_dfs <- split(gene.module.table, gene.module.table$module)
-genelist<-vector("list",length=length(list_of_dfs))
-names(genelist)<-names(list_of_dfs)
-
-for(i in 1:length(list_of_dfs)){
-  genelist[[i]]<-list_of_dfs[[i]]$genes
-}
-
-# Finding the maximum length of vectors in the list
-max_length <- max(sapply(genelist, length))
-
-# Padding shorter vectors with NA
-genelist_padded <- lapply(genelist, function(x) {
-  length(x) <- max_length  # Setting the length of each vector to the maximum
-  x
-})
-
-# Convert the list to a data frame
-df_genelist <- as.data.frame(genelist_padded)
-
-
-# Writing the data frame to a tab-delimited text file without column names
-write.table(df_genelist, file = file.path(output_folder,"bronch_wgcna_genelist_batch12346.txt"), sep = "\t", row.names = FALSE, col.names = TRUE, na = "", quote = FALSE)
-
-# Loop through each element in the list and write to a CSV file
-for (module_name in names(list_of_dfs)) {
-  # Extract the 'genes' column from each dataframe
-  gene_data <- list_of_dfs[[module_name]]$genes
-  
-  # Create a file path
-  file_path <- file.path(output_folder,paste0(module_name,"batch12346", ".txt"))
-  
-  # Write to a text file without row names or column names
-  write.table(gene_data, file=file_path, quote=FALSE, row.names=FALSE, col.names=FALSE)
-}
 
 #####
 # 12. choose hub genes
