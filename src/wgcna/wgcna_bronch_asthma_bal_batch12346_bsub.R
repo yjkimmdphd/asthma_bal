@@ -325,7 +325,10 @@ if (!dir.exists(module_output_folder)) {
   dir.create(module_output_folder, recursive = TRUE)
 }
 
-write.table(df_genelist, file = file.path(output_folder,"bronch_wgcna_genelist_batch12346.txt"), sep = "\t", row.names = FALSE, col.names = TRUE, na = "", quote = FALSE)
+write.table(df_genelist, file = file.path(output_folder,"bronch_wgcna_genelist_batch12346.txt"), sep = "\t",
+            row.names = TRUE, 
+            col.names = NA)
+
 
 # Loop through each element in the list and write to a CSV file
 for (module_name in names(list_of_dfs)) {
@@ -336,7 +339,10 @@ for (module_name in names(list_of_dfs)) {
   file_path <- file.path(module_output_folder,paste0(module_name,"batch12346", ".txt"))
   
   # Write to a text file without row names or column names
-  write.table(gene_data, file=file_path, quote=FALSE, row.names=FALSE, col.names=FALSE)
+  write.table(gene_data, file=file_path, sep = "\t",
+              row.names = TRUE, 
+              col.names = NA)
+  
 }
 
 # ----------------
@@ -586,6 +592,9 @@ top_kWithin_by_module_deg_overlap <- top_kWithin_by_module %>%
 
 head(top_kWithin_by_module_deg_overlap)
 
-write.table(top_kWithin_by_module_deg_overlap, file=file.path(output_folder,"top_kWithin_by_module_deg_overlap.txt"), quote=FALSE, row.names=FALSE, col.names=FALSE)
+write.table(top_kWithin_by_module_deg_overlap, file=file.path(output_folder,"top_kWithin_by_module_deg_overlap.txt"),   sep = "\t",
+            row.names = TRUE, 
+            col.names = NA)
+
 
 
