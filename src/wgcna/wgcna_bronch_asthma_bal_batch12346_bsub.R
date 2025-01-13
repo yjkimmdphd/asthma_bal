@@ -558,12 +558,8 @@ par(cex = 1.0, mar = c(1,1,1,1))
 plotEigengeneNetworks(MET, "Eigengene adjacency heatmap", marHeatmap = c(10,10,2,2),
                       plotDendrograms = FALSE, xLabelsAngle = 90)
 
-###
-# 11. find genes in each module that has high correlation and low p-val in gene significance vs. module membership
-### 
-
 #####
-# 12. choose hub genes
+# 11. choose hub genes
 #####
 
 HubGenes <- chooseTopHubInEachModule(expression.data, mergedColors, power = 4, type= "signed")
@@ -629,5 +625,121 @@ node_attributes <- data.frame(
 # Save node attributes to a file
 write.table(node_attributes, file.path(output_folder,"wgcna_bronch_node_attributes.txt"), row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
 
+## 
+# 12. fisher's exact test
+## 
+
+# 1. Predefine a target set of genes
+## 1.1 Define the folder and check that it exists
+deg_folder <- file.path("./reports/local_only", "deg_bal_bronch~cell2025-01-03")
+
+if (!dir.exists(deg_folder)) {
+  stop("Folder doesn't exist: ", deg_folder)
+} else {
+  deg_file <- list.files(deg_folder, pattern = "\\.csv$")
+  print(deg_file)  # Optional: inspect the CSV files found in deg_folder
+}
+deg <- read.csv(
+  file.path(deg_folder, "deg_bronch_res_sig_16_~ bal_Eos_p_more_1 + Batch_2025-01-03_.csv"),
+  row.names = 1
+)
+## 1.2 Create a vector of all assessed genes
+all_assessed_genes <- read.csv(
+  file.path(deg_folder, "deg_bronch_res_all_16_~ bal_Eos_p_more_1 + Batch_2025-01-03_.csv"),
+  row.names = 1
+) %>% rownames()
+
+## 1.3 Filter DEGs by absolute log2 fold-change > 1
+deg_abs_lfc <- deg %>%
+  dplyr::filter(abs(log2FoldChange) >= 1) %>%
+  rownames()
+
+## 1.4 Define WGCNA folder and locate module files
+module_output_folder <- file.path("./reports/local_only/wgcna/bronch/output/module-gene_list")
+
+wgcna_folder <- module_output_folder  
+
+module_list <- list.files(wgcna_folder, pattern = "\\.txt$")
+modules_files <- file.path(wgcna_folder, module_list)
+
+## 1.5 Read modules into a list and name each element
+m_gene_list <- lapply(modules_files, function(x){read.table(x,header = TRUE, col.names = "genes",row.names = 1, sep = "\t")})
+names(m_gene_list) <- sub("batch12346\\.txt", "", module_list) # Remove "batch12346.txt" from file names for cleaner naming
+
+# 2. Define the "universe" of genes
+all_genes <- union(unique(unlist(m_gene_list)), unique(deg_abs_lfc))
+N <- length(all_genes)  # total number of genes in the universe
+
+# 3. Prepare a data frame to store results
+fisher_results_df <- data.frame(
+  gene_set       = character(),
+  size_of_set    = numeric(),
+  size_of_target = numeric(),
+  overlap        = numeric(),
+  p_value        = numeric(),
+  stringsAsFactors = FALSE
+)
+
+# 5. Calculate the size of the target set
+d <- length(deg_abs_lfc)
+
+# 6. Loop over each gene set in m_gene_list
+for (i in seq_along(m_gene_list)) {
+  current_set <- unlist(m_gene_list[[i]])
+  set_name    <- names(m_gene_list)[i]  # name of the gene set
+  
+  # Size of this gene set (A)
+  k <- length(current_set)
+  
+  # Overlap with the target set (B)
+  overlap <- length(intersect(current_set, deg_abs_lfc))
+  
+  # 2x2 contingency table for Fisher's exact test:
+  #            in_target   not_in_target
+  # in_set A        i          (k - i)
+  # not_in_set A   (d - i)     N - k - (d - i)
+  table_2x2 <- matrix(
+    c(overlap,
+      k - overlap,
+      d - overlap,
+      N - k - (d - overlap)),
+    nrow  = 2,
+    byrow = TRUE
+  )
+  
+  # Fisher's exact test for over-representation
+  fisher_res <- fisher.test(table_2x2, alternative = "greater")
+  
+  # Calculate fold enrichment
+  # fold_enrichment = overlap / ((k * d) / N)
+  if ((k * d) == 0) {
+    fold_enrichment <- NA  # If one of the sets is empty
+  } else {
+    fold_enrichment <- overlap / ((k * d) / N)
+  }
+  
+  # Append results to results_df
+  fisher_results_df <- rbind(
+    fisher_results_df,
+    data.frame(
+      gene_set        = set_name,
+      size_of_set     = k,
+      size_of_target  = d,
+      overlap         = overlap,
+      fold_enrichment = round(fold_enrichment, 2),
+      p_value         = round(fisher_res$p.value, 3),
+      stringsAsFactors = FALSE
+    )
+  )
+}
+
+# 7. Correct for multiple testing (fdr)
+fisher_results_df$padj_fdr <- p.adjust(fisher_results_df$p_value, method = "fdr")
+
+# 8. Sort by adjusted p-value and inspect top results
+fisher_results_df <- fisher_results_df[order(fisher_results_df$padj_fdr), ]
+print(fisher_results_df)
+
+write.table(fisher_results_df, file.path(output_folder,"wgcna_bronch_deg_overlap_fishers-exact_enrichment.txt"), row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
 
 
