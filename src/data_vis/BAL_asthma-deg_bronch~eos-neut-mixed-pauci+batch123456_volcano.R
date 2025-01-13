@@ -4,27 +4,32 @@ library(pheatmap)
 library(gridExtra)
 library(grid)
 
-# load deg results (all results FDR > 0) bronch ~ cell count, continuous
-cont_bronch<-file.path("./reports/local_only/deg_bal_bronch~cell2025-01-03")
-file_path<-cont_bronch
+# load deg results (all results FDR > 0) bronch ~ mixed cell count
+dich_bronch<-file.path("./reports/local_only/deg_bronch~eos-neut-mixed-pauci+batch123456")
+file_path<-dich_bronch
 file_names<-list.files(file_path)
-file_names<-file_names[grep("deg_bronch_res_all",file_names)]
+file_names<-file_names[grep("res_all",file_names)]
 deg_results<-lapply(file.path(file_path,file_names),function(d)read.csv(d,row.names = 1))
+dich_bronch<-deg_results
+head(dich_bronch[1])
 
 # Extract the string after '~' and remove the '.csv' extension to name each list element
 extracted_strings <- sapply(file_names, function(x) {
-  string_after_tilde <- trimws(strsplit(x, "~")[[1]][2])
-  string_without_csv <- sub("\\+ Batch_2025-01-03_.csv$", "", string_after_tilde)
-  return(string_without_csv)
+  string_before_date <- trimws(strsplit(x, "_2024-11-05_.csv")[[1]][1])
+  string_cleaned <- sub(".*comp", "comp", string_before_date)
+  return(string_cleaned)
 })
-names(deg_results)<-extracted_strings
-lapply(deg_results,head)
+names(dich_bronch)<-extracted_strings
+names(dich_bronch)
+
 ####################################################################
 # data exploration of DEG analysis using bronchial rnaseq data
-# model: "Bronch DEG ~ cell count continuous + Batch
+# model: "Bronch DEG ~ cell count dichotomous + Batch
 ####################################################################
 
-deg_results<-lapply(deg_results, function(d)
+
+
+dich_bronch<-lapply(dich_bronch, function(d)
   mutate(d, deg_sig = ifelse(
     padj < 0.05 & log2FoldChange > 1,
     'cyan',
@@ -33,9 +38,9 @@ deg_results<-lapply(deg_results, function(d)
            'grey')
   )))
 
-keyvals <- lapply(deg_results,function(res)ifelse(res$padj<0.05&res$log2FoldChange>1,'cyan',
-                  ifelse(res$padj<0.05&res$log2FoldChange< -1,'magenta',
-                         'grey')))
+keyvals <- lapply(dich_bronch,function(res)ifelse(res$padj<0.05&res$log2FoldChange>1,'cyan',
+                                                  ifelse(res$padj<0.05&res$log2FoldChange< -1,'magenta',
+                                                         'grey')))
 # Iterate over each element in the list
 for (name in names(keyvals)) {
   # Assign names to the character vector elements within each list item
@@ -60,7 +65,7 @@ print(keyvals)
 # how many have NA?
 lapply(lapply(keyvals,is.na),sum)
 
-all_deg_list<-deg_results
+all_deg_list<-dich_bronch
 
 for(i in seq_along(all_deg_list)){
   res<-all_deg_list[[i]]
@@ -91,32 +96,33 @@ for(i in seq_along(all_deg_list)){
                      legendIconSize = 5.0,    
                      drawConnectors = TRUE,
                      widthConnectors = 0.75)
-  assign(x = paste0("p",i),p)
+  assign(x = paste0("pd",i),p)
 }
 
-names(all_deg_list)
-
 # Assuming p1 to p10 are your ggplot objects stored in a list
-plots <- list(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
+plots <- list(pd1, pd2, pd3, pd4, pd5, pd6, pd7, pd8, pd9, pd10, pd11,pd12)
 
-
+# Names vector corresponding to dich_bronch
+names_dich_bronch <- names(dich_bronch)
 
 # Directory where the plots will be saved
-output_dir <- "./reports/figures/deg/volcano_plot"
+output_dir <- "./reports/figures/deg/volcano_plot/deg_bronch~eos-neut-mixed-pauci+batch123456"
 
 # Loop through the list and save each plot
 for (i in 1:length(plots)) {
   # Construct the file name
-  file_name <- paste("volcano", names_cont_bronch[i], sep = "_")
+  file_name <- paste("volcano", names_dich_bronch[i], sep = "_")
   
   # Save the plot
   ggsave(filename = paste0(output_dir, "/", file_name, ".png"), plot = plots[[i]], width = 8, height = 6, dpi = 300)
 }
 
+
+
 ###########################
 ## GO analysis  
 ###########################
-go_deg_folder<-file.path("./reports/local_only/deg_bal_bronch~cell2025-01-03/GO_output")
+go_deg_folder<-file.path("./reports/local_only/deg_bronch~eos-neut-mixed-pauci+batch123456/GO")
 
 go_deg_filelist<-if(file.exists(go_deg_folder)){list.files(path=go_deg_folder)}
 
@@ -141,7 +147,7 @@ lapply(go_deg_terms,colnames)
 go_deg_terms<-lapply(go_deg_terms,
                      function(d){
                        d[,colnames(d)%in%c("Category","GO_ID","Description","Genes","Fold.Enrichment","FDR")]%>%
-                         filter(FDR<0.05)%>%
+                         filter(FDR<0.05&!grepl("GOTERM_CC_DIRECT",Category))%>%
                          arrange(desc(Fold.Enrichment))})
 
 names(go_deg_terms)<-gsub("\\+batch12346", "", substr(go_deg_filelist, 1, nchar(go_deg_filelist) - 4))
@@ -163,7 +169,7 @@ wrapped_label<-lapply(go_deg_terms,
 library(grid)
 library(gridExtra)
 for(i in 1:length(go_deg_terms)){
-  p<-ggplot(go_deg_terms[[i]][1:10,], aes(x = Fold.Enrichment, y = Description, fill = -log10(FDR))) + # show only top 10
+  p<-ggplot(go_deg_terms[[i]][1:5,], aes(x = Fold.Enrichment, y = Description, fill = -log10(FDR))) + # show only top 10
     geom_bar(stat = "identity") +
     geom_label(aes(label = round(-log10(FDR), 1)), fill="white",nudge_y=0.3, hjust = -0.1, size = 3, color = "black") +  # Add text labels for log10(FDR)
     scale_fill_gradient(low = "blue", high = "red") +  # Adjust color gradient as needed
@@ -212,4 +218,3 @@ plot_list3 <- plot_list[(2 * third_length + 1):length(plot_list)]
 grid.arrange(grobs = plot_list1, ncol = 1)  # First figure
 grid.arrange(grobs = plot_list2, ncol = 1)  # Second figure
 grid.arrange(grobs = plot_list3, ncol = 1)  # Third figure
-
