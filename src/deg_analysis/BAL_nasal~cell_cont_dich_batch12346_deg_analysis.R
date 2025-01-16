@@ -53,6 +53,19 @@ phen<-phen %>% filter(BAL_eos_p >= 0 & BAL_neut_p >= 0) %>%
                                   BAL_eos_p <= 1 ~ "low_eos"), levels = c("high_eos", "low_eos")))
 phen$Batch<-factor(phen$Batch,levels=unique(phen$Batch))
 
+
+
+# load data for sampling date differences 
+sampling_date_diff<-"./resources/processed_data/sampling_dates/swab-bal-cbc_differences_in_days.txt"
+sampling_date_diff<-if(file.exists(sampling_date_diff)){read.table(sampling_date_diff,row.names = NULL,header = TRUE)}else{print("sampling date data doesn't exist")}
+sampling_date_diff<-sampling_date_diff%>%filter(Comparison=="blood_bal")
+colnames(sampling_date_diff)[1:3]<-c("ID","sampling_date_comp","sampling_date_diff_days")
+
+# left join sampling date data and phenotype data 
+phen<-left_join(phen,sampling_date_diff,by="ID")
+
+
+
 phen_bronch<-phen[grepl("^B",phen$SampleID),]
 phen_nasal<-phen[grepl("^N",phen$SampleID),]
 phen_nasal<-phen_nasal[-grep("F", phen_nasal$SampleID),]
@@ -130,34 +143,60 @@ var_dichot_blood <- c(
   "bld_AEC_more_300", "bld_AEC_more_500"
 )
 
+#===============================================================================
+# 6. Prepare ColData for DESeq2
+#===============================================================================
+
 # Combine continuous (log counts) and categorical variables
 var_to_test <- c(source.cell.log, var_dichot_bal, var_dichot_blood)
 
-# Results variable names: continuous or "variableTRUE" for categorical
+# identify blood cell count phenotype variables
+var_to_test_bld<-var_to_test[c(grep("blood",var_to_test),grep("bld",var_to_test))]
+
+# Results variable names that will be used for DESeq2 results() function: continuous or "variableTRUE" for categorical
 var_to_test_res <- c(
   source.cell.log,
   paste0(c(var_dichot_bal, var_dichot_blood), "TRUE")
 )
 
-#===============================================================================
-# 6. Prepare ColData for DESeq2
-#===============================================================================
-# 6.1. Filter phenotype rows that are non-NA
-pi <- lapply(phen[ , var_to_test], function(x) !is.na(x))
-df <- vector("list", length(var_to_test))
-names(df) <- paste0(var_to_test, "_all")
+# Create a list indicating non-missing values for each variable to test
+valid_samples <- lapply(phen[, var_to_test], function(data) !is.na(data))
 
+# Initialize a named list to store data frames for DESeq2 input
+df_var <- setNames(vector("list", length(var_to_test)), var_to_test)
+
+# Populate the list with data frames containing relevant samples
 for (i in seq_along(var_to_test)) {
-  df[[i]] <- phen[pi[[i]], c("SampleID", var_to_test[i], "Batch")]
+  df_var[[i]] <- phen[valid_samples[[i]], c("SampleID", var_to_test[i], "Batch")]
 }
 
-print(sapply(df, dim)[1, ])
+# Print the number of samples in each data frame
+cat("Sample counts before filtering:\n")
+print(sapply(df_var, function(x) dim(x)[1]))
+
+# Identify samples with CBC data and sampling date difference < 1 year
+cbc_sampleID <- phen %>%
+  filter(!is.na(vars(var_to_test_bld)), abs(sampling_date_diff_days) < 365) %>%
+  pull(SampleID)
+
+# Filter blood cell count data frames based on the identified samples
+blood_df <- df_var[var_to_test_bld]
+blood_df_filtered <- lapply(blood_df, function(df) filter(df, SampleID %in% cbc_sampleID))
+
+# Print sample counts before and after filtering
+cat("Sample counts before filtering blood data:\n")
+print(sapply(blood_df, function(x) dim(x)[1]))
+cat("Sample counts after filtering blood data:\n")
+print(sapply(blood_df_filtered, function(x) dim(x)[1]))
+
+# Replace original blood cell count data with filtered data
+df_var[var_to_test_bld] <- blood_df_filtered
 
 #===============================================================================
 # 7. Filter Counts and Prepare Count Table
 #===============================================================================
 # We use df (all available data) as input for DESeq2.
-df.input <- df
+df.input <- df_var
 
 # Subset the RNA-seq counts by the phenotype
 id   <- phen$SampleID
