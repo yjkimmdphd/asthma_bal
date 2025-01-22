@@ -1,5 +1,5 @@
 ################################################################################
-# Bronchial RNA-seq Analysis with Additional Samples (Batch 6)
+# nasal RNA-seq Analysis with Additional Samples (Batch 6)
 # Reference Genome: GRCh38
 # Updated Phenotype Table
 #
@@ -72,7 +72,7 @@ phen_nasal<-phen_nasal[-grep("F", phen_nasal$SampleID),]
 
 phen_input<-phen_nasal
 #===============================================================================
-# 3. Subset Phenotype for Bronchial RNA-seq
+# 3. Subset Phenotype for nasal RNA-seq
 #===============================================================================
 sampleID_exists <- phen_input$SampleID %in% counts.ID
 phen_input  <- phen_input[sampleID_exists, ]
