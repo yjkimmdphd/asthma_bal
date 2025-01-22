@@ -4,7 +4,7 @@ library(tidyr)
 library(stringr)
 
 # Define folder path
-folder_path <- "./reports/local_only/deg_bal_nasal~cell2025-01-04"
+folder_path <- "./reports/local_only/deg_bal_nasal~cell2025-01-21"
 
 # List all .csv files in the folder with the specified pattern
 file_list <- list.files(folder_path, pattern = "deg_nasal_res_sig_", full.names = TRUE)
@@ -25,7 +25,7 @@ for (file in file_list) {
     )
   
   # Get file name without path and extension, replace '.' with '_'
-  file_name <- str_replace_all(basename(file), c("\\.csv$" = "", "\\." = "_","\\.."="_","\\..."="_"))
+  file_name <- str_replace_all(basename(file), c("\\.csv$" = "", "\\~" = "","\\+"="","\\ "="_"))
   
   # Create separate lists for up and down-regulated DEGs
   for (reg in c("up", "down")) {
