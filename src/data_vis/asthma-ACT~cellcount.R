@@ -29,13 +29,13 @@ library(ggplot2)
 
 # ACT 
 # Define function to perform t-test, plot, and summarize data
-perform_analysis <- function(data, cutoff, eos_var, label, lm_vars = c("sex", "Race")) {
+perform_analysis <- function(data, cutoff, eos_var, label) {
   # Create a new variable indicating above/below cutoff
   data <- data %>%
     mutate(above_cutoff = get(eos_var) > cutoff) %>%
     group_by(above_cutoff) %>%
     arrange(above_cutoff) %>%
-    dplyr::select(SampleID, above_cutoff, asthma_phen_ACT.score, sex, Race)
+    dplyr::select(SampleID, above_cutoff, asthma_phen_ACT.score)
   
   # Perform t-test
   t_result <- t.test(asthma_phen_ACT.score ~ above_cutoff, data = data)
@@ -60,6 +60,7 @@ perform_analysis <- function(data, cutoff, eos_var, label, lm_vars = c("sex", "R
 
 # Apply analysis for different cutoffs
 par(mfrow=c(1,2))
+perform_analysis(bphen, 0, "BAL_eos_p", "BAL Eos% > 0%")
 perform_analysis(bphen, 1, "BAL_eos_p", "BAL Eos% > 1%")
 perform_analysis(bphen, 3, "BAL_eos_p", "BAL Eos% > 3%")
 perform_analysis(bphen, 1, "BAL_eos_ct", "BAL AEC > 1")
