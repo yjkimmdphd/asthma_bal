@@ -96,21 +96,24 @@ for(i in seq_along(all_deg_list)){
 
 names(all_deg_list)
 
-# Assuming p1 to p10 are your ggplot objects stored in a list
-plots <- list(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)
 
+# Create a sequence of plot names
+plot_names <- paste0("p", seq_along(all_deg_list))
+
+# Retrieve the ggplot objects and save them into a list
+plot_list <- mget(plot_names)
 
 
 # Directory where the plots will be saved
-output_dir <- "./reports/figures/deg/volcano_plot"
+output_dir <- "./reports/figures/deg/volcano_plot/bronch~cell(cont_or_dich)"
 
 # Loop through the list and save each plot
-for (i in 1:length(plots)) {
+for (i in 1:length(plot_list)) {
   # Construct the file name
-  file_name <- paste("volcano", names_cont_bronch[i], sep = "_")
+  file_name <- paste("volcano", names(all_deg_list)[i], sep = "_")
   
   # Save the plot
-  ggsave(filename = paste0(output_dir, "/", file_name, ".png"), plot = plots[[i]], width = 8, height = 6, dpi = 300)
+  ggsave(filename = paste0(output_dir, "/", file_name, ".png"), plot = plot_list[[i]], width = 8, height = 6, dpi = 300)
 }
 
 ###########################
