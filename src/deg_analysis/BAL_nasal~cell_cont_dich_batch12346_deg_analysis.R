@@ -27,7 +27,7 @@ counts <- if (file.exists(countdata)) {
 
 genes <- counts[, "SampleID"]
 
-# Select bronchial samples
+# Select nasal samples
 samples_of_interest  <- grepl("^N", colnames(counts))
 counts_of_interest   <- counts[, samples_of_interest]
 rownames(counts_of_interest) <- genes
