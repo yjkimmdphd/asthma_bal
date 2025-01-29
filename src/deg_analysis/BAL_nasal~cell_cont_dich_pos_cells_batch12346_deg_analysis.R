@@ -119,7 +119,7 @@ source.cell.log <- c(
 
 # Categorical variables to test (BAL)
 var_dichot_bal <- c(
-  "bal_AEC_more_1", "bal_AEC_more_3", "bal_AEC_more_5",
+  "bal_AEC_more_3", "bal_AEC_more_5",
   "bal_Eos_p_more_1", "bal_Eos_p_more_3",
   "bal_ANC_more_5", "bal_ANC_more_13",
   "bal_neut_p_more_2", "bal_neut_p_more_5"
