@@ -33,7 +33,12 @@ counts_of_interest   <- counts[, samples_of_interest]
 rownames(counts_of_interest) <- genes
 counts.ID       <- colnames(counts_of_interest)
 
+keep<-rowSums(counts_of_interest)>=10
+counts_of_interest<-counts_of_interest[keep,]
+
 head(counts_of_interest)
+
+
 
 #===============================================================================
 # 2. Load Phenotype Data
