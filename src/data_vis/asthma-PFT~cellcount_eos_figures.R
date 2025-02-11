@@ -1,6 +1,23 @@
 # Load necessary libraries
 library(dplyr)
 
+# -----------------------------------------------------------------------------
+# 1) Load phenotype data
+# -----------------------------------------------------------------------------
+phen_path <- file.path(
+  "./resources/processed_data",
+  "scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_2024-12-26.csv"
+)
+phen <- read.csv(phen_path)
+
+phen$Batch<-factor(phen$Batch,levels=unique(phen$Batch))
+
+phen_bronch<-phen[grepl("^B",phen$SampleID),]
+phen_nasal<-phen[grepl("^N",phen$SampleID),]
+phen_nasal<-phen_nasal[-grep("F", phen_nasal$SampleID),]
+
+phen_input<-phen_bronch
+
 # Define the variables to test
 variables_to_test <- c("asthma_phen_ACT.score", "asthma_phen_FEV1_perc", 
                        "asthma_phen_FVC_perc", "asthma_phen_FEV1.FVC", 
