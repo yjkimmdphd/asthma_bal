@@ -5,7 +5,7 @@ library(dplyr)
 # load biomarker phenotype file saved in  'phenotype'
 phenotype <-
   file.path(
-    "./resources/processed_data/scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_2024-12-26.csv"
+    "./resources/processed_data/scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_2025-02-14.csv"
   )
 phenotype_big <-
   file.path(
@@ -27,7 +27,7 @@ bphen <- phen %>% filter(grepl("^B", SampleID))
 library(ggplot2)
 
 # ACT 
-var_phenotype<-"asthma_phen_ACT.score"
+var_phenotype<-"ACT.score"
 # Define function to perform t-test, plot, and summarize data
 
 
@@ -96,7 +96,7 @@ perform_analysis <- function(data, cutoff, var, var_phenotype, label, output_dir
 }
 
 
-output_dir <- "./reports/figures/phenotype~cell_counts"
+output_dir <- "./reports/figures/phenotype~cell_counts_2025-02-14"
 
 if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
 
@@ -122,7 +122,7 @@ results <- lapply(analysis_params, function(params) {
     cutoff = params$cutoff,
     var = params$var,
     label = params$label,
-    var_phenotype = "asthma_phen_ACT.score",
+    var_phenotype = "ACT.score",
     output_dir = output_dir
   )
 })
@@ -131,7 +131,7 @@ results <- lapply(analysis_params, function(params) {
 results_df <- bind_rows(results)
 
 # Save results to a CSV file
-write.csv(results_df, file = "./reports/local_only/astham-phenotype~cellcount/t_test_results_ACT.csv", row.names = FALSE)
+write.csv(results_df, file = "./reports/local_only/astham-phenotype~cellcount/t_test_results_ACT_2025-02-14.csv", row.names = FALSE)
 
 ##############
 # Perform all analyses for FEV1 and save results
