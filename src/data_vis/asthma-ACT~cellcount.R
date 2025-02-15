@@ -5,21 +5,12 @@ library(dplyr)
 # load biomarker phenotype file saved in  'phenotype'
 phenotype <-
   file.path(
-    "./resources/processed_data/scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_2025-02-14.csv"
-  )
-phenotype_big <-
-  file.path(
-    "./resources/processed_data/Nasal_Biomarkers_BAL_transformed_with_raceinfo.csv"
+    "./resources/processed_data/scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_2025-02-14.csv" # updated to a new phenotype file. the one from 2024-12-26 had error: some rows of ACT score shifted, causing artifactual differences
   )
 phen <-
   if (file.exists(phenotype)) {
     read.csv(phenotype, row.names = NULL)
   }
-phen_big <-
-  if (file.exists(phenotype_big)) {
-    read.csv(phenotype_big, row.names = NULL)
-  } %>% dplyr::select("ID", "Age_at_visit", "sex", "ethnicity", "Race")
-phen <- left_join(phen, phen_big, by = "ID")
 bphen <- phen %>% filter(grepl("^B", SampleID))
 
 
@@ -27,7 +18,7 @@ bphen <- phen %>% filter(grepl("^B", SampleID))
 library(ggplot2)
 
 # ACT 
-var_phenotype<-"ACT.score"
+var_phenotype<-"ACT_score"
 # Define function to perform t-test, plot, and summarize data
 
 
@@ -122,7 +113,7 @@ results <- lapply(analysis_params, function(params) {
     cutoff = params$cutoff,
     var = params$var,
     label = params$label,
-    var_phenotype = "ACT.score",
+    var_phenotype = "ACT_score",
     output_dir = output_dir
   )
 })
@@ -142,7 +133,7 @@ results <- lapply(analysis_params, function(params) {
     cutoff = params$cutoff,
     var = params$var,
     label = params$label,
-    var_phenotype = "asthma_phen_FEV1_perc",
+    var_phenotype = "FEV1_percent",
     output_dir = output_dir
   )
 })
@@ -150,7 +141,7 @@ results <- lapply(analysis_params, function(params) {
 
 # Combine all results into a single data frame
 results_df <- bind_rows(results)
-write.csv(results_df, file = "./reports/local_only/astham-phenotype~cellcount/t_test_results_asthma_phen_FEV1_perc.csv", row.names = FALSE)
+write.csv(results_df, file = "./reports/local_only/astham-phenotype~cellcount/t_test_results_asthma_phen_FEV1_perc_2025-02-14.csv", row.names = FALSE)
 
 #################################################################################
 
