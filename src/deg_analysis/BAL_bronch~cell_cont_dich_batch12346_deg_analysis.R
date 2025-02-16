@@ -45,7 +45,7 @@ phen_path <- file.path(
 )
 phen <- read.csv(phen_path)
 
-phen<-phen %>% filter(BAL_eos_p >= 0) %>% #& BAL_neut_p >= 0) %>%
+phen<-phen %>% filter(BAL_eos_p >= 0 & BAL_neut_p >= 0) %>%
   mutate(comp1 = factor(case_when(BAL_eos_p > 1 & BAL_neut_p > 4 ~ "mixed",
                                   BAL_eos_p > 1 & BAL_neut_p <= 4 ~ "eos",
                                   BAL_eos_p <= 1 & BAL_neut_p > 4 ~ "neut",
