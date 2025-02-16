@@ -92,10 +92,15 @@ mergedMEs<-if(file.exists(file.path(output_folder,"mergedMEs.txt"))){read.delim(
 
 # -----------------------------------------------------------------------------
 # Load phenotype data
+# the phenotype table
+# "scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_2024-12-26.csv" had
+# a serious defect in which the ACT score was row-shifted, and erroneously had
+# incorrect association between Eos % and ACT score
+# file changed to 2025-02-14
 # -----------------------------------------------------------------------------
 phen_path <- file.path(
   "./resources/processed_data",
-  "scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_2024-12-26.csv"
+  "scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_2025-02-14.csv"
 )
 phen <- read.csv(phen_path)
 
@@ -183,8 +188,8 @@ cbc_sampleID <- phen_input %>%
 alltraits<-phen_input[phen_input$SampleID%in%rownames(mergedMEs),]
 rownames(alltraits)<-alltraits$SampleID
 
-alltraits<-alltraits[,c("asthma_phen_ACT.score","BAL_eos_ct_log", "BAL_eos_p_log", "BAL_neut_ct_log", "BAL_neut_p_log",
-                        "BAL_wbc_log", var_dichot_bal)] # only select ACT and cell counts in the phenotype data
+alltraits<-alltraits[,c("FEV1_percent","BAL_eos_ct_log", "BAL_eos_p_log", "BAL_neut_ct_log", "BAL_neut_p_log",
+                        "BAL_wbc_log", var_dichot_bal)] # only select FEV1 predicted % and cell counts in the phenotype data
 good<-!(sapply(alltraits[,-1],is.na)%>%rowSums()>0) # remove rows with at least one NA in cell count phenotype
 datTraits_bal<-alltraits[good,]
 
@@ -193,7 +198,7 @@ alltraits<-phen_input[phen_input$SampleID%in%rownames(mergedMEs),]
 alltraits<-alltraits[alltraits$SampleID%in%cbc_sampleID,]
 rownames(alltraits)<-alltraits$SampleID
 
-alltraits_bld<-alltraits[,c("asthma_phen_ACT.score",var_to_test_bld)] # only select ACT and cell counts in the phenotype data
+alltraits_bld<-alltraits[,c("FEV1_percent",var_to_test_bld)] # only select FEV1 and cell counts in the phenotype data
 good_bld<-!(sapply(alltraits_bld[,-1],is.na)%>%rowSums()>0) # remove rows with at least one NA in cell count phenotype
 datTraits_bld<-alltraits_bld[good_bld,]
 
@@ -204,7 +209,9 @@ datTraits_bld<-alltraits_bld[good_bld,]
 gene.module.table<-data.frame(genes=colnames(expression.data),modules=mergedColors$modules)
 
 # ==================
-# quantify the association between the expression profile and ACT score and BAL cell count phenotypes
+# quantify the association between the expression profile and FEV1 percent and
+# BAL cell count phenotypes (previously was for ACT score, which had erroneous
+# artifacts )
 # ==================
 # calculates the correlation of the trait with previously identified module eigengenes. 
 # This pairwise correlation is known as the eigengene gene significance
@@ -220,7 +227,7 @@ textMatrix_bal = paste(signif(module.trait.correlation_bal, 2), "\n(",
 dim(textMatrix_bal) = dim(module.trait.correlation_bal)
 
 # Display the correlation values within a heatmap plot
-png(file.path(output_folder, "module-trait-correlation_bal.png"), width = 1200, height = 1200)
+png(file.path(output_folder, paste("module-trait-correlation_bal",Sys.Date(),".png"), width = 1200, height = 1200))
 
 par(mar = c(12, 12, 8, 8))  # Adjust margins
 plot(1, type = "n", axes = FALSE, xlab = "", ylab = "")  # Empty plot to set margins
@@ -242,10 +249,10 @@ labeledHeatmap(
 dev.off()
 
 # subset specific traits for main figure
-trait_subset<-c("asthma_phen_ACT.score","BAL_eos_p_log","bal_Eos_p_more_1")
+trait_subset<-c("FEV1_percent","BAL_eos_p_log","bal_Eos_p_more_1")
 fig_text_index<-which(colnames(module.trait.correlation_bal)%in%trait_subset)
 # Display the correlation values within a heatmap plot
-png(file.path(output_folder, "module-trait-correlation_bal_subset.png"), width = 400, height = 1200)
+png(file.path(output_folder, paste("module-trait-correlation_bal_subset",Sys.Date(),".png")), width = 400, height = 1200)
 
 par(mar = c(10, 10, 4, 4))  # Adjust margins
 plot(1, type = "n", axes = FALSE, xlab = "", ylab = "")  # Empty plot to set margins
@@ -267,7 +274,8 @@ labeledHeatmap(
 dev.off()
 
 # ==================
-# quantify the association between the expression profile and ACT score and blood cell count profile phenotypes
+# quantify the association between the expression profile and FEV1 perc  and
+# blood cell count profile phenotypes (previously had erroneous ACT score)
 # ==================
 # calculates the correlation of the trait with previously identified module eigengenes. 
 # This pairwise correlation is known as the eigengene gene significance
@@ -283,7 +291,7 @@ textMatrix_bld = paste(signif(module.trait.correlation_bld, 2), "\n(",
                    signif(module.trait.Pvalue_bld, 1), ")", sep = "");
 dim(textMatrix_bld) = dim(module.trait.correlation_bld)
 # Display the correlation values within a heatmap plot
-png(file.path(output_folder, "module-trait-correlation_bld.png"), width = 1200, height = 1200)
+png(file.path(output_folder, paste("module-trait-correlation_bld",Sys.Date(),".png")), width = 1200, height = 1200)
 
 par(mar = c(12, 12, 8, 8))  # Adjust margins
 plot(1, type = "n", axes = FALSE, xlab = "", ylab = "")  # Empty plot to set margins
@@ -304,10 +312,27 @@ labeledHeatmap(
 
 dev.off()
 # ----------------
-# proportion of module gene that overlaps with bronch DEG for 
+# proportion of module gene that overlaps with bronch DEG
+# ----------------
+# load deg results (all results FDR > 0) bronch ~ cell count, continuous
+deg_folder<-file.path("./reports/local_only/deg_bal_bronch~cell2025-01-03")
+deg_file<-list.files(deg_folder)
+deg_file<-deg_file[grep("deg_bronch_res_sig",deg_file)]
+deg_results<-lapply(file.path(file_path,deg_file),function(d)read.csv(d,row.names = 1))
+
+# Extract the string after '~' and remove the '.csv' extension to name each list element
+extracted_strings <- sapply(file_names, function(x) {
+  string_after_tilde <- trimws(strsplit(x, "~")[[1]][2])
+  string_without_csv <- sub("\\+ Batch_2025-01-03_.csv$", "", string_after_tilde)
+  return(string_without_csv)
+})
+names(deg_results)<-extracted_strings
+lapply(deg_results,head)
+
+# ---------------- 
+# do it for for
 # blood Eos %, AEC, Neut %, ANC
 # ----------------
-
 # Filter BAL-related files
 input_deg_files <- deg_file[grep("bld|blood", deg_file, ignore.case = TRUE)]
 input_deg_files <- input_deg_files[grep("sig", input_deg_files)]
@@ -359,7 +384,7 @@ merged_df <- do.call(rbind, lapply(names(overlap_proportion), function(name) {
 }))
 
 # Save results
-output_file <- file.path(output_folder, "module-gene_bld-deg-gene_overlap.txt")
+output_file <- file.path(output_folder, paste("module-gene_bld-deg-gene_overlap",Sys.Date(),".txt",sep=""))
 write.table(merged_df, output_file, sep = "\t", quote = FALSE, row.names = TRUE, col.names = NA)
 
 # Print first few rows
@@ -419,7 +444,7 @@ merged_df <- do.call(rbind, lapply(names(overlap_proportion), function(name) {
 }))
 
 # Save results
-output_file <- file.path(output_folder, "module-gene_bal-deg-gene_overlap.txt")
+output_file <- file.path(output_folder, paste("module-gene_bal-deg-gene_overlap",Sys.Date(),".txt",sep=""))
 write.table(merged_df, output_file, sep = "\t", quote = FALSE, row.names = TRUE, col.names = NA)
 
 # Print first few rows
@@ -678,7 +703,7 @@ for (i in seq_along(m_gene_list)) {
       size_of_target  = d,
       overlap         = overlap,
       fold_enrichment = round(fold_enrichment, 2),
-      p_value         = round(fisher_res$p.value, 3),
+      p_value         = round(fisher_res$p.value, 40),
       stringsAsFactors = FALSE
     )
   )
@@ -698,15 +723,17 @@ write.table(fisher_results_df, file.path(output_folder,"wgcna_bronch_deg_overlap
 ### 
 
 # Isolate blood_eos_log from the clinical traits
-bal_eos_mt1=as.data.frame(datTraits_bal$bal_Eos_p_more_1);
-bal_act=as.data.frame(datTraits_bal$asthma_phen_ACT.score);
+datTraits_bal_subset<-datTraits_bal%>%filter(FEV1_percent>0)
+
+bal_eos_mt1=as.data.frame(datTraits_bal_subset$bal_Eos_p_more_1);
+bal_fev1_perc=as.data.frame(datTraits_bal_subset$FEV1_percent); # previously was ACT. changed to FEV1
 
 names(bal_eos_mt1) = "eos_mt1"
-names(bal_act) = "act"
+names(bal_fev1_perc) = "fev1_p"
 
 # Add the BAL_eos_ct_log to existing module eigengenes
-mergedMEs<-mergedMEs[rownames(mergedMEs)%in%rownames(datTraits_bal),]
-MET = orderMEs(cbind(mergedMEs, bal_eos_mt1, bal_act ))
+mergedMEs<-mergedMEs[rownames(mergedMEs)%in%rownames(datTraits_bal_subset),]
+MET = orderMEs(cbind(mergedMEs, bal_eos_mt1, bal_fev1_perc ))
 # Plot the relationships among the eigengenes and the trait
 par(cex = 0.9)
 plotEigengeneNetworks(MET, "", marDendro = c(0,4,1,2), marHeatmap = c(5,4,1,2), cex.lab = 0.8, xLabelsAngle
