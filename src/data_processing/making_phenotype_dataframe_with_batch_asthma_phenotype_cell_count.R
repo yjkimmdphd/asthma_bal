@@ -23,6 +23,7 @@ phenotype<-mutate(phenotype,bal_eos_p_mt1 = factor(case_when(BAL_eos_p > 1 ~ 1 ,
                               levels = c(0, 1)))
 
 t.test(ACT_score~bal_eos_p_mt1,data=phenotype)
+t.test(FEV1_percent~bal_eos_p_mt1,data=phenotype)
 
 # -----------------------------------------------------------------------------
 # 3) Calculate BAL absolute eos and neut counts 
