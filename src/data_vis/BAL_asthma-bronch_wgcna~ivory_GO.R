@@ -58,7 +58,7 @@ for(i in 1:length(go_deg_terms)){
   p<-ggplot(go_deg_terms[[i]][1:n,], aes(x = Fold.Enrichment, y = Description, fill = -log10(FDR))) + # show only top 10
     geom_bar(stat = "identity") +
     # geom_label(aes(label = round(-log10(FDR), 1)), fill="white",nudge_y=0.3, hjust = -0.1, size = 3, color = "black") +  # Add text labels for log10(FDR)
-    scale_fill_gradient(low = "blue", high = "yellow") +  # Adjust color gradient as needed
+    scale_fill_gradient(low = "blue", high = "blue") +  # Adjust color gradient as needed
     labs(x = "Fold Enrichment", y = "Gene Ontology Term", fill = "-log10(FDR)", title = names(go_deg_terms[i])) +
     theme(axis.text.x = element_text(size = 10),  # Change size of x-axis labels
           axis.text.y = element_text(size = 12),
