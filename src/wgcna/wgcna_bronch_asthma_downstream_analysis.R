@@ -311,13 +311,33 @@ labeledHeatmap(
 )
 
 dev.off()
+# ---------------- 
+# while IL-4, IL-5, IL-13 expression is only detectable in immune cells (e.g.,
+# induced sputum), will try to compare their expression in BE samples
 # ----------------
-# proportion of module gene that overlaps with bronch DEG
+deg_folder<-file.path("./reports/local_only/deg_bal_bronch~cell2025-01-03")
+file_names<-list.files(deg_folder)
+deg_file_bal_eos_p_mt1<-file_names[grep("deg_bronch_res_sig_16_",file_names)]
+deg_results_bal_eos_p_mt1<-read.csv(file.path(file_path,deg_file_bal_eos_p_mt1),row.names = 1)
+
+# Extract the string after '~' and remove the '.csv' extension to name each list element
+extracted_strings <- sapply(deg_file_bal_eos_p_mt1, function(x) {
+  string_after_tilde <- trimws(strsplit(x, "~")[[1]][2])
+  string_without_csv <- sub("\\+ Batch_2025-01-03_.csv$", "", string_after_tilde)
+  return(string_without_csv)
+})
+names(deg_results_bal_eos_p_mt1)<-extracted_strings
+head(deg_results_bal_eos_p_mt1)
+
+rownames(deg_results_bal_eos_p_mt1)[c(grep("IL",rownames(deg_results_bal_eos_p_mt1)))] # their levels are too low, and likely was filtered out
+
 # ----------------
 # load deg results (all results FDR > 0) bronch ~ cell count, continuous
+# ----------------
+
 deg_folder<-file.path("./reports/local_only/deg_bal_bronch~cell2025-01-03")
-deg_file<-list.files(deg_folder)
-deg_file<-deg_file[grep("deg_bronch_res_sig",deg_file)]
+file_names<-list.files(deg_folder)
+deg_file<-deg_file[grep("deg_bronch_res_sig",file_names)]
 deg_results<-lapply(file.path(file_path,deg_file),function(d)read.csv(d,row.names = 1))
 
 # Extract the string after '~' and remove the '.csv' extension to name each list element
@@ -330,6 +350,7 @@ names(deg_results)<-extracted_strings
 lapply(deg_results,head)
 
 # ---------------- 
+# proportion of module gene that overlaps with bronch DEG
 # do it for for
 # blood Eos %, AEC, Neut %, ANC
 # ----------------
@@ -783,6 +804,14 @@ top_kWithin_by_module_deg_overlap <- top_kWithin_by_module %>%
 
 head(top_kWithin_by_module_deg_overlap)
 
-write.table(top_kWithin_by_module_deg_overlap, file=file.path(output_folder,"top_kWithin_by_module_deg_overlap.txt"),   sep = "\t",
-            row.names = TRUE, 
-            col.names = NA)
+
+write.table(
+  top_kWithin_by_module_deg_overlap,
+  file = file.path(
+    output_folder,
+    paste("top_kWithin_by_module_deg_overlap", Sys.Date(), ".txt", sep = "")
+  ),
+  sep = "\t",
+  row.names = TRUE,
+  col.names = NA
+)
