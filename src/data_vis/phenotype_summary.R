@@ -283,7 +283,7 @@ print(as.data.frame(phen_summary))
 
 # write the summary
 composite_summary<-rbind(ungrouped_phen_summary,phen_summary)
-write.csv(composite_summary,"./reports/local_only/astham-phenotype~cellcount/phenotype_summary_compasite.csv",row.names = FALSE)
+write.csv(composite_summary,"./reports/local_only/astham-phenotype~cellcount/phenotype_summary_composite.csv",row.names = FALSE)
 
 
 # bal Neut % ~ BAL Eos% >1 not significantly different
