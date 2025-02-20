@@ -337,11 +337,11 @@ rownames(deg_results_bal_eos_p_mt1)[c(grep("IL",rownames(deg_results_bal_eos_p_m
 
 deg_folder<-file.path("./reports/local_only/deg_bal_bronch~cell2025-01-03")
 file_names<-list.files(deg_folder)
-deg_file<-deg_file[grep("deg_bronch_res_sig",file_names)]
+deg_file<-file_names[grep("deg_bronch_res_sig",file_names)]
 deg_results<-lapply(file.path(file_path,deg_file),function(d)read.csv(d,row.names = 1))
 
 # Extract the string after '~' and remove the '.csv' extension to name each list element
-extracted_strings <- sapply(file_names, function(x) {
+extracted_strings <- sapply(deg_file, function(x) {
   string_after_tilde <- trimws(strsplit(x, "~")[[1]][2])
   string_without_csv <- sub("\\+ Batch_2025-01-03_.csv$", "", string_after_tilde)
   return(string_without_csv)
