@@ -1,4 +1,4 @@
-library(dplyr)
+library(tidyverse)
 library(EnhancedVolcano)
 library(pheatmap)
 library(gridExtra)
@@ -240,11 +240,13 @@ grid.arrange(grobs = plot_list3, ncol = 1)  # Third figure
 go_deg_terms_bal_eos_p_mt1<-go_deg_terms[grep("GO_deg_bronch_res_sig_16_~ bal_Eos_p_more_1",names(go_deg_terms))]
 go_deg_terms_bal_eos_p_mt1[[1]]<-go_deg_terms_bal_eos_p_mt1[[1]]%>%mutate(Fold.Enrichment=-Fold.Enrichment)
 go_deg_terms_bal_eos_p_mt1_all<-rbind(go_deg_terms_bal_eos_p_mt1[[1]],go_deg_terms_bal_eos_p_mt1[[2]])%>%arrange(Fold.Enrichment)
+go_deg_terms_bal_eos_p_mt1_all$Description<-as.character(go_deg_terms_bal_eos_p_mt1_all$Description)
+
 description_go<-go_deg_terms_bal_eos_p_mt1_all$Description
 description_go<-which(duplicated(description_go) | duplicated(description_go, fromLast = TRUE))
 print(go_deg_terms_bal_eos_p_mt1_all[description_go,])
 
-go_deg_terms_bal_eos_p_mt1_all[13,]$Description<-paste(go_deg_terms_bal_eos_p_mt1_all[13,]$Description,"down",sep="_")
+go_deg_terms_bal_eos_p_mt1_all[13,"Description"]<-paste(go_deg_terms_bal_eos_p_mt1_all[13,]$Description,"down",sep="_")
 
 gt_bal_eos_p_mt1<-factor(go_deg_terms_bal_eos_p_mt1_all$Description,levels=unique(go_deg_terms_bal_eos_p_mt1_all$Description))
 go_deg_terms_bal_eos_p_mt1_all$Description<-gt_bal_eos_p_mt1
