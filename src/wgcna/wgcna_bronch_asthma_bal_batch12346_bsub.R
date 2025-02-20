@@ -204,6 +204,10 @@ MElist <- moduleEigengenes(expression.data, colors = ModuleColors)
 MEs <- MElist$eigengenes 
 head(MEs)
 
+
+write.table(MElist,file.path(output_folder,"pre-merge_MElist.txt"), sep="\t",quote=FALSE, row.names=TRUE, col.names=NA)
+write.table(MEs,file.path(output_folder,"pre-merge_MEs.txt"), sep="\t",quote=FALSE, row.names=TRUE, col.names=NA)
+
 ###
 # 7. Module merging
 ### 
