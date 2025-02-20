@@ -233,3 +233,37 @@ grid.arrange(grobs = plot_list[1:2], ncol = 1)  # First figure
 grid.arrange(grobs = plot_list2, ncol = 1)  # Second figure
 grid.arrange(grobs = plot_list3, ncol = 1)  # Third figure
 
+
+# --------------
+# combined figure for BAL eos % > 1 
+# --------------
+go_deg_terms_bal_eos_p_mt1<-go_deg_terms[grep("GO_deg_bronch_res_sig_16_~ bal_Eos_p_more_1",names(go_deg_terms))]
+go_deg_terms_bal_eos_p_mt1[[1]]<-go_deg_terms_bal_eos_p_mt1[[1]]%>%mutate(Fold.Enrichment=-Fold.Enrichment)
+go_deg_terms_bal_eos_p_mt1_all<-rbind(go_deg_terms_bal_eos_p_mt1[[1]],go_deg_terms_bal_eos_p_mt1[[2]])%>%arrange(Fold.Enrichment)
+description_go<-go_deg_terms_bal_eos_p_mt1_all$Description
+description_go<-which(duplicated(description_go) | duplicated(description_go, fromLast = TRUE))
+print(go_deg_terms_bal_eos_p_mt1_all[description_go,])
+
+go_deg_terms_bal_eos_p_mt1_all[13,]$Description<-paste(go_deg_terms_bal_eos_p_mt1_all[13,]$Description,"down",sep="_")
+
+gt_bal_eos_p_mt1<-factor(go_deg_terms_bal_eos_p_mt1_all$Description,levels=unique(go_deg_terms_bal_eos_p_mt1_all$Description))
+go_deg_terms_bal_eos_p_mt1_all$Description<-gt_bal_eos_p_mt1
+wrapped_label_bal_eos_p_mt1<-str_to_title(str_wrap(gt_bal_eos_p_mt1, width=30))
+
+
+                        
+# Plot
+p_bal_eos_p_mt1 <- ggplot(go_deg_terms_bal_eos_p_mt1_all, aes(y = Fold.Enrichment, x = Description, fill = -log10(FDR))) +
+  geom_bar(stat = "identity") +
+  #geom_label(aes(label = round(-log10(FDR), 1)), fill = "white", nudge_y = 0.3, hjust = -0.1, size = 3, color = "black") +
+  scale_fill_gradient(low = "blue", high = "yellow") +
+  labs(y = "Fold Enrichment", x = "Gene Ontology Term", fill = "-log10(FDR)", title = "bal_Eos_p_more_1") +
+  theme(axis.text.x = element_text(size = 15,angle = -45,hjust=-0,vjust=1),
+        axis.text.y = element_text(size = 12),
+        axis.title = element_text(size = 12),
+        legend.title = element_text(size = 10),
+        plot.title = element_text(size = 12)) +
+  scale_x_discrete(labels = wrapped_label_bal_eos_p_mt1)+
+  scale_y_continuous(position = "left")+
+  coord_flip() # Flip the coordinates for horizontal bars
+p_bal_eos_p_mt1
