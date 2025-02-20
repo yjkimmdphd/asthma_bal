@@ -815,3 +815,41 @@ write.table(
   row.names = TRUE,
   col.names = NA
 )
+
+#####
+# 10. Find Eigen genes of significant ivory module hub genes
+#####
+
+# Load cell count table
+normalized_count_table_path <- "./resources/processed_data/normalized_gene_count/normalized_gene_count_bronch_vsd_batch-corrected.txt"
+if (file.exists(normalized_count_table_path)) {
+  counts <- read.table(normalized_count_table_path, 
+                       header = TRUE, 
+                       row.names = 1, 
+                       sep = "\t")
+}
+genes <- rownames(counts)
+
+counts_select<-counts[genes%in%c("CDH26", "POSTN","FETUB","CST1","CLCA1", "SERPINB10","SERPINB2"),]
+
+calculate_eigengene <- function(gene_expression_matrix) {
+  # Perform PCA
+  pca_result <- prcomp(t(gene_expression_matrix), center = TRUE, scale. = TRUE)
+  
+  # Extract the first principal component (PC1) as the eigengene levels
+  eigengene_levels <- pca_result$x[, 1]
+  
+  # Return as a data frame
+  return(data.frame(SampleID = colnames(gene_expression_matrix), Eigengene_Level = eigengene_levels))
+}
+
+# Compute eigengene levels
+eigengene_df <- calculate_eigengene(counts_select)
+
+# Create SampleID by extracting the first 4 letters, removing 'B', and converting to numeric
+ids <- eigengene_df$SampleID
+processed_ids <- as.numeric(gsub("B", "", substr(ids, 1, 4)))
+eigengene_df$ID<-processed_ids
+eigengene_df<-eigengene_df%>%select(ID,everything())
+
+write.table(eigengene_df,"./reports/local_only/wgcna/bronch/output/eigengene_df_t2.txt",row.names = FALSE,col.names = TRUE,sep="\t")
