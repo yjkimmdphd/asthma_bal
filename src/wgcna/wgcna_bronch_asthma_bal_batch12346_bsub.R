@@ -255,8 +255,60 @@ write.table(mergedMEs,file.path(output_folder,"mergedMEs.txt"), sep="\t",quote=F
 
 
 ###
-# 8. construct cytoscape info
-## 
+# 8. choose hub genes
+#####
+HubGenes <-
+  chooseTopHubInEachModule(expression.data,
+                           mergedColors,
+                           power = 4,
+                           type = "signed")
+connectivity_allClusters <-
+  intramodularConnectivity(adjacency, mergedColors, scaleByMax = FALSE)
+colnames(expression.data) %>% head
+
+# Check if rownames(connectivity_allClusters) match gene.module.table$genes
+
+matched <-
+  match(rownames(connectivity_allClusters), gene.module.table$genes)
+# Update connectivity_allClusters$module with the corresponding module values
+
+connectivity_allClusters$module <-
+  gene.module.table$modules[matched]
+
+connectivity_allClusters$gene <- gene.module.table$genes[matched]
+
+top_kWithin_by_module <- connectivity_allClusters %>%
+  
+  group_by(module) %>%
+  
+  slice_max(order_by = kWithin, n = 20) %>%
+  
+  ungroup() %>%
+  
+  arrange(module, desc(kWithin))
+
+head(top_kWithin_by_module)
+
+top_kWithin_by_module_deg_overlap <- top_kWithin_by_module %>%
+  
+  filter(gene %in% deg_abs_lfc)
+
+head(top_kWithin_by_module_deg_overlap)
+
+write.table(
+  top_kWithin_by_module_deg_overlap,
+  file = file.path(output_folder, "top_kWithin_by_module_deg_overlap.txt"),
+  sep = "\t",
+  
+  row.names = TRUE,
+  
+  col.names = NA
+)
+
+
+###
+# 9. 
+###
 
 # Set a threshold for adjacency to filter significant edges
 threshold <- 0.1
