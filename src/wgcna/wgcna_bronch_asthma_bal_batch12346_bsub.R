@@ -204,9 +204,14 @@ MElist <- moduleEigengenes(expression.data, colors = ModuleColors)
 MEs <- MElist$eigengenes 
 head(MEs)
 
+write.table(MEs,file.path(output_folder,"pre-merge_MEs.txt"), sep="\t",quote=FALSE, row.names=TRUE, col.names=TRUE)
+write.table(ModuleColors,file.path(output_folder,"pre-merge_ModuleColors.txt"), sep="\t",quote=FALSE, row.names=TRUE, col.names=TRUE)
+# check if the saved MEs is same as the MElist$eigengenes
+pre_merge_modcol<-as.character(unlist(read.table(file.path(output_folder,"pre-merge_ModuleColors.txt"), row.names=1, header=TRUE)))
+print(identical(pre_merge_modcol,ModuleColors))
+pre_merge_ME<-read.table(file.path(output_folder,"pre-merge_MEs.txt"), row.names=1, header=TRUE)
+print(pre_merge_ME-MEs)
 
-write.table(MElist,file.path(output_folder,"pre-merge_MElist.txt"), sep="\t",quote=FALSE, row.names=TRUE, col.names=NA)
-write.table(MEs,file.path(output_folder,"pre-merge_MEs.txt"), sep="\t",quote=FALSE, row.names=TRUE, col.names=NA)
 
 ###
 # 7. Module merging
@@ -215,7 +220,9 @@ write.table(MEs,file.path(output_folder,"pre-merge_MEs.txt"), sep="\t",quote=FAL
 # goal: condense the branches
 
 # remove the NA values
-ME.dissimilarity = 1-cor(MElist$eigengenes, use="complete") #Calculate eigengene dissimilarity
+#ME.dissimilarity = 1-cor(MElist$eigengenes, use="complete") # old code for the one right below
+
+ME.dissimilarity = 1-cor(MEs, use="complete") #Calculate eigengene dissimilarity
 METree = hclust(as.dist(ME.dissimilarity), method = "average") #Clustering eigengenes 
 par(mar = c(0,4,2,0)) #seting margin sizes
 par(cex = 0.6);#scaling the graphic
