@@ -167,12 +167,8 @@ go_deg_filelist<-txt_files
 go_deg_filelist<-go_deg_filelist[1:length(go_deg_filelist)]
 print(go_deg_filelist)
 print(file.exists(file.path(go_deg_folder,go_deg_filelist)))
-###
-# 1. GO term for  DEG ~ BAL
-###
 
 go_deg_terms<-lapply(file.path(go_deg_folder,go_deg_filelist),read.table,sep="\t",header=TRUE)
-
 lapply(go_deg_terms,colnames)
 
 # select relevant columns
@@ -197,6 +193,10 @@ wrapped_label<-lapply(go_deg_terms,
                       function(data){
                         go_term<-data$Description
                         str_wrap(go_term, width=30)})
+###
+# 1. GO term for  DEG ~ all BAL cell profiling
+###
+
 # Plot
 library(grid)
 library(gridExtra)
@@ -238,13 +238,37 @@ grid.arrange(grobs = plot_list3, ncol = 1)  # Third figure
 # combined figure for BAL eos % > 1 
 # --------------
 go_deg_terms_bal_eos_p_mt1<-go_deg_terms[grep("GO_deg_bronch_res_sig_16_~ bal_Eos_p_more_1",names(go_deg_terms))]
-go_deg_terms_bal_eos_p_mt1[[1]]<-go_deg_terms_bal_eos_p_mt1[[1]]%>%mutate(Fold.Enrichment=-Fold.Enrichment)
-go_deg_terms_bal_eos_p_mt1_all<-rbind(go_deg_terms_bal_eos_p_mt1[[1]],go_deg_terms_bal_eos_p_mt1[[2]])%>%arrange(Fold.Enrichment)
-go_deg_terms_bal_eos_p_mt1_all$Description<-as.character(go_deg_terms_bal_eos_p_mt1_all$Description)
 
+# select only the top 5
+go_deg_terms_bal_eos_p_mt1<-lapply(go_deg_terms_bal_eos_p_mt1, function(df){
+  if(nrow(df)>5){
+    df<-df[1:5,]
+    print(dim(df))
+    return(df)
+  }else{
+    print(dim(df))
+    return(df)
+  }
+})
+
+# flip the sign for negatively regulated genes
+go_deg_terms_bal_eos_p_mt1[[1]]<-go_deg_terms_bal_eos_p_mt1[[1]]%>%mutate(Fold.Enrichment=-Fold.Enrichment)
+
+# combine positive and negatively regulated genes into one GO df
+go_deg_terms_bal_eos_p_mt1_all<-rbind(go_deg_terms_bal_eos_p_mt1[[1]],go_deg_terms_bal_eos_p_mt1[[2]])%>%arrange(Fold.Enrichment)
+
+# set GO term description
+go_deg_terms_bal_eos_p_mt1_all$Description<-as.character(go_deg_terms_bal_eos_p_mt1_all$Description)
 description_go<-go_deg_terms_bal_eos_p_mt1_all$Description
-description_go<-which(duplicated(description_go) | duplicated(description_go, fromLast = TRUE))
-print(go_deg_terms_bal_eos_p_mt1_all[description_go,])
+# check for duplicated GO terms
+if(length(which(duplicated(description_go) | duplicated(description_go, fromLast = TRUE)))==0){
+  print("no duplicate GO")
+}else{
+  duplicated_go<-which(duplicated(description_go) | duplicated(description_go, fromLast = TRUE))
+  print(go_deg_terms_bal_eos_p_mt1_all[duplicated_go,])
+}
+
+
 
 go_deg_terms_bal_eos_p_mt1_all[13,"Description"]<-paste(go_deg_terms_bal_eos_p_mt1_all[13,]$Description,"down",sep="_")
 
