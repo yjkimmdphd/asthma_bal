@@ -31,8 +31,9 @@ if(summarise(phen,diff_admit=mean(admit_count-admit_count_new,na.rm=TRUE))==0){
 
 phen$exac<-rowSums(phen[,c("ED_visits","admit_count")])
 
-phen[,c("exac","ED_visits","admit_count")]
-
+phen$total_IgE_num<-as.numeric(phen$total_IgE_repeat)
+phen$total_IgE_num[grep(">",phen$total_IgE_repeat)]<-5000
+print(phen$total_IgE_num)
 # add columns with categorical variables of BAL eos/neut data
 
 phen<- phen %>%
@@ -277,6 +278,8 @@ phen_summary<-phen%>%
             med_ICS.saba_no = sum(ICS.LABA=="Unchecked",na.rm=TRUE),
             med_ltr_yes = sum(LTR=="Checked",na.rm=TRUE),
             med_ltr_no = sum(LTR=="Unchecked",na.rm=TRUE),
+            total_IgE_mean=mean(total_IgE_num,na.rm=TRUE),
+            total_IgE_sd=sd(total_IgE_num,na.rm=TRUE),
             total = sum(!is.na(bal_eos_p_mt1)))
 
 print(as.data.frame(phen_summary))
@@ -297,7 +300,7 @@ boxplot(BAL_neut_p ~ bal_eos_p_mt1, data=phen)
 # ---------------
 
 # List of variables to test
-variables <- c("exac", "Age_at_visit","ACT_score", "FEV1_percent","ED_visits","admit_count", "ED_visit_log","admit_log","exac_log", "BAL_neut_p","BAL_neut_p_log")
+variables <- c("exac", "Age_at_visit","ACT_score", "FEV1_percent","ED_visits","admit_count", "ED_visit_log","admit_log","exac_log", "BAL_neut_p","BAL_neut_p_log", "total_IgE_num")
 
 # Apply t.test to each variable
 ttest_results <- lapply(variables, function(var) {
