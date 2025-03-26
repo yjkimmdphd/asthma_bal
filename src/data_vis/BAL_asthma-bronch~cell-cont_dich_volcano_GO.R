@@ -268,10 +268,6 @@ if(length(which(duplicated(description_go) | duplicated(description_go, fromLast
   print(go_deg_terms_bal_eos_p_mt1_all[duplicated_go,])
 }
 
-
-
-go_deg_terms_bal_eos_p_mt1_all[13,"Description"]<-paste(go_deg_terms_bal_eos_p_mt1_all[13,]$Description,"down",sep="_")
-
 gt_bal_eos_p_mt1<-factor(go_deg_terms_bal_eos_p_mt1_all$Description,levels=unique(go_deg_terms_bal_eos_p_mt1_all$Description))
 go_deg_terms_bal_eos_p_mt1_all$Description<-gt_bal_eos_p_mt1
 wrapped_label_bal_eos_p_mt1<-str_to_title(str_wrap(gt_bal_eos_p_mt1, width=30))
@@ -286,7 +282,7 @@ p_bal_eos_p_mt1 <- ggplot(go_deg_terms_bal_eos_p_mt1_all, aes(y = Fold.Enrichmen
   labs(y = "Fold Enrichment", x = "Gene Ontology Term", fill = "-log10(FDR)", title = "bal_Eos_p_more_1") +
   theme(axis.text.x = element_text(size = 15,angle = -45,hjust=-0,vjust=1),
         axis.text.y = element_text(size = 12),
-        axis.title = element_text(size = 12),
+        axis.title = element_text(size = 20),
         legend.title = element_text(size = 10),
         plot.title = element_text(size = 12)) +
   scale_x_discrete(labels = wrapped_label_bal_eos_p_mt1)+
