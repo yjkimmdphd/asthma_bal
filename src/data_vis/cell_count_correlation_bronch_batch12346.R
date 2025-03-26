@@ -17,7 +17,7 @@ rownames(counts)<-counts[,"SampleID"]
 counts.ID<-colnames(counts)
 
 # asthma biomarker phenotype file saved in  'phenotype'
-phenotype<-file.path("./resources/processed_data/scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_20240731.csv")
+phenotype<-file.path("./resources/processed_data/scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_2025-02-14.csv")
 phenotype<-if(file.exists(phenotype)){read.csv(phenotype, row.names = NULL)}
 
 sampling_date_diff<-"./resources/processed_data/sampling_dates/swab-bal-cbc_differences_in_days.txt"
