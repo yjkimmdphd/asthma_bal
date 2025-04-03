@@ -484,7 +484,7 @@ write.csv(phen_summary,"./reports/local_only/astham-phenotype~cellcount/phenotyp
 
 # ---------------
 # # of exacerbations, ED visits, Admission
-# age, ACT score, FEV1 percentage, BAL_neut_p
+# age, ACT score, FEV1 percentage, BAL_neut_p, total_IgE
 # t-test
 # ---------------
 
