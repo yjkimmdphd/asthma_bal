@@ -177,9 +177,55 @@ col <- create_color_df(phen_var)
 par(mar = c(4, 4, 4, 4))
 
 # Function to create MDS plots in a more organized way
-create_mds_plot <- function(data, color_var, label_var, title) {
-  plotMDS(data, col = color_var, labels = label_var, main = title)
+create_mds_plot <- function(data, color_var, label_var, title, dim1=1, dim2=2) {
+  # If using default dimensions 1 and 2, use the builtin plotting
+  if (dim1 == 1 && dim2 == 2) {
+    return(plotMDS(data, col = color_var, labels = label_var, main = title))
+  }
+  
+  # Otherwise, calculate MDS with enough dimensions and plot manually
+  mds_result <- plotMDS(data, ndim=max(dim1, dim2), plot=FALSE)
+  
+  # Extract coordinates for the requested dimensions
+  x_coords <- if (dim1 <= 2) {
+    if (dim1 == 1) mds_result$x else mds_result$y
+  } else {
+    mds_result$eigen.vectors[, dim1] * sqrt(abs(mds_result$eigen.values[dim1]))
+  }
+  
+  y_coords <- if (dim2 <= 2) {
+    if (dim2 == 1) mds_result$x else mds_result$y
+  } else {
+    mds_result$eigen.vectors[, dim2] * sqrt(abs(mds_result$eigen.values[dim2]))
+  }
+  
+  # Calculate variance explained percentages
+  var_exp_x <- round(mds_result$var.explained[dim1] * 100, 1)
+  var_exp_y <- round(mds_result$var.explained[dim2] * 100, 1)
+  
+  # Create the plot
+  plot(x_coords, y_coords, 
+       col = color_var, 
+       pch = 19,
+       main = title,
+       xlab = paste0("MDS", dim1, " (", var_exp_x, "%)"),
+       ylab = paste0("MDS", dim2, " (", var_exp_y, "%)"))
+  
+  # Add labels if provided and not NULL
+  if (!is.null(label_var)) {
+    text(x_coords, y_coords, labels = label_var, pos = 3, cex = 0.7)
+  }
+  
+  # Return useful information
+  invisible(list(
+    x = x_coords,
+    y = y_coords,
+    dim1 = dim1,
+    dim2 = dim2,
+    var_explained = mds_result$var.explained
+  ))
 }
+
 
 # Create MDS plots for cell count variables
 mds_plots_cell <- list()
@@ -194,19 +240,21 @@ for (i in 1:length(source.cell)) {
 }
 
 # Create MDS plots for metadata variables
-mds_batch <- create_mds_plot(normalized_counts, col$Batch, phen_var$Batch, "Batch")
-mds_nasal_bronch <- create_mds_plot(normalized_counts, col$n_b, phen_var$n_b, "Sample type (nasal/bronch)")
-mds_age <- create_mds_plot(normalized_counts, col$Age_at_visit, phen_var$Age_at_visit, "Age")
-mds_race <- create_mds_plot(normalized_counts, col$Race, phen_var$Race, "Race")
-mds_eth <- create_mds_plot(normalized_counts, col$Ethnicity, phen_var$Ethnicity, "Ethnicity")
+mds_batch <- create_mds_plot(normalized_counts, col$Batch, phen_var$Batch, "Batch", dim1=1, dim2=2)
+mds_sex <- create_mds_plot(normalized_counts, col$Sex, phen_var$Sex, "Sex", dim1=1, dim2=2)
+mds_sex <- create_mds_plot(normalized_counts, col$Sex, phen_var$Sex, "Sex", dim1=1, dim2=4)
+mds_nasal_bronch <- create_mds_plot(normalized_counts, col$n_b, phen_var$n_b, "Sample type (nasal/bronch)", dim1=1, dim2=2)
+mds_age <- create_mds_plot(normalized_counts, col$Age_at_visit, phen_var$Age_at_visit, "Age", dim1=1, dim2=2)
+mds_race <- create_mds_plot(normalized_counts, col$Race, phen_var$Race, "Race", dim1=1, dim2=2)
+mds_eth <- create_mds_plot(normalized_counts, col$Ethnicity, phen_var$Ethnicity, "Ethnicity", dim1=1, dim2=2)
 
 # 7. Analyze MDS results
 mds_result <- plotMDS(normalized_counts, plot = FALSE)
 
 # Calculate the proportion of variance explained by each PC
 var_explained_df <- data.frame(
-  PC = factor(paste0("PC", 1:length(mds_result$var.explained)), 
-              levels = paste0("PC", 1:length(mds_result$var.explained))),
+  PC = factor(paste0("MDS", 1:length(mds_result$var.explained)), 
+              levels = paste0("MDS", 1:length(mds_result$var.explained))),
   VarExplained = mds_result$var.explained,
   Percentage = round(mds_result$var.explained * 100, 2)
 )
@@ -407,9 +455,191 @@ if (requireNamespace("corrplot", quietly = TRUE)) {
 # 15. Save results to a CSV for external visualization
 write.csv(results_df, "./reports/local_only/correlation_pca_trait/MDS_associations.csv", row.names = FALSE)
 
-
+######################
 # bronchial MDS results 
-mds_result_b <- plotMDS(normalized_counts_b, plot=FALSE)  # plot=FALSE to prevent automatic plotting
+######################
+phen_var<-filter(phen_var,n_b=="bronch")
+normalized_counts<-normalized_counts_b
 
-# nasal MDS results 
+# Create color dataframe
+col <- create_color_df(phen_var)
+
+# Analyze MDS results, bronchial only
+mds_result <- plotMDS(normalized_counts_b, plot = FALSE)
+
+# Calculate the proportion of variance explained by each PC
+var_explained_df <- data.frame(
+  PC = factor(paste0("MDS", 1:length(mds_result$var.explained)), 
+              levels = paste0("MDS", 1:length(mds_result$var.explained))),
+  VarExplained = mds_result$var.explained,
+  Percentage = round(mds_result$var.explained * 100, 2)
+)
+
+# Print the percentage of variance explained by each PC
+print("Variance explained by top PCs:")
+print(var_explained_df[1:10, ])
+
+# 8. Create variance explained plot
+p_var_explained <- ggplot(var_explained_df[1:10, ], aes(x = PC, y = Percentage)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = paste0(Percentage, "%")), vjust = -0.5) +
+  theme_minimal() +
+  labs(title = "Percentage of Variance Explained by MDS Components",
+       x = "MDS Component",
+       y = "Percentage of Variance Explained")
+
+print(p_var_explained)
+
+# 9. Extract MDS scores and prepare for correlation analysis
+mds_scores <- mds_result$eigen.vectors
+
+# Convert to dataframe and add sample IDs
+mds_df <- as.data.frame(mds_scores)
+colnames(mds_df) <- paste0("MDS", seq_len(ncol(mds_df)))
+mds_df$SampleID <- colnames(normalized_counts)
+
+# Merge PC scores with metadata
+merged_data <- merge(phen, mds_df, by = "SampleID")
+
+# 10. Define variables for association analysis
+continuous_vars <- c("Age_at_visit", "admit_count", "ED_visits", "ACT_score", 
+                     "FEV1_percent", "BAL_eos_p_log", "blood_eos_p_log")
+categorical_vars <- c("Sex", "Race", "Ethnicity", "bal_eos_p_mt1", "Batch")
+selected_pcs <- colnames(mds_df)[1:5]  # First 5 PCs
+
+# 12. Apply association function to all variables and PCs
+all_vars <- c(continuous_vars, categorical_vars)
+results_df <- data.frame()
+
+for (var in all_vars) {
+  for (pc in selected_pcs) {
+    # Skip if variable doesn't exist in data
+    if (!var %in% colnames(merged_data)) {
+      warning(paste("Variable", var, "not found in data"))
+      next
+    }
+    
+    # Skip if too many missing values
+    if (sum(is.na(merged_data[[var]])) > 0.8 * nrow(merged_data)) {
+      warning(paste("Too many missing values in", var))
+      next
+    }
+    
+    result <- get_association(var, pc, merged_data)
+    
+    results_df <- rbind(results_df, data.frame(
+      Variable = var,
+      PC = pc,
+      Association = result$association,
+      P_value = result$p_value,
+      Method = result$method,
+      Type = ifelse(var %in% categorical_vars, "Categorical", "Continuous")
+    ))
+  }
+}
+
+# Apply multiple testing correction
+results_df$Adj_P_value <- p.adjust(results_df$P_value, method = "fdr")
+results_df$Significant <- results_df$Adj_P_value < 0.05
+
+# 13. Create matrices for visualization
+# For continuous variables
+cont_matrix <- matrix(NA, nrow = length(continuous_vars), ncol = length(selected_pcs),
+                      dimnames = list(continuous_vars, selected_pcs))
+cont_p_matrix <- matrix(NA, nrow = length(continuous_vars), ncol = length(selected_pcs),
+                        dimnames = list(continuous_vars, selected_pcs))
+
+# For categorical variables
+cat_matrix <- matrix(NA, nrow = length(categorical_vars), ncol = length(selected_pcs),
+                     dimnames = list(categorical_vars, selected_pcs))
+cat_p_matrix <- matrix(NA, nrow = length(categorical_vars), ncol = length(selected_pcs),
+                       dimnames = list(categorical_vars, selected_pcs))
+
+# Fill matrices
+for (i in 1:nrow(results_df)) {
+  row <- results_df[i, ]
+  if (row$Type == "Continuous" && row$Variable %in% rownames(cont_matrix)) {
+    cont_matrix[row$Variable, row$PC] <- row$Association
+    cont_p_matrix[row$Variable, row$PC] <- row$Adj_P_value
+  } else if (row$Type == "Categorical" && row$Variable %in% rownames(cat_matrix)) {
+    cat_matrix[row$Variable, row$PC] <- row$Association
+    cat_p_matrix[row$Variable, row$PC] <- row$Adj_P_value
+  }
+}
+
+# 14. Visualize results with corrplot
+# For continuous variables
+if (requireNamespace("corrplot", quietly = TRUE)) {
+  # Correlation plot for continuous variables
+  corrplot(cont_matrix, method = "color", 
+           type = "full", 
+           tl.col = "black", tl.srt = 45,
+           p.mat = cont_p_matrix, sig.level = 0.05,
+           insig = "p-value", 
+           cl.offset = -0.5,
+           cl.align.text = "r",
+           mar = c(6, 1, 7, 0),
+           title = "Pearson Correlations: \nContinuous Variables vs PCs")
+  
+  corrplot(cont_matrix, method = "color", 
+           type = "full", 
+           tl.col = "black", tl.srt = 45,
+           p.mat = cont_p_matrix, sig.level = 0.05,
+           insig = "label_sig", 
+           cl.offset = -0.5,
+           cl.align.text = "r",
+           mar = c(6, 1, 7, 0),
+           title = "Pearson Correlations: \nContinuous Variables vs PCs")
+  
+  # Effect size plot for categorical variables
+  corrplot(cat_matrix, method = "color", 
+           type = "full", 
+           tl.col = "black", tl.srt = 45,
+           col = colorRampPalette(c("white", "pink", "red"))(100),
+           p.mat = cat_p_matrix, sig.level = 0.05,
+           insig = "p-value", 
+           mar = c(6, 1, 7, 0),
+           cl.offset = -0.5,
+           cl.align.text = "r",
+           title = "Effect Sizes (η²): \nCategorical Variables vs PCs",
+           is.corr = FALSE)
+  
+  corrplot(cat_matrix, method = "color", 
+           type = "full", 
+           tl.col = "black", tl.srt = 45,
+           col = colorRampPalette(c("white", "pink", "red"))(100),
+           p.mat = cat_p_matrix, sig.level = 0.05,
+           insig = "label_sig", 
+           mar = c(6, 1, 7, 0),
+           cl.offset = -0.5,
+           cl.align.text = "r",
+           title = "Effect Sizes (η²): \nCategorical Variables vs PCs",
+           is.corr = FALSE)
+} else {
+  # Fallback to base R heatmap if corrplot is not available
+  par(mfrow = c(1, 2))
+  image(1:ncol(cont_matrix), 1:nrow(cont_matrix), t(cont_matrix),
+        col = colorRampPalette(c("blue", "white", "red"))(100),
+        xlab = "Principal Component", ylab = "Variable",
+        axes = FALSE,
+        main = "Pearson Correlations: Continuous Variables vs PCs")
+  axis(1, at = 1:ncol(cont_matrix), labels = colnames(cont_matrix))
+  axis(2, at = 1:nrow(cont_matrix), labels = rownames(cont_matrix), las = 1)
+  
+  image(1:ncol(cat_matrix), 1:nrow(cat_matrix), t(cat_matrix),
+        col = colorRampPalette(c("white", "red"))(100),
+        xlab = "Principal Component", ylab = "Variable",
+        axes = FALSE,
+        main = "Effect Sizes (η²): Categorical Variables vs PCs")
+  axis(1, at = 1:ncol(cat_matrix), labels = colnames(cat_matrix))
+  axis(2, at = 1:nrow(cat_matrix), labels = rownames(cat_matrix), las = 1)
+}
+
+# 15. Save results to a CSV for external visualization
+write.csv(results_df, "./reports/local_only/correlation_pca_trait/MDS_associations.csv", row.names = FALSE)
+
+
+###################
+# nasal MDS results
+###################
 mds_result_n <- plotMDS(normalized_counts_n, plot=FALSE)  # plot=FALSE to prevent automatic plotting
