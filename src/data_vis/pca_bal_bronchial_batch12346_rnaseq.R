@@ -124,49 +124,6 @@ cellCountRange3<-function(cell,q1){
   return(range)
 } # function to set range of cell count for PCA >75th percentile
 
-###########################################---------------------###########################################
-# sample type: nasal-bronchial
-# gene filter: all genes
-###########################################---------------------###########################################
-phen<-if(exists("nphen")){
-  rbind(nphen,bphen)
-  }else{
-    bphen
-  }
-
-##
-# Normalising gene expression distributions
-##
-
-# select just the nasal RNAseq counts
-sid<-phen$SampleID
-
-if(exists("nphen")){
-  print("check counts matrix")
-}else{
-  counts<-bronch.counts
-}
-
-ct<-counts[,sid] # First column is actually gene name 
-genes<-counts$SampleID
-rownames(ct)<-genes
-
-## use TMM normalized lcpm as a cutoff point ()
-ct_filtered<-filter_low_expressed_genes_method2(ct,9) 
-
-
-# normalize counts with TMM
-norm.factor<-calcNormFactors(ct, method = "TMM")
-
-sample.size<-length(colnames(ct))
-for(i in 1:sample.size){
-  ct[,i]<-ct[,i]/norm.factor[i]
-}
-
-# calculate lcpm based on TMM normalized counts 
-lcpm.ct<-cpm(ct,log=TRUE)
-
-
 ###
 #MDS by groups
 ###
