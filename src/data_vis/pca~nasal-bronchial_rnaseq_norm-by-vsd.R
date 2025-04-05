@@ -72,6 +72,8 @@ phen <- phen %>%
     admit_count = if_else(asthma_admit_hx == "No", 0, admit_count),
     # Create exacerbation count (sum of ED visits and admissions)
     exac = ED_visits + admit_count,
+    # scale age
+    Age_at_visit_scaled = as.numeric(scale(Age_at_visit)),
     # Process IgE values
     total_IgE_num = as.numeric(gsub(">", "", total_IgE_repeat)),
     total_IgE_num = if_else(grepl(">", total_IgE_repeat), 5000, total_IgE_num)
@@ -286,7 +288,7 @@ mds_df$SampleID <- colnames(normalized_counts)
 merged_data <- merge(phen, mds_df, by = "SampleID")
 
 # 10. Define variables for association analysis
-continuous_vars <- c("Age_at_visit", "admit_count", "ED_visits", "ACT_score", 
+continuous_vars <- c("Age_at_visit_scaled", "admit_count", "ED_visits", "ACT_score", 
                      "FEV1_percent", "BAL_eos_p_log", "blood_eos_p_log")
 categorical_vars <- c("Sex", "Race", "Ethnicity", "bal_eos_p_mt1", "Batch", "n_b")
 selected_pcs <- colnames(mds_df)[1:5]  # First 5 PCs
@@ -527,7 +529,7 @@ mds_df$SampleID <- colnames(normalized_counts)
 merged_data <- merge(phen, mds_df, by = "SampleID")
 
 # 10. Define variables for association analysis
-continuous_vars <- c("Age_at_visit", "admit_count", "ED_visits", "ACT_score", 
+continuous_vars <- c("Age_at_visit_scaled", "admit_count", "ED_visits", "ACT_score", 
                      "FEV1_percent", "BAL_eos_p_log", "blood_eos_p_log")
 categorical_vars <- c("Sex", "Race", "Ethnicity", "bal_eos_p_mt1", "Batch")
 selected_pcs <- colnames(mds_df)[1:5]  # First 5 PCs
@@ -751,7 +753,7 @@ mds_df$SampleID <- colnames(normalized_counts)
 merged_data <- merge(phen, mds_df, by = "SampleID")
 
 # 10. Define variables for association analysis
-continuous_vars <- c("Age_at_visit", "admit_count", "ED_visits", "ACT_score", 
+continuous_vars <- c("Age_at_visit_scaled", "admit_count", "ED_visits", "ACT_score", 
                      "FEV1_percent", "BAL_eos_p_log", "blood_eos_p_log")
 categorical_vars <- c("Sex", "Race", "Ethnicity", "bal_eos_p_mt1", "Batch")
 selected_pcs <- colnames(mds_df)[1:5]  # First 5 PCs
