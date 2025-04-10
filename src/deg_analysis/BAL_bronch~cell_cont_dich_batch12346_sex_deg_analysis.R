@@ -152,7 +152,7 @@ df <- vector("list", length(var_to_test))
 names(df) <- paste0(var_to_test, "_all")
 
 for (i in seq_along(var_to_test)) {
-  df[[i]] <- phen[pi[[i]], c("SampleID", var_to_test[i], "Batch","Sex","Age_at_visit_scaled")]
+  df[[i]] <- phen[pi[[i]], c("SampleID", var_to_test[i], "Batch","Sex")]
 }
 
 print(sapply(df, dim)[1, ])
@@ -176,7 +176,7 @@ count.table <- lapply(df.input, function(tbl) {
 #===============================================================================
 # 8. Construct DESeq2 Design Formula
 #===============================================================================
-deg.design <- paste("~", var_to_test, "+ Batch + Sex + Age_at_visit_scaled")
+deg.design <- paste("~", var_to_test, "+ Batch + Sex")
 print(deg.design)
 
 # Prepare empty lists for DESeq2 objects, results, and significant results
