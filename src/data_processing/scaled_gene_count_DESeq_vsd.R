@@ -47,11 +47,13 @@ head(counts_selected)
 library(DESeq2)
 library(vsn)
 countdata<-counts_selected
-coldata_cols<-c("comp1","Batch")
+coldata_cols<-c("comp2","Batch")
 coldata<-phen_input[,coldata_cols]
 rownames(coldata)<-sample_id
 
-dds<-DESeqDataSetFromMatrix(countData = countdata,colData=coldata, design= ~ comp1+Batch)
+dds<-DESeqDataSetFromMatrix(countData = countdata,colData=coldata, design= ~ comp2+Batch)
+# With blind=FALSE, the transformation will take into account the specified experimental variables (in your case, comp1 and Batch) when estimating dispersions.
+# With blind=TRUE (the default), the transformation would ignore the design and estimate dispersions treating all samples as if they were replicates of a single condition.
 
 # prefilter low count genes
 smallestGroupSize <- min(apply(table(coldata),1,sum)) 
@@ -79,7 +81,7 @@ pheatmap(sampleDistMatrix,
          clustering_distance_cols=sampleDists,
          col=colors)
 plotPCA(vsd, intgroup=c("Batch"))
-plotPCA(vsd, intgroup=c("comp1"))
+plotPCA(vsd, intgroup=c("comp2"))
 
 ### vsd with batch effect removed 
 library(limma)
@@ -102,7 +104,7 @@ pheatmap(sampleDistMatrix,
          clustering_distance_cols=sampleDists,
          col=colors)
 plotPCA(vsd, intgroup=c("Batch"))
-plotPCA(vsd, intgroup=c("comp1"))
+plotPCA(vsd, intgroup=c("comp2"))
 
 ### will only export vsd with batch effect removal
 
