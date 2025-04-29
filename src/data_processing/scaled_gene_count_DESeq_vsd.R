@@ -35,74 +35,149 @@ countdata<-file.path("./resources/raw_data/MS_asthma/MS_asthma.batch12346.GRCh38
 counts<-if(file.exists(countdata)){read.delim(countdata, check.names = FALSE)}
 genes<-counts[,"SampleID"]
 
-phen_input<-phen_bronch
+# count normalization without batch correction
+normalizeCounts <- function(input_df, var1="comp2", var2="Batch", formula) {
+  
+  phen_input <- input_df
+  
+  # select bronchial samples 
+  sample_id <- phen_input$SampleID
+  counts_selected <- counts[,sample_id]
+  rownames(counts_selected) <- genes
+  head(counts_selected)
+  
+  # Assuming your DESeq2 object is called 'dds'
+  library(DESeq2)
+  library(vsn)
+  countdata <- counts_selected
+  coldata_cols <- c(var1, var2)
+  coldata <- phen_input[,coldata_cols]
+  rownames(coldata) <- sample_id
+  
+  dds <- DESeqDataSetFromMatrix(countData = countdata, colData=coldata, design= as.formula(formula))
+  
+  # prefilter low count genes
+  smallestGroupSize <- min(apply(table(coldata),1,sum)) 
+  keep <- rowSums(counts(dds) >= 10) >= smallestGroupSize
+  dds <- dds[keep,]
+  
+  vsd <- vst(dds, blind=FALSE) 
+  
+  # Plot the meanSD plot as a side effect
+  meanSdPlot(assay(vsd))
+  
+  ## vsd with vs without batch effect removal 
+  
+  ### vsd without batch effect removal 
+  normalized_counts <- assay(vsd)  # This is now your transformed expression matrix
+  
+  sampleDists <- dist(t(assay(vsd)))
+  
+  library(pheatmap)
+  library("RColorBrewer")
+  library(gridExtra)
+  
+  sampleDistMatrix <- as.matrix(sampleDists)
+  rownames(sampleDistMatrix) <- vsd$Batch
+  colnames(sampleDistMatrix) <- NULL
+  colors <- colorRampPalette(rev(brewer.pal(9, "Blues")))(255)
+  
+  # For pheatmap to display in RStudio's plot pane, use grid.arrange or direct plotting
+  
+  dev.new()
+  p_heatmap <- pheatmap(sampleDistMatrix,
+                        clustering_distance_rows=sampleDists,
+                        clustering_distance_cols=sampleDists,
+                        col=colors)
+  
+  # Display PCA plots
+  # These should display fine as they use ggplot2 under the hood
+  pca_plot1 <- plotPCA(vsd, intgroup=c(var2))
+  print(pca_plot1)
+  
+  pca_plot2 <- plotPCA(vsd, intgroup=c(var1))
+  print(pca_plot2)
+  
+  # Return normalized counts
+  return(normalized_counts)
+}
 
-# select bronchial samples 
-sample_id<-phen_input$SampleID
-counts_selected<-counts[,sample_id]
-rownames(counts_selected)<-genes
-head(counts_selected)
+### vsd with batch effect removed, count normalization without batch correction
+normalizeCounts_batch_removed <- function(input_df, var1="comp2", var2="Batch", formula) {
+  
+  phen_input <- input_df
+  
+  # select bronchial samples 
+  sample_id <- phen_input$SampleID
+  counts_selected <- counts[,sample_id]
+  rownames(counts_selected) <- genes
+  head(counts_selected)
+  
+  # Assuming your DESeq2 object is called 'dds'
+  library(DESeq2)
+  library(vsn)
+  countdata <- counts_selected
+  coldata_cols <- c(var1, var2)
+  coldata <- phen_input[,coldata_cols]
+  rownames(coldata) <- sample_id
+  
+  dds <- DESeqDataSetFromMatrix(countData = countdata, colData=coldata, design= as.formula(formula))
+  
+  # prefilter low count genes
+  smallestGroupSize <- min(apply(table(coldata),1,sum)) 
+  keep <- rowSums(counts(dds) >= 10) >= smallestGroupSize
+  dds <- dds[keep,]
+  
+  vsd <- vst(dds, blind=FALSE) 
+  
+  library(limma)
+  mat <- assay(vsd)
+  mm <- model.matrix(~comp2, colData(vsd))
+  mat <- limma::removeBatchEffect(mat, batch=vsd$Batch, design=mm)
+  assay(vsd) <- mat
+  meanSdPlot(assay(vsd))
 
-# Assuming your DESeq2 object is called 'dds'
-library(DESeq2)
-library(vsn)
-countdata<-counts_selected
-coldata_cols<-c("comp2","Batch")
-coldata<-phen_input[,coldata_cols]
-rownames(coldata)<-sample_id
+  ## vsd with vs without batch effect removal 
+  
+  ### vsd without batch effect removal 
+  normalized_counts <- assay(vsd)  # This is now your transformed expression matrix
+  
+  sampleDists <- dist(t(assay(vsd)))
+  
+  library(pheatmap)
+  library("RColorBrewer")
+  library(gridExtra)
+  
+  sampleDistMatrix <- as.matrix(sampleDists)
+  rownames(sampleDistMatrix) <- vsd$Batch
+  colnames(sampleDistMatrix) <- NULL
+  colors <- colorRampPalette(rev(brewer.pal(9, "Blues")))(255)
+  
+  # For pheatmap to display in RStudio's plot pane, use grid.arrange or direct plotting
+  
+  dev.new()
+  p_heatmap <- pheatmap(sampleDistMatrix,
+                        clustering_distance_rows=sampleDists,
+                        clustering_distance_cols=sampleDists,
+                        col=colors)
+  
+  # Display PCA plots
+  # These should display fine as they use ggplot2 under the hood
+  pca_plot1 <- plotPCA(vsd, intgroup=c(var2))
+  print(pca_plot1)
+  
+  pca_plot2 <- plotPCA(vsd, intgroup=c(var1))
+  print(pca_plot2)
+  
+  # Return normalized counts
+  return(normalized_counts)
+}
 
-dds<-DESeqDataSetFromMatrix(countData = countdata,colData=coldata, design= ~ comp2+Batch)
+normalized_bronch_count<-normalizeCounts(phen_bronch,"comp2","Batch", "~ comp2 + Batch")
+normalized_nasal_count<-normalizeCounts(phen_nasal,"comp2","Batch", "~ comp2 + Batch")
 
-# prefilter low count genes
-smallestGroupSize <- min(apply(table(coldata),1,sum)) 
-keep <- rowSums(counts(dds) >= 10) >= smallestGroupSize
-dds <- dds[keep,]
-
-vsd <- vst(dds, blind=FALSE) 
-
-meanSdPlot(assay(vsd))
-
-## vsd with vs without batch effect removal 
-
-### vsd without batch effect removal 
-normalized_counts <- assay(vsd)  # This is now your transformed expression matrix
-sampleDists <- dist(t(assay(vsd)))
-
-library(pheatmap)
-library("RColorBrewer")
-sampleDistMatrix <- as.matrix(sampleDists)
-rownames(sampleDistMatrix) <- vsd$Batch
-colnames(sampleDistMatrix) <- NULL
-colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
-pheatmap(sampleDistMatrix,
-         clustering_distance_rows=sampleDists,
-         clustering_distance_cols=sampleDists,
-         col=colors)
-plotPCA(vsd, intgroup=c("Batch"))
-plotPCA(vsd, intgroup=c("comp2"))
-
-### vsd with batch effect removed 
-library(limma)
-mat <- assay(vsd)
-mm <- model.matrix(~comp2, colData(vsd))
-mat <- limma::removeBatchEffect(mat, batch=vsd$Batch, design=mm)
-assay(vsd) <- mat
-meanSdPlot(assay(vsd))
-
-normalized_counts <- assay(vsd)  # This is now your transformed expression matrix
-sampleDists <- dist(t(assay(vsd)))
-
-library("RColorBrewer")
-sampleDistMatrix <- as.matrix(sampleDists)
-rownames(sampleDistMatrix) <- vsd$Batch
-colnames(sampleDistMatrix) <- NULL
-colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
-pheatmap(sampleDistMatrix,
-         clustering_distance_rows=sampleDists,
-         clustering_distance_cols=sampleDists,
-         col=colors)
-plotPCA(vsd, intgroup=c("Batch"))
-plotPCA(vsd, intgroup=c("comp2"))
+normalized_bronch_count_batch_removed<-normalizeCounts_batch_removed(phen_bronch,"comp2","Batch", "~ comp2 + Batch")
+normalized_nasal_count_batch_removed<-normalizeCounts_batch_removed(phen_nasal,"comp2","Batch", "~ comp2 + Batch")
 
 ### will only export vsd with batch effect removal
 
@@ -111,7 +186,16 @@ plotPCA(vsd, intgroup=c("comp2"))
 # -----------------------------------------------------------------------------
 
 write.table(
-  assay(vsd),
+  normalized_bronch_count,
+  "./resources/processed_data/normalized_gene_count/normalized_gene_count_bronch_vsd_no-batch-corrected.txt",
+  sep = "\t",
+  row.names = TRUE, 
+  col.names = NA
+)
+
+
+write.table(
+  normalized_bronch_count_batch_removed,
   "./resources/processed_data/normalized_gene_count/normalized_gene_count_bronch_vsd_batch-corrected.txt",
   sep = "\t",
   row.names = TRUE, 
@@ -119,102 +203,14 @@ write.table(
 )
 
 
-# -----------------------------------------------------------------------------
-# 4) Normalized nasal count table with vsd
-# -----------------------------------------------------------------------------
-
-# load count table
-countdata<-file.path("./resources/raw_data/MS_asthma/MS_asthma.batch12346.GRCh38.geneID_readcount.all_samples.QCed_final.txt")
-counts<-if(file.exists(countdata)){read.delim(countdata, check.names = FALSE)}
-genes<-counts[,"SampleID"]
-
-phen_input<-phen_nasal
-
-# select bronchial samples 
-sample_id<-phen_input$SampleID
-counts_selected<-counts[,sample_id]
-rownames(counts_selected)<-genes
-head(counts_selected)
-
-# Assuming your DESeq2 object is called 'dds'
-library(DESeq2)
-library(vsn)
-countdata<-counts_selected
-coldata_cols<-c("comp1","Batch","comp2")
-coldata<-phen_input[,coldata_cols]
-rownames(coldata)<-sample_id
-
-dds<-DESeqDataSetFromMatrix(countData = countdata,colData=coldata, design= ~ comp2+Batch)
-
-# prefilter low count genes
-smallestGroupSize <- min(apply(table(coldata),1,sum)) 
-keep <- rowSums(counts(dds) >= 10) >= smallestGroupSize
-dds <- dds[keep,]
-
-vsd <- vst(dds, blind=FALSE) 
-
-meanSdPlot(assay(vsd))
-
-#------------------------------------------
-## vsd with vs without batch effect removal 
-#------------------------------------------
-
-#-----------------------------------
-### vsd without batch effect removal
-#-----------------------------------
-
-normalized_counts <- assay(vsd)  # This is now your transformed expression matrix
-sampleDists <- dist(t(assay(vsd)))
-
-library(pheatmap)
-library("RColorBrewer")
-sampleDistMatrix <- as.matrix(sampleDists)
-rownames(sampleDistMatrix) <- vsd$Batch
-colnames(sampleDistMatrix) <- NULL
-colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
-pheatmap(sampleDistMatrix,
-         clustering_distance_rows=sampleDists,
-         clustering_distance_cols=sampleDists,
-         col=colors)
-plotPCA(vsd, intgroup=c("Batch"))
-plotPCA(vsd, intgroup=c("comp1"))
-plotPCA(vsd, intgroup=c("comp2"))
-
-#------------------------------------------
-### vsd with batch effect removed 
-#------------------------------------------
-library(limma)
-mat <- assay(vsd)
-mm <- model.matrix(~comp2, colData(vsd))
-mat <- limma::removeBatchEffect(mat, batch=vsd$Batch, design=mm)
-assay(vsd) <- mat
-meanSdPlot(assay(vsd))
-
-normalized_counts_batch_corrected <- assay(vsd)  # This is now your transformed expression matrix
-sampleDists_batch_corrected <- dist(t(assay(vsd)))
-
-library("RColorBrewer")
-sampleDistMatrix <- as.matrix(sampleDists_batch_corrected)
-rownames(sampleDistMatrix) <- vsd$Batch
-colnames(sampleDistMatrix) <- NULL
-colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
-pheatmap(sampleDistMatrix,
-         clustering_distance_rows=sampleDists,
-         clustering_distance_cols=sampleDists,
-         col=colors)
-plotPCA(vsd, intgroup=c("Batch"))
-plotPCA(vsd, intgroup=c("comp1"))
-plotPCA(vsd, intgroup=c("comp2"))
-
-### will only export vsd with batch effect removal
 
 # -----------------------------------------------------------------------------
-# 5) export normalized nasal gene count table
+# 4) export normalized nasal gene count table
 # -----------------------------------------------------------------------------
 
 
 write.table(
-  normalized_counts,
+  normalized_nasal_count,
   "./resources/processed_data/normalized_gene_count/normalized_gene_count_nasal_vsd_no-batch-corrected.txt",
   sep = "\t",
   row.names = TRUE, 
@@ -223,7 +219,7 @@ write.table(
 
 
 write.table(
-  normalized_counts_batch_corrected,
+  normalized_nasal_count_batch_removed,
   "./resources/processed_data/normalized_gene_count/normalized_gene_count_nasal_vsd_batch-corrected.txt",
   sep = "\t",
   row.names = TRUE, 
