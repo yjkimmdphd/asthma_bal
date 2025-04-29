@@ -82,12 +82,12 @@ phen <- phen %>%
 print(paste("Number of samples after filtering:", nrow(phen)))
 
 # 4. Prepare variables for MDS color coding
-var <- c(source.cell.log, "Batch", "Age_at_visit", "Sex", "Race", "Ethnicity", "total_IgE_num", "n_b")
+var <- c(source.cell.log,"bal_eos_p_mt1", "Batch", "Age_at_visit", "Sex", "Race", "Ethnicity", "total_IgE_num", "n_b")
 phen_var <- phen[, var]
 
 # Convert categorical variables to factors
-phen_var[, c("Batch", "Sex", "Race", "Ethnicity", "n_b")] <- lapply(
-  phen_var[, c("Batch", "Sex", "Race", "Ethnicity", "n_b")],
+phen_var[, c("bal_eos_p_mt1","Batch", "Sex", "Race", "Ethnicity", "n_b")] <- lapply(
+  phen_var[, c("bal_eos_p_mt1","Batch", "Sex", "Race", "Ethnicity", "n_b")],
   function(d) factor(d, levels = unique(d))
 )
 
@@ -98,157 +98,278 @@ for (n in var) {
   }
 }
 
-# 5. Create color coding function for visualization
-create_color_df <- function(df) {
-  # Initialize result dataframe
-  col_df <- data.frame(matrix(ncol = ncol(df), nrow = nrow(df)))
-  names(col_df) <- names(df)
+# 5. Create multipanel MDS plot for RNA-seq data analysis
+# This script should be run after your initial MDS analysis
+# Create a MDS multipanel plot with outside legends using Base R
+# This works directly with your existing color dataframe 'col'
+
+# Function to perform MDS and create plots with outside legends
+create_multipanel_mds <- function(normalized_counts, phen_var, col) {
+  # Setup 4x2 panel layout with extra space for legends
+  pdf("mds_analysis_with_legends.pdf", width=14, height=14)
+  # Set layout with wider right margin for legends
+  par(mfrow=c(4, 2), mar=c(4, 4, 3, 8), oma=c(0, 0, 2, 0))
   
-  # Define color palettes
-  quart_colors <- c("#FFF5F0", "#FCBBA1", "#FB6A4A", "#CB181D") # Red gradient
-  na_color <- "#CCCCCC"  # Gray for NA values
+  # Calculate MDS
+  mds <- limma::plotMDS(normalized_counts, ndim=5, plot=FALSE)
   
-  # Color palettes for categorical variables
-  cat_palettes <- list(
-    c("#1f77b4", "#ff7f0e"),                                    # 2 levels
-    c("#1f77b4", "#ff7f0e", "#2ca02c"),                         # 3 levels
-    c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"),              # 4 levels
-    c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd"),   # 5 levels
-    c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b")  # 6 levels
-  )
+  # Extract coordinates for all dimensions we'll use
+  x1 <- mds$eigen.vectors[,1] * sqrt(mds$eigen.values[1])
+  x2 <- mds$eigen.vectors[,2] * sqrt(mds$eigen.values[2])
+  x3 <- mds$eigen.vectors[,3] * sqrt(mds$eigen.values[3])
+  x4 <- mds$eigen.vectors[,4] * sqrt(mds$eigen.values[4])
   
-  # Process each column
-  for (col_name in names(df)) {
-    col <- df[[col_name]]
+  # Get variance explained
+  var1 <- round(mds$var.explained[1] * 100, 1)
+  var2 <- round(mds$var.explained[2] * 100, 1)
+  var3 <- round(mds$var.explained[3] * 100, 1)
+  var4 <- round(mds$var.explained[4] * 100, 1)
+  
+  # NA color (grey)
+  na_color <- "#CCCCCC"
+  
+  # Helper function to add legends for categorical variables
+  add_categorical_legend <- function(var_name) {
+    # Get unique values and corresponding colors
+    unique_values <- unique(phen_var[[var_name]])
+    unique_colors <- c()
     
-    if (is.numeric(col) || is.integer(col)) {
-      # For numeric columns, assign colors based on quartiles
-      quarts <- quantile(col, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE)
-      
-      # Set default color as NA color
-      col_df[[col_name]] <- na_color
-      
-      # Non-NA values
-      non_na_idx <- !is.na(col)
-      
-      for (i in 1:4) {
-        if (i < 4) {
-          idx <- non_na_idx & col >= quarts[i] & col < quarts[i+1]
-        } else {
-          idx <- non_na_idx & col >= quarts[i] & col <= quarts[i+1]
-        }
-        col_df[idx, col_name] <- quart_colors[i]
-      }
-    } else {
-      # For categorical columns, assign unique colors for each value
-      levels <- unique(na.omit(col))  # Exclude NA from levels
-      n_levels <- length(levels)
-      
-      # Select appropriate palette based on number of levels
-      palette_idx <- min(n_levels, length(cat_palettes))
-      colors <- cat_palettes[[palette_idx]]
-      
-      # If we have more levels than colors in our largest palette, recycle colors
-      if (n_levels > length(colors)) {
-        colors <- rep(colors, length.out = n_levels)
-      }
-      
-      # Start with NA color for all
-      col_df[[col_name]] <- na_color
-      
-      # Assign colors to non-NA values
-      for (i in 1:n_levels) {
-        idx <- which(col == levels[i])
-        if (length(idx) > 0) {
-          col_df[idx, col_name] <- colors[i]
-        }
-      }
+    for(val in unique_values) {
+      # Find first index with this value
+      idx <- which(phen_var[[var_name]] == val)[1]
+      unique_colors <- c(unique_colors, col[[var_name]][idx])
     }
     
-    # Convert the column to character
-    col_df[[col_name]] <- as.character(col_df[[col_name]])
+    # Include NA in the legend if there are any NA values
+    if(any(is.na(phen_var[[var_name]]))) {
+      legend_values <- c(as.character(unique_values), "NA")
+      legend_colors <- c(unique_colors, na_color)
+    } else {
+      legend_values <- as.character(unique_values)
+      legend_colors <- unique_colors
+    }
+    
+    # Add legend outside the plot
+    par(xpd=TRUE)  # Allow drawing outside the plot region
+    legend(par("usr")[2] * 1.05, par("usr")[4], 
+           legend=legend_values, 
+           fill=legend_colors, 
+           title=var_name,
+           cex=0.7, bty="n")
+    par(xpd=FALSE)  # Reset to default
   }
   
-  return(col_df)
-}
-
-# Create color dataframe
-col <- create_color_df(phen_var)
-
-# 6. Generate MDS plots for different variables
-par(mar = c(4, 4, 4, 4))
-
-# Function to create MDS plots in a more organized way
-create_mds_plot <- function(data, color_var, label_var, title, dim1=1, dim2=2) {
-  # If using default dimensions 1 and 2, use the builtin plotting
-  if (dim1 == 1 && dim2 == 2) {
-    return(plotMDS(data, col = color_var, labels = label_var, main = title))
+  # Helper function to add legends for numeric variables
+  add_numeric_legend <- function(var_name) {
+    # Use red gradient colors for numeric variables
+    quart_colors <- c("#FFF5F0", "#FCBBA1", "#FB6A4A", "#CB181D")
+    
+    # Calculate quartiles for the variable
+    var_quants <- quantile(phen_var[[var_name]], probs=c(0, 0.25, 0.5, 0.75, 1), na.rm=TRUE)
+    
+    # Create legend labels (rounded to 1 decimal place)
+    quart_labels <- c(
+      paste0("Q1: ", round(var_quants[1], 1), "-", round(var_quants[2], 1)),
+      paste0("Q2: ", round(var_quants[2], 1), "-", round(var_quants[3], 1)),
+      paste0("Q3: ", round(var_quants[3], 1), "-", round(var_quants[4], 1)),
+      paste0("Q4: ", round(var_quants[4], 1), "-", round(var_quants[5], 1))
+    )
+    
+    # Include NA in the legend if there are any NA values
+    if(any(is.na(phen_var[[var_name]]))) {
+      legend_labels <- c(quart_labels, "NA")
+      legend_colors <- c(quart_colors, na_color)
+    } else {
+      legend_labels <- quart_labels
+      legend_colors <- quart_colors
+    }
+    
+    # Add legend outside the plot
+    par(xpd=TRUE)  # Allow drawing outside the plot region
+    legend(par("usr")[2] * 1.05, par("usr")[4], 
+           legend=legend_labels, 
+           fill=legend_colors, 
+           title=var_name,
+           cex=0.7, bty="n")
+    par(xpd=FALSE)  # Reset to default
   }
   
-  # Otherwise, calculate MDS with enough dimensions and plot manually
-  mds_result <- plotMDS(data, ndim=max(dim1, dim2), plot=FALSE)
+  # Plot 1: Sample Type
+  plot(x1, x2, 
+       col=col$n_b, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Sample Type (Nasal/Bronchial)")
+  add_categorical_legend("n_b")
   
-  # Extract coordinates for the requested dimensions
-  x_coords <- if (dim1 <= 2) {
-    if (dim1 == 1) mds_result$x else mds_result$y
-  } else {
-    mds_result$eigen.vectors[, dim1] * sqrt(abs(mds_result$eigen.values[dim1]))
-  }
+  # Plot 2: Batch
+  plot(x1, x2, 
+       col=col$Batch, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Batch Effect")
+  add_categorical_legend("Batch")
   
-  y_coords <- if (dim2 <= 2) {
-    if (dim2 == 1) mds_result$x else mds_result$y
-  } else {
-    mds_result$eigen.vectors[, dim2] * sqrt(abs(mds_result$eigen.values[dim2]))
-  }
+  # Plot 3: Sex
+  plot(x1, x2, 
+       col=col$Sex, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Sex")
+  add_categorical_legend("Sex")
   
-  # Calculate variance explained percentages
-  var_exp_x <- round(mds_result$var.explained[dim1] * 100, 1)
-  var_exp_y <- round(mds_result$var.explained[dim2] * 100, 1)
+  # Plot 4: Age
+  plot(x1, x2, 
+       col=col$Age_at_visit, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Age")
+  add_numeric_legend("Age_at_visit")
   
-  # Create the plot
-  plot(x_coords, y_coords, 
-       col = color_var, 
-       pch = 19,
-       main = title,
-       xlab = paste0("MDS", dim1, " (", var_exp_x, "%)"),
-       ylab = paste0("MDS", dim2, " (", var_exp_y, "%)"))
+  # Plot 5: BAL Eos > 1%
+  plot(x1, x2, 
+       col=col$bal_eos_p_mt1, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="BAL Eos% >1%")
+  add_categorical_legend("bal_eos_p_mt1")
   
-  # Add labels if provided and not NULL
-  if (!is.null(label_var)) {
-    text(x_coords, y_coords, labels = label_var, pos = 3, cex = 0.7)
-  }
+  # Plot 6: BAL Eos% (log)
+  plot(x1, x2, 
+       col=col$BAL_eos_p_log, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="BAL Eosinophils % (log)")
+  add_numeric_legend("BAL_eos_p_log")
   
-  # Return useful information
-  invisible(list(
-    x = x_coords,
-    y = y_coords,
-    dim1 = dim1,
-    dim2 = dim2,
-    var_explained = mds_result$var.explained
+  # Plot 7: Blood Eos (log)
+  plot(x1, x2, 
+       col=col$blood_eos_log, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Blood Eosinophils (log)")
+  add_numeric_legend("blood_eos_log")
+  
+  # Plot 8: Sex (Dims 1 & 4)
+  plot(x1, x4, 
+       col=col$Sex, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS4 (", var4, "%)"),
+       main="Sex (Dims 1 & 4)")
+  add_categorical_legend("Sex")
+  
+  # Add overall title
+  mtext("Multi-dimensional Scaling Analysis of RNA-seq Data", 
+        outer=TRUE, cex=1.5)
+  
+  # Close PDF device
+  dev.off()
+  
+  # Also display on screen
+  par(mfrow=c(4, 2), mar=c(4, 4, 3, 8), oma=c(0, 0, 2, 0))
+  
+  # Plot 1: Sample Type
+  plot(x1, x2, 
+       col=col$n_b, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Sample Type (Nasal/Bronchial)")
+  add_categorical_legend("n_b")
+  
+  # Plot 2: Batch
+  plot(x1, x2, 
+       col=col$Batch, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Batch Effect")
+  add_categorical_legend("Batch")
+  
+  # Plot 3: Sex
+  plot(x1, x2, 
+       col=col$Sex, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Sex")
+  add_categorical_legend("Sex")
+  
+  # Plot 4: Age
+  plot(x1, x2, 
+       col=col$Age_at_visit, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Age")
+  add_numeric_legend("Age_at_visit")
+  
+  # Plot 5: BAL Eos > 1%
+  plot(x1, x2, 
+       col=col$bal_eos_p_mt1, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="BAL Eos% >1%")
+  add_categorical_legend("bal_eos_p_mt1")
+  
+  # Plot 6: BAL Eos% (log)
+  plot(x1, x2, 
+       col=col$BAL_eos_p_log, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="BAL Eosinophils % (log)")
+  add_numeric_legend("BAL_eos_p_log")
+  
+  # Plot 7: Blood Eos (log)
+  plot(x1, x2, 
+       col=col$blood_eos_log, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Blood Eosinophils (log)")
+  add_numeric_legend("blood_eos_log")
+  
+  # Plot 8: Sex (Dims 1 & 4)
+  plot(x1, x4, 
+       col=col$Sex, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS4 (", var4, "%)"),
+       main="Sex (Dims 1 & 4)")
+  add_categorical_legend("Sex")
+  
+  # Add overall title
+  mtext("Multi-dimensional Scaling Analysis of RNA-seq Data", 
+        outer=TRUE, cex=1.5)
+  
+  # Return MDS coordinates in case they're needed elsewhere
+  return(list(
+    x1 = x1, x2 = x2, x3 = x3, x4 = x4,
+    var1 = var1, var2 = var2, var3 = var3, var4 = var4
   ))
 }
 
+# Run the function
+mds_results <- create_multipanel_mds(normalized_counts, phen_var, col)
+# To save the plot (uncomment to use)
+# ggsave("multipanel_mds_analysis.pdf", grid.arrange(grobs=multipanel_plots), width=12, height=10)
 
-# Create MDS plots for cell count variables
-mds_plots_cell <- list()
-for (i in 1:length(source.cell)) {
-  var_name <- source.cell.log[i]
-  mds_plots_cell[[i]] <- create_mds_plot(
-    normalized_counts, 
-    col[[var_name]], 
-    phen_var[[var_name]], 
-    source.cell[i]
-  )
-}
-
-# Create MDS plots for metadata variables
-mds_batch <- create_mds_plot(normalized_counts, col$Batch, phen_var$Batch, "Batch", dim1=1, dim2=2)
-mds_sex <- create_mds_plot(normalized_counts, col$Sex, phen_var$Sex, "Sex", dim1=1, dim2=2)
-mds_sex <- create_mds_plot(normalized_counts, col$Sex, phen_var$Sex, "Sex", dim1=1, dim2=4)
-mds_nasal_bronch <- create_mds_plot(normalized_counts, col$n_b, phen_var$n_b, "Sample type (nasal/bronch)", dim1=1, dim2=2)
-mds_age <- create_mds_plot(normalized_counts, col$Age_at_visit, phen_var$Age_at_visit, "Age", dim1=1, dim2=2)
-mds_race <- create_mds_plot(normalized_counts, col$Race, phen_var$Race, "Race", dim1=1, dim2=2)
-mds_eth <- create_mds_plot(normalized_counts, col$Ethnicity, phen_var$Ethnicity, "Ethnicity", dim1=1, dim2=2)
+# Alternative using patchwork package for more control:
+# If you prefer patchwork, uncomment and install if needed:
+# install.packages("patchwork")
+# library(patchwork)
+# combined_plot <- (multipanel_plots$p_sample_type + multipanel_plots$p_batch) / 
+#                  (multipanel_plots$p_sex + multipanel_plots$p_age) /
+#                  (multipanel_plots$p_blood_eos + multipanel_plots$p_blood_neut) /
+#                  (multipanel_plots$p_sex_dim14 + multipanel_plots$p_sample_dim23) +
+#                  plot_annotation(title = "Multi-dimensional Scaling Analysis of RNA-seq Data")
+# 
+# ggsave("multipanel_mds_analysis_patchwork.pdf", combined_plot, width=12, height=16)
+# If you want to create just the PDF without displaying on screen:
+# create_multipanel_pdf <- function() {
+#   pdf("mds_analysis_multipanel.pdf", width=12, height=14)
+#   par(mfrow=c(4,2), mar=c(4,4,3,1), oma=c(0,0,2,0))
+#   
+#   # [Copy all the plot commands from create_multipanel_mds_base here]
+#   
+#   dev.off()
+# }
+# create_multipanel_pdf()
+### ===============================
 
 # 7. Analyze MDS results
 mds_result <- plotMDS(normalized_counts, plot = FALSE)
@@ -388,6 +509,8 @@ for (i in 1:nrow(results_df)) {
 
 # 14. Visualize results with corrplot
 # For continuous variables
+library(corrplot)
+par(mfrow=c(2,2))
 if (requireNamespace("corrplot", quietly = TRUE)) {
   # Correlation plot for continuous variables
   corrplot(cont_matrix, method = "color", 
@@ -397,7 +520,7 @@ if (requireNamespace("corrplot", quietly = TRUE)) {
            insig = "p-value", 
            cl.offset = -0.5,
            cl.align.text = "r",
-           mar = c(6, 1, 7, 0),
+           mar = c(4, 1, 4, 0),
            title = "Pearson Correlations: \nContinuous Variables vs PCs")
   
   corrplot(cont_matrix, method = "color", 
@@ -407,7 +530,7 @@ if (requireNamespace("corrplot", quietly = TRUE)) {
            insig = "label_sig", 
            cl.offset = -0.5,
            cl.align.text = "r",
-           mar = c(6, 1, 7, 0),
+           mar = c(4, 1, 4, 0),
            title = "Pearson Correlations: \nContinuous Variables vs PCs")
   
   # Effect size plot for categorical variables
@@ -417,7 +540,7 @@ if (requireNamespace("corrplot", quietly = TRUE)) {
            col = colorRampPalette(c("white", "pink", "red"))(100),
            p.mat = cat_p_matrix, sig.level = 0.05,
            insig = "p-value", 
-           mar = c(6, 1, 7, 0),
+           mar = c(4, 1, 4, 0),
            cl.offset = -0.5,
            cl.align.text = "r",
            title = "Effect Sizes (η²): \nCategorical Variables vs PCs",
@@ -429,7 +552,7 @@ if (requireNamespace("corrplot", quietly = TRUE)) {
            col = colorRampPalette(c("white", "pink", "red"))(100),
            p.mat = cat_p_matrix, sig.level = 0.05,
            insig = "label_sig", 
-           mar = c(6, 1, 7, 0),
+           mar = c(4, 1, 4, 0),
            cl.offset = -0.5,
            cl.align.text = "r",
            title = "Effect Sizes (η²): \nCategorical Variables vs PCs",
@@ -463,33 +586,261 @@ write.csv(results_df, "./reports/local_only/correlation_pca_trait/MDS_associatio
 phen_var<-filter(phen_var,n_b=="bronch")
 normalized_counts<-normalized_counts_b
 
-# Create color dataframe
-col <- create_color_df(phen_var)
+# Create multipanel MDS plot for RNA-seq data analysis
 
+# Create a MDS multipanel plot with outside legends using Base R
+# This works directly with your existing color dataframe 'col'
 
-
-# Create MDS plots for cell count variables
-mds_plots_cell <- list()
-for (i in 1:length(source.cell)) {
-  var_name <- source.cell.log[i]
-  mds_plots_cell[[i]] <- create_mds_plot(
-    normalized_counts, 
-    col[[var_name]], 
-    phen_var[[var_name]], 
-    source.cell[i]
-  )
+# Function to perform MDS and create plots with outside legends
+create_multipanel_mds <- function(normalized_counts, phen_var, col) {
+  # Setup 4x2 panel layout with extra space for legends
+  pdf("mds_analysis_with_legends.pdf", width=14, height=14)
+  # Set layout with wider right margin for legends
+  par(mfrow=c(4, 2), mar=c(4, 4, 3, 8), oma=c(0, 0, 2, 0))
+  
+  # Calculate MDS
+  mds <- limma::plotMDS(normalized_counts, ndim=5, plot=FALSE)
+  
+  # Extract coordinates for all dimensions we'll use
+  x1 <- mds$eigen.vectors[,1] * sqrt(mds$eigen.values[1])
+  x2 <- mds$eigen.vectors[,2] * sqrt(mds$eigen.values[2])
+  x3 <- mds$eigen.vectors[,3] * sqrt(mds$eigen.values[3])
+  x4 <- mds$eigen.vectors[,4] * sqrt(mds$eigen.values[4])
+  
+  # Get variance explained
+  var1 <- round(mds$var.explained[1] * 100, 1)
+  var2 <- round(mds$var.explained[2] * 100, 1)
+  var3 <- round(mds$var.explained[3] * 100, 1)
+  var4 <- round(mds$var.explained[4] * 100, 1)
+  
+  # NA color (grey)
+  na_color <- "#CCCCCC"
+  
+  # Helper function to add legends for categorical variables
+  add_categorical_legend <- function(var_name) {
+    # Get unique values and corresponding colors
+    unique_values <- unique(phen_var[[var_name]])
+    unique_colors <- c()
+    
+    for(val in unique_values) {
+      # Find first index with this value
+      idx <- which(phen_var[[var_name]] == val)[1]
+      unique_colors <- c(unique_colors, col[[var_name]][idx])
+    }
+    
+    # Include NA in the legend if there are any NA values
+    if(any(is.na(phen_var[[var_name]]))) {
+      legend_values <- c(as.character(unique_values), "NA")
+      legend_colors <- c(unique_colors, na_color)
+    } else {
+      legend_values <- as.character(unique_values)
+      legend_colors <- unique_colors
+    }
+    
+    # Add legend outside the plot
+    par(xpd=TRUE)  # Allow drawing outside the plot region
+    legend(par("usr")[2] * 1.05, par("usr")[4], 
+           legend=legend_values, 
+           fill=legend_colors, 
+           title=var_name,
+           cex=0.7, bty="n")
+    par(xpd=FALSE)  # Reset to default
+  }
+  
+  # Helper function to add legends for numeric variables
+  add_numeric_legend <- function(var_name) {
+    # Use red gradient colors for numeric variables
+    quart_colors <- c("#FFF5F0", "#FCBBA1", "#FB6A4A", "#CB181D")
+    
+    # Calculate quartiles for the variable
+    var_quants <- quantile(phen_var[[var_name]], probs=c(0, 0.25, 0.5, 0.75, 1), na.rm=TRUE)
+    
+    # Create legend labels (rounded to 1 decimal place)
+    quart_labels <- c(
+      paste0("Q1: ", round(var_quants[1], 1), "-", round(var_quants[2], 1)),
+      paste0("Q2: ", round(var_quants[2], 1), "-", round(var_quants[3], 1)),
+      paste0("Q3: ", round(var_quants[3], 1), "-", round(var_quants[4], 1)),
+      paste0("Q4: ", round(var_quants[4], 1), "-", round(var_quants[5], 1))
+    )
+    
+    # Include NA in the legend if there are any NA values
+    if(any(is.na(phen_var[[var_name]]))) {
+      legend_labels <- c(quart_labels, "NA")
+      legend_colors <- c(quart_colors, na_color)
+    } else {
+      legend_labels <- quart_labels
+      legend_colors <- quart_colors
+    }
+    
+    # Add legend outside the plot
+    par(xpd=TRUE)  # Allow drawing outside the plot region
+    legend(par("usr")[2] * 1.05, par("usr")[4], 
+           legend=legend_labels, 
+           fill=legend_colors, 
+           title=var_name,
+           cex=0.7, bty="n")
+    par(xpd=FALSE)  # Reset to default
+  }
+  
+  # Plot 1: Batch
+  plot(x1, x2, 
+       col=col$Batch, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Batch Effect")
+  add_categorical_legend("Batch")
+  
+  # Plot 2: Sex
+  plot(x1, x2, 
+       col=col$Sex, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Sex")
+  add_categorical_legend("Sex")
+  
+  # Plot 3: Age
+  plot(x1, x2, 
+       col=col$Age_at_visit, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Age")
+  add_numeric_legend("Age_at_visit")
+  
+  # Plot 4: BAL Eos > 1%
+  plot(x1, x2, 
+       col=col$bal_eos_p_mt1, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="BAL Eos% >1%")
+  add_categorical_legend("bal_eos_p_mt1")
+  
+  # Plot 5: BAL Eos% (log)
+  plot(x1, x2, 
+       col=col$BAL_eos_p_log, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="BAL Eosinophils % (log)")
+  add_numeric_legend("BAL_eos_p_log")
+  
+  # Plot 6: Blood Eos (log)
+  plot(x1, x2, 
+       col=col$blood_eos_log, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Blood Eosinophils (log)")
+  add_numeric_legend("blood_eos_log")
+  
+  # Plot 7: Sex (Dims 1 & 4)
+  plot(x1, x4, 
+       col=col$Sex, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS4 (", var4, "%)"),
+       main="Sex (Dims 1 & 4)")
+  add_categorical_legend("Sex")
+  
+  # Add overall title
+  mtext("Multi-dimensional Scaling Analysis of RNA-seq Data", 
+        outer=TRUE, cex=1.5)
+  
+  # Close PDF device
+  dev.off()
+  
+  # Also display on screen
+  par(mfrow=c(4, 2), mar=c(4, 4, 3, 8), oma=c(0, 0, 2, 0))
+  
+  # Plot 1: Batch
+  plot(x1, x2, 
+       col=col$Batch, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Batch Effect")
+  add_categorical_legend("Batch")
+  
+  # Plot 2: Sex
+  plot(x1, x2, 
+       col=col$Sex, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Sex")
+  add_categorical_legend("Sex")
+  
+  # Plot 3: Age
+  plot(x1, x2, 
+       col=col$Age_at_visit, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Age")
+  add_numeric_legend("Age_at_visit")
+  
+  # Plot 4: BAL Eos > 1%
+  plot(x1, x2, 
+       col=col$bal_eos_p_mt1, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="BAL Eos% >1%")
+  add_categorical_legend("bal_eos_p_mt1")
+  
+  # Plot 5: BAL Eos% (log)
+  plot(x1, x2, 
+       col=col$BAL_eos_p_log, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="BAL Eosinophils % (log)")
+  add_numeric_legend("BAL_eos_p_log")
+  
+  # Plot 6: Blood Eos (log)
+  plot(x1, x2, 
+       col=col$blood_eos_log, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Blood Eosinophils (log)")
+  add_numeric_legend("blood_eos_log")
+  
+  # Plot 7: Sex (Dims 1 & 4)
+  plot(x1, x4, 
+       col=col$Sex, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS4 (", var4, "%)"),
+       main="Sex (Dims 1 & 4)")
+  add_categorical_legend("Sex")
+  
+  # Add overall title
+  mtext("Multi-dimensional Scaling Analysis of RNA-seq Data", 
+        outer=TRUE, cex=1.5)
+  
+  # Return MDS coordinates in case they're needed elsewhere
+  return(list(
+    x1 = x1, x2 = x2, x3 = x3, x4 = x4,
+    var1 = var1, var2 = var2, var3 = var3, var4 = var4
+  ))
 }
 
-# Create MDS plots for metadata variables
-mds_batch <- create_mds_plot(normalized_counts, col$Batch, phen_var$Batch, "Batch", dim1=1, dim2=2)
-mds_sex <- create_mds_plot(normalized_counts, col$Sex, phen_var$Sex, "Sex", dim1=1, dim2=2)
-mds_sex <- create_mds_plot(normalized_counts, col$Sex, phen_var$Sex, "Sex", dim1=1, dim2=4)
-mds_nasal_bronch <- create_mds_plot(normalized_counts, col$n_b, phen_var$n_b, "Sample type (nasal/bronch)", dim1=1, dim2=2)
-mds_age <- create_mds_plot(normalized_counts, col$Age_at_visit, phen_var$Age_at_visit, "Age", dim1=1, dim2=2)
-mds_race <- create_mds_plot(normalized_counts, col$Race, phen_var$Race, "Race", dim1=1, dim2=2)
-mds_eth <- create_mds_plot(normalized_counts, col$Ethnicity, phen_var$Ethnicity, "Ethnicity", dim1=1, dim2=2)
+# Run the function
+mds_results <- create_multipanel_mds(normalized_counts, phen_var, col)
+# To save the plot (uncomment to use)
+# ggsave("multipanel_mds_analysis.pdf", grid.arrange(grobs=multipanel_plots), width=12, height=10)
 
-
+# Alternative using patchwork package for more control:
+# If you prefer patchwork, uncomment and install if needed:
+# install.packages("patchwork")
+# library(patchwork)
+# combined_plot <- (multipanel_plots$p_sample_type + multipanel_plots$p_batch) / 
+#                  (multipanel_plots$p_sex + multipanel_plots$p_age) /
+#                  (multipanel_plots$p_blood_eos + multipanel_plots$p_blood_neut) /
+#                  (multipanel_plots$p_sex_dim14 + multipanel_plots$p_sample_dim23) +
+#                  plot_annotation(title = "Multi-dimensional Scaling Analysis of RNA-seq Data")
+# 
+# ggsave("multipanel_mds_analysis_patchwork.pdf", combined_plot, width=12, height=16)
+# If you want to create just the PDF without displaying on screen:
+# create_multipanel_pdf <- function() {
+#   pdf("mds_analysis_multipanel.pdf", width=12, height=14)
+#   par(mfrow=c(4,2), mar=c(4,4,3,1), oma=c(0,0,2,0))
+#   
+#   # [Copy all the plot commands from create_multipanel_mds_base here]
+#   
+#   dev.off()
+# }
+# create_multipanel_pdf()
 
 # Analyze MDS results, bronchial only
 mds_result <- plotMDS(normalized_counts_b, plot = FALSE)
@@ -596,6 +947,7 @@ for (i in 1:nrow(results_df)) {
 
 # 14. Visualize results with corrplot
 # For continuous variables
+par(mfrow=c(2,2))
 if (requireNamespace("corrplot", quietly = TRUE)) {
   # Correlation plot for continuous variables
   corrplot(cont_matrix, method = "color", 
@@ -605,7 +957,7 @@ if (requireNamespace("corrplot", quietly = TRUE)) {
            insig = "p-value", 
            cl.offset = -0.5,
            cl.align.text = "r",
-           mar = c(6, 1, 7, 0),
+           mar = c(4, 1, 4, 0),
            title = "Pearson Correlations: \nContinuous Variables vs PCs")
   
   corrplot(cont_matrix, method = "color", 
@@ -615,7 +967,7 @@ if (requireNamespace("corrplot", quietly = TRUE)) {
            insig = "label_sig", 
            cl.offset = -0.5,
            cl.align.text = "r",
-           mar = c(6, 1, 7, 0),
+           mar = c(4, 1, 4, 0),
            title = "Pearson Correlations: \nContinuous Variables vs PCs")
   
   # Effect size plot for categorical variables
@@ -625,7 +977,7 @@ if (requireNamespace("corrplot", quietly = TRUE)) {
            col = colorRampPalette(c("white", "pink", "red"))(100),
            p.mat = cat_p_matrix, sig.level = 0.05,
            insig = "p-value", 
-           mar = c(6, 1, 7, 0),
+           mar = c(4, 1, 4, 0),
            cl.offset = -0.5,
            cl.align.text = "r",
            title = "Effect Sizes (η²): \nCategorical Variables vs PCs",
@@ -637,7 +989,7 @@ if (requireNamespace("corrplot", quietly = TRUE)) {
            col = colorRampPalette(c("white", "pink", "red"))(100),
            p.mat = cat_p_matrix, sig.level = 0.05,
            insig = "label_sig", 
-           mar = c(6, 1, 7, 0),
+           mar = c(4, 1, 4, 0),
            cl.offset = -0.5,
            cl.align.text = "r",
            title = "Effect Sizes (η²): \nCategorical Variables vs PCs",
@@ -669,13 +1021,13 @@ write.csv(results_df, "./reports/local_only/correlation_pca_trait/MDS_associatio
 ###################
 # nasal MDS results
 ###################
-var <- c(source.cell.log, "Batch", "Age_at_visit", "Sex", "Race", "Ethnicity", "total_IgE_num", "n_b")
+var <- c(source.cell.log,"bal_eos_p_mt1", "Batch", "Age_at_visit", "Sex", "Race", "Ethnicity", "total_IgE_num", "n_b")
+
 phen_var <- phen[, var]
-phen$SampleID<-gsub("-",".",phen$SampleID)
 
 # Convert categorical variables to factors
-phen_var[, c("Batch", "Sex", "Race", "Ethnicity", "n_b")] <- lapply(
-  phen_var[, c("Batch", "Sex", "Race", "Ethnicity", "n_b")],
+phen_var[, c("bal_eos_p_mt1","Batch", "Sex", "Race", "Ethnicity", "n_b")] <- lapply(
+  phen_var[, c("bal_eos_p_mt1","Batch", "Sex", "Race", "Ethnicity", "n_b")],
   function(d) factor(d, levels = unique(d))
 )
 
@@ -689,31 +1041,257 @@ for (n in var) {
 phen_var<-filter(phen_var,n_b=="nasal")
 normalized_counts<-normalized_counts_n
 
-# Create color dataframe
-col <- create_color_df(phen_var)
 
-# Create MDS plots for cell count variables
-mds_plots_cell <- list()
-for (i in 1:length(source.cell)) {
-  var_name <- source.cell.log[i]
-  mds_plots_cell[[i]] <- create_mds_plot(
-    normalized_counts, 
-    col[[var_name]], 
-    phen_var[[var_name]], 
-    source.cell[i]
-  )
+# Function to perform MDS and create plots with outside legends
+create_multipanel_mds <- function(normalized_counts, phen_var, col) {
+  # Setup 4x2 panel layout with extra space for legends
+  pdf("mds_analysis_with_legends.pdf", width=14, height=14)
+  # Set layout with wider right margin for legends
+  par(mfrow=c(4, 2), mar=c(4, 4, 3, 8), oma=c(0, 0, 2, 0))
+  
+  # Calculate MDS
+  mds <- limma::plotMDS(normalized_counts, ndim=5, plot=FALSE)
+  
+  # Extract coordinates for all dimensions we'll use
+  x1 <- mds$eigen.vectors[,1] * sqrt(mds$eigen.values[1])
+  x2 <- mds$eigen.vectors[,2] * sqrt(mds$eigen.values[2])
+  x3 <- mds$eigen.vectors[,3] * sqrt(mds$eigen.values[3])
+  x4 <- mds$eigen.vectors[,4] * sqrt(mds$eigen.values[4])
+  
+  # Get variance explained
+  var1 <- round(mds$var.explained[1] * 100, 1)
+  var2 <- round(mds$var.explained[2] * 100, 1)
+  var3 <- round(mds$var.explained[3] * 100, 1)
+  var4 <- round(mds$var.explained[4] * 100, 1)
+  
+  # NA color (grey)
+  na_color <- "#CCCCCC"
+  
+  # Helper function to add legends for categorical variables
+  add_categorical_legend <- function(var_name) {
+    # Get unique values and corresponding colors
+    unique_values <- unique(phen_var[[var_name]])
+    unique_colors <- c()
+    
+    for(val in unique_values) {
+      # Find first index with this value
+      idx <- which(phen_var[[var_name]] == val)[1]
+      unique_colors <- c(unique_colors, col[[var_name]][idx])
+    }
+    
+    # Include NA in the legend if there are any NA values
+    if(any(is.na(phen_var[[var_name]]))) {
+      legend_values <- c(as.character(unique_values), "NA")
+      legend_colors <- c(unique_colors, na_color)
+    } else {
+      legend_values <- as.character(unique_values)
+      legend_colors <- unique_colors
+    }
+    
+    # Add legend outside the plot
+    par(xpd=TRUE)  # Allow drawing outside the plot region
+    legend(par("usr")[2] * 1.05, par("usr")[4], 
+           legend=legend_values, 
+           fill=legend_colors, 
+           title=var_name,
+           cex=0.7, bty="n")
+    par(xpd=FALSE)  # Reset to default
+  }
+  
+  # Helper function to add legends for numeric variables
+  add_numeric_legend <- function(var_name) {
+    # Use red gradient colors for numeric variables
+    quart_colors <- c("#FFF5F0", "#FCBBA1", "#FB6A4A", "#CB181D")
+    
+    # Calculate quartiles for the variable
+    var_quants <- quantile(phen_var[[var_name]], probs=c(0, 0.25, 0.5, 0.75, 1), na.rm=TRUE)
+    
+    # Create legend labels (rounded to 1 decimal place)
+    quart_labels <- c(
+      paste0("Q1: ", round(var_quants[1], 1), "-", round(var_quants[2], 1)),
+      paste0("Q2: ", round(var_quants[2], 1), "-", round(var_quants[3], 1)),
+      paste0("Q3: ", round(var_quants[3], 1), "-", round(var_quants[4], 1)),
+      paste0("Q4: ", round(var_quants[4], 1), "-", round(var_quants[5], 1))
+    )
+    
+    # Include NA in the legend if there are any NA values
+    if(any(is.na(phen_var[[var_name]]))) {
+      legend_labels <- c(quart_labels, "NA")
+      legend_colors <- c(quart_colors, na_color)
+    } else {
+      legend_labels <- quart_labels
+      legend_colors <- quart_colors
+    }
+    
+    # Add legend outside the plot
+    par(xpd=TRUE)  # Allow drawing outside the plot region
+    legend(par("usr")[2] * 1.05, par("usr")[4], 
+           legend=legend_labels, 
+           fill=legend_colors, 
+           title=var_name,
+           cex=0.7, bty="n")
+    par(xpd=FALSE)  # Reset to default
+  }
+  
+  # Plot 1: Batch
+  plot(x1, x2, 
+       col=col$Batch, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Batch Effect")
+  add_categorical_legend("Batch")
+  
+  # Plot 2: Sex
+  plot(x1, x2, 
+       col=col$Sex, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Sex")
+  add_categorical_legend("Sex")
+  
+  # Plot 3: Age
+  plot(x1, x2, 
+       col=col$Age_at_visit, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Age")
+  add_numeric_legend("Age_at_visit")
+  
+  # Plot 4: BAL Eos > 1%
+  plot(x1, x2, 
+       col=col$bal_eos_p_mt1, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="BAL Eos% >1%")
+  add_categorical_legend("bal_eos_p_mt1")
+  
+  # Plot 5: BAL Eos% (log)
+  plot(x1, x2, 
+       col=col$BAL_eos_p_log, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="BAL Eosinophils % (log)")
+  add_numeric_legend("BAL_eos_p_log")
+  
+  # Plot 6: Blood Eos (log)
+  plot(x1, x2, 
+       col=col$blood_eos_log, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Blood Eosinophils (log)")
+  add_numeric_legend("blood_eos_log")
+  
+  # Plot 7: Sex (Dims 1 & 4)
+  plot(x1, x4, 
+       col=col$Sex, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS4 (", var4, "%)"),
+       main="Sex (Dims 1 & 4)")
+  add_categorical_legend("Sex")
+  
+  # Add overall title
+  mtext("Multi-dimensional Scaling Analysis of RNA-seq Data", 
+        outer=TRUE, cex=1.5)
+  
+  # Close PDF device
+  dev.off()
+  
+  # Also display on screen
+  par(mfrow=c(4, 2), mar=c(4, 4, 3, 8), oma=c(0, 0, 2, 0))
+  
+  # Plot 1: Batch
+  plot(x1, x2, 
+       col=col$Batch, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Batch Effect")
+  add_categorical_legend("Batch")
+  
+  # Plot 2: Sex
+  plot(x1, x2, 
+       col=col$Sex, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Sex")
+  add_categorical_legend("Sex")
+  
+  # Plot 3: Age
+  plot(x1, x2, 
+       col=col$Age_at_visit, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Age")
+  add_numeric_legend("Age_at_visit")
+  
+  # Plot 4: BAL Eos > 1%
+  plot(x1, x2, 
+       col=col$bal_eos_p_mt1, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="BAL Eos% >1%")
+  add_categorical_legend("bal_eos_p_mt1")
+  
+  # Plot 5: BAL Eos% (log)
+  plot(x1, x2, 
+       col=col$BAL_eos_p_log, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="BAL Eosinophils % (log)")
+  add_numeric_legend("BAL_eos_p_log")
+  
+  # Plot 6: Blood Eos (log)
+  plot(x1, x2, 
+       col=col$blood_eos_log, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS2 (", var2, "%)"),
+       main="Blood Eosinophils (log)")
+  add_numeric_legend("blood_eos_log")
+  
+  # Plot 7: Sex (Dims 1 & 4)
+  plot(x1, x4, 
+       col=col$Sex, pch=19,
+       xlab=paste0("MDS1 (", var1, "%)"),
+       ylab=paste0("MDS4 (", var4, "%)"),
+       main="Sex (Dims 1 & 4)")
+  add_categorical_legend("Sex")
+  
+  # Add overall title
+  mtext("Multi-dimensional Scaling Analysis of RNA-seq Data", 
+        outer=TRUE, cex=1.5)
+  
+  # Return MDS coordinates in case they're needed elsewhere
+  return(list(
+    x1 = x1, x2 = x2, x3 = x3, x4 = x4,
+    var1 = var1, var2 = var2, var3 = var3, var4 = var4
+  ))
 }
 
-# Create MDS plots for metadata variables
-mds_batch <- create_mds_plot(normalized_counts, col$Batch, phen_var$Batch, "Batch", dim1=1, dim2=2)
-mds_sex <- create_mds_plot(normalized_counts, col$Sex, phen_var$Sex, "Sex", dim1=1, dim2=2)
-mds_sex <- create_mds_plot(normalized_counts, col$Sex, phen_var$Sex, "Sex", dim1=1, dim2=4)
-mds_nasal_bronch <- create_mds_plot(normalized_counts, col$n_b, phen_var$n_b, "Sample type (nasal/bronch)", dim1=1, dim2=2)
-mds_age <- create_mds_plot(normalized_counts, col$Age_at_visit, phen_var$Age_at_visit, "Age", dim1=1, dim2=2)
-mds_race <- create_mds_plot(normalized_counts, col$Race, phen_var$Race, "Race", dim1=1, dim2=2)
-mds_eth <- create_mds_plot(normalized_counts, col$Ethnicity, phen_var$Ethnicity, "Ethnicity", dim1=1, dim2=2)
+# Run the function
+mds_results <- create_multipanel_mds(normalized_counts, phen_var, col)
+# To save the plot (uncomment to use)
+# ggsave("multipanel_mds_analysis.pdf", grid.arrange(grobs=multipanel_plots), width=12, height=10)
 
-
+# Alternative using patchwork package for more control:
+# If you prefer patchwork, uncomment and install if needed:
+# install.packages("patchwork")
+# library(patchwork)
+# combined_plot <- (multipanel_plots$p_sample_type + multipanel_plots$p_batch) / 
+#                  (multipanel_plots$p_sex + multipanel_plots$p_age) /
+#                  (multipanel_plots$p_blood_eos + multipanel_plots$p_blood_neut) /
+#                  (multipanel_plots$p_sex_dim14 + multipanel_plots$p_sample_dim23) +
+#                  plot_annotation(title = "Multi-dimensional Scaling Analysis of RNA-seq Data")
+# 
+# ggsave("multipanel_mds_analysis_patchwork.pdf", combined_plot, width=12, height=16)
+# If you want to create just the PDF without displaying on screen:
+# create_multipanel_pdf <- function() {
+#   pdf("mds_analysis_multipanel.pdf", width=12, height=14)
+#   par(mfrow=c(4,2), mar=c(4,4,3,1), oma=c(0,0,2,0))
+#   
+#   # [Copy all the plot commands from create_multipanel_mds_base here]
+#   
+#   dev.off()
+# }
+# create_multipanel_pdf()
 
 # Analyze MDS results, nasal only
 mds_result <- plotMDS(normalized_counts_n, plot = FALSE)
@@ -820,6 +1398,7 @@ for (i in 1:nrow(results_df)) {
 
 # 14. Visualize results with corrplot
 # For continuous variables
+par(mfrow=c(2,2))
 if (requireNamespace("corrplot", quietly = TRUE)) {
   # Correlation plot for continuous variables
   corrplot(cont_matrix, method = "color", 
@@ -829,9 +1408,19 @@ if (requireNamespace("corrplot", quietly = TRUE)) {
            insig = "p-value", 
            cl.offset = -0.5,
            cl.align.text = "r",
-           mar = c(6, 1, 7, 0),
+           mar = c(4, 1, 4, 0),
            title = "Pearson Correlations: \nContinuous Variables vs PCs")
- 
+  
+  corrplot(cont_matrix, method = "color", 
+           type = "full", 
+           tl.col = "black", tl.srt = 45,
+           p.mat = cont_p_matrix, sig.level = 0.05,
+           insig = "label_sig", 
+           cl.offset = -0.5,
+           cl.align.text = "r",
+           mar = c(4, 1, 4, 0),
+           title = "Pearson Correlations: \nContinuous Variables vs PCs")
+  
   # Effect size plot for categorical variables
   corrplot(cat_matrix, method = "color", 
            type = "full", 
@@ -839,7 +1428,7 @@ if (requireNamespace("corrplot", quietly = TRUE)) {
            col = colorRampPalette(c("white", "pink", "red"))(100),
            p.mat = cat_p_matrix, sig.level = 0.05,
            insig = "p-value", 
-           mar = c(6, 1, 7, 0),
+           mar = c(4, 1, 4, 0),
            cl.offset = -0.5,
            cl.align.text = "r",
            title = "Effect Sizes (η²): \nCategorical Variables vs PCs",
@@ -851,7 +1440,7 @@ if (requireNamespace("corrplot", quietly = TRUE)) {
            col = colorRampPalette(c("white", "pink", "red"))(100),
            p.mat = cat_p_matrix, sig.level = 0.05,
            insig = "label_sig", 
-           mar = c(6, 1, 7, 0),
+           mar = c(4, 1, 4, 0),
            cl.offset = -0.5,
            cl.align.text = "r",
            title = "Effect Sizes (η²): \nCategorical Variables vs PCs",
@@ -875,6 +1464,7 @@ if (requireNamespace("corrplot", quietly = TRUE)) {
   axis(1, at = 1:ncol(cat_matrix), labels = colnames(cat_matrix))
   axis(2, at = 1:nrow(cat_matrix), labels = rownames(cat_matrix), las = 1)
 }
+
 
 # 15. Save results to a CSV for external visualization
 write.csv(results_df, "./reports/local_only/correlation_pca_trait/MDS_associations_nasal.csv", row.names = FALSE)
