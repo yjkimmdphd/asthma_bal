@@ -52,8 +52,6 @@ coldata<-phen_input[,coldata_cols]
 rownames(coldata)<-sample_id
 
 dds<-DESeqDataSetFromMatrix(countData = countdata,colData=coldata, design= ~ comp2+Batch)
-# With blind=FALSE, the transformation will take into account the specified experimental variables (in your case, comp1 and Batch) when estimating dispersions.
-# With blind=TRUE (the default), the transformation would ignore the design and estimate dispersions treating all samples as if they were replicates of a single condition.
 
 # prefilter low count genes
 smallestGroupSize <- min(apply(table(coldata),1,sum)) 
@@ -86,7 +84,7 @@ plotPCA(vsd, intgroup=c("comp2"))
 ### vsd with batch effect removed 
 library(limma)
 mat <- assay(vsd)
-mm <- model.matrix(~comp1, colData(vsd))
+mm <- model.matrix(~comp2, colData(vsd))
 mat <- limma::removeBatchEffect(mat, batch=vsd$Batch, design=mm)
 assay(vsd) <- mat
 meanSdPlot(assay(vsd))
@@ -146,7 +144,7 @@ coldata_cols<-c("comp1","Batch","comp2")
 coldata<-phen_input[,coldata_cols]
 rownames(coldata)<-sample_id
 
-dds<-DESeqDataSetFromMatrix(countData = countdata,colData=coldata, design= ~ comp1+Batch)
+dds<-DESeqDataSetFromMatrix(countData = countdata,colData=coldata, design= ~ comp2+Batch)
 
 # prefilter low count genes
 smallestGroupSize <- min(apply(table(coldata),1,sum)) 
@@ -187,7 +185,7 @@ plotPCA(vsd, intgroup=c("comp2"))
 #------------------------------------------
 library(limma)
 mat <- assay(vsd)
-mm <- model.matrix(~comp1, colData(vsd))
+mm <- model.matrix(~comp2, colData(vsd))
 mat <- limma::removeBatchEffect(mat, batch=vsd$Batch, design=mm)
 assay(vsd) <- mat
 meanSdPlot(assay(vsd))
