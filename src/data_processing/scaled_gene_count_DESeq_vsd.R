@@ -9,7 +9,7 @@ library(tidyverse)
 # -----------------------------------------------------------------------------
 phen_path <- file.path(
   "./resources/processed_data",
-  "scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_2024-12-26.csv"
+  "scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_2025-02-14.csv"
 )
 phen <- read.csv(phen_path)
 
