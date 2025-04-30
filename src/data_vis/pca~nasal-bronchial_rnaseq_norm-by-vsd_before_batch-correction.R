@@ -340,7 +340,7 @@ analyze_mds_results <- function(normalized_counts, phen, title_prefix = "") {
   print(p_var_explained)
   
   # Save plot
-  ggsave(paste0(title_prefix, "_variance_explained.pdf"), p_var_explained, width = 10, height = 6)
+  ggsave(file.path(output_folder,paste0(title_prefix, "_variance_explained.pdf")), p_var_explained, width = 10, height = 6)
   
   # Extract MDS scores
   mds_scores <- mds_result$eigen.vectors
@@ -462,92 +462,131 @@ analyze_mds_results <- function(normalized_counts, phen, title_prefix = "") {
   cont_p_matrix_fixed <- prepare_p_matrix(cont_p_matrix)
   cat_p_matrix_fixed <- prepare_p_matrix(cat_p_matrix)
   
-  # Visualize results with corrplot
-  pdf(paste0(title_prefix, "_association_plots.pdf"), width = 12, height = 12)
+  # NEW CODE - Creating heatmaps with p-values and asterisks
+  # Function to create annotation text with p-values and asterisks
+  create_annotations <- function(association_matrix, pvalue_matrix) {
+    # Format p-values and add asterisks for significance
+    annotations <- matrix("", nrow = nrow(pvalue_matrix), ncol = ncol(pvalue_matrix),
+                          dimnames = dimnames(pvalue_matrix))
+    
+    for (i in 1:nrow(pvalue_matrix)) {
+      for (j in 1:ncol(pvalue_matrix)) {
+        if (!is.na(pvalue_matrix[i, j])) {
+          # Format p-value based on its magnitude
+          p_value <- pvalue_matrix[i, j]
+          
+          # Use scientific notation for very small p-values
+          if (p_value < 0.001) {
+            p_formatted <- sprintf("%.2e", p_value)
+          } else {
+            p_formatted <- sprintf("%.3f", p_value)
+          }
+          
+          # Add asterisk if significant
+          if (p_value < 0.05) {
+            annotations[i, j] <- paste0(p_formatted, "*")
+          } else {
+            annotations[i, j] <- p_formatted
+          }
+        }
+      }
+    }
+    
+    return(annotations)
+  }
   
-  par(mfrow = c(2, 2))
+  # Create annotation matrices
+  cont_annotations <- create_annotations(cont_matrix, cont_p_matrix)
+  cat_annotations <- create_annotations(cat_matrix, cat_p_matrix)
   
-  # Correlation plot for continuous variables - with error handling
-  tryCatch({
-    corrplot(cont_matrix, method = "color", 
-             type = "full", 
-             tl.col = "black", tl.srt = 45,
-             p.mat = cont_p_matrix_fixed, 
-             sig.level = c(0.001, 0.01, 0.05), # Multiple significance levels
-             insig = "pch",  # Use symbols instead of p-values
-             pch.cex = 0.8,
-             pch.col = "black",
-             cl.offset = -0.5,
-             cl.align.text = "r",
-             mar = c(4, 1, 4, 0),
-             title = paste(title_prefix, "Pearson Correlations: \nContinuous Variables vs PCs"))
-  }, error = function(e) {
-    plot.new()
-    title(paste(title_prefix, "Pearson Correlations: \nContinuous Variables vs PCs"))
-    text(0.5, 0.5, "No significant correlations to display", cex = 1.2)
-    message("Warning: Unable to create correlation plot - ", e$message)
-  })
+  # Prepare data frames for ggplot2
+  prepare_for_ggplot <- function(matrix_data, p_matrix, annotations, type) {
+    df <- data.frame()
+    
+    for (i in 1:nrow(matrix_data)) {
+      for (j in 1:ncol(matrix_data)) {
+        if (!is.na(matrix_data[i, j])) {
+          df <- rbind(df, data.frame(
+            Variable = rownames(matrix_data)[i],
+            PC = colnames(matrix_data)[j],
+            Value = matrix_data[i, j],
+            P_value = p_matrix[i, j],
+            Annotation = annotations[i, j],
+            Significant = p_matrix[i, j] < 0.05
+          ))
+        }
+      }
+    }
+    
+    df$Variable <- factor(df$Variable, levels = rev(rownames(matrix_data)))
+    df$PC <- factor(df$PC, levels = colnames(matrix_data))
+    df$Type <- type
+    
+    return(df)
+  }
   
-  tryCatch({
-    corrplot(cont_matrix, method = "color", 
-             type = "full", 
-             tl.col = "black", tl.srt = 45,
-             p.mat = cont_p_matrix_fixed, 
-             sig.level = c(0.001, 0.01, 0.05),
-             insig = "blank",  # Don't show insignificant values
-             cl.offset = -0.5,
-             cl.align.text = "r",
-             mar = c(4, 1, 4, 0),
-             title = paste(title_prefix, "Pearson Correlations: \nContinuous Variables vs PCs"))
-  }, error = function(e) {
-    plot.new()
-    title(paste(title_prefix, "Pearson Correlations: \nContinuous Variables vs PCs"))
-    text(0.5, 0.5, "No significant correlations to display", cex = 1.2)
-    message("Warning: Unable to create correlation plot - ", e$message)
-  })
+  cont_df <- prepare_for_ggplot(cont_matrix, cont_p_matrix, cont_annotations, "Continuous")
+  cat_df <- prepare_for_ggplot(cat_matrix, cat_p_matrix, cat_annotations, "Categorical")
   
-  # Effect size plot for categorical variables - with error handling
-  tryCatch({
-    corrplot(cat_matrix, method = "color", 
-             type = "full", 
-             tl.col = "black", tl.srt = 45,
-             col = colorRampPalette(c("white", "pink", "red"))(100),
-             p.mat = cat_p_matrix_fixed, 
-             sig.level = c(0.001, 0.01, 0.05),
-             insig = "pch", 
-             pch.cex = 0.8,
-             pch.col = "black",
-             mar = c(4, 1, 4, 0),
-             cl.offset = -0.5,
-             cl.align.text = "r",
-             title = paste(title_prefix, "Effect Sizes (η²): \nCategorical Variables vs PCs"),
-             is.corr = FALSE)
-  }, error = function(e) {
-    plot.new()
-    title(paste(title_prefix, "Effect Sizes (η²): \nCategorical Variables vs PCs"))
-    text(0.5, 0.5, "No significant associations to display", cex = 1.2)
-    message("Warning: Unable to create effect size plot - ", e$message)
-  })
+  # Create heatmaps with ggplot2
+  create_heatmap <- function(df, title, legend_title) {
+    ggplot(df, aes(x = PC, y = Variable, fill = Value)) +
+      geom_tile(color = "white") +
+      geom_text(aes(label = Annotation, fontface = ifelse(Significant, "bold", "plain"))) +
+      scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0,
+                           name = legend_title) +
+      theme_minimal() +
+      theme(
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.title = element_text(face = "bold"),
+        plot.title = element_text(hjust = 0.5, face = "bold")
+      ) +
+      labs(
+        title = title,
+        x = "MDS Component",
+        y = "Variable"
+      )
+  }
   
-  tryCatch({
-    corrplot(cat_matrix, method = "color", 
-             type = "full", 
-             tl.col = "black", tl.srt = 45,
-             col = colorRampPalette(c("white", "pink", "red"))(100),
-             p.mat = cat_p_matrix_fixed, 
-             sig.level = c(0.001, 0.01, 0.05),
-             insig = "blank",
-             mar = c(4, 1, 4, 0),
-             cl.offset = -0.5,
-             cl.align.text = "r",
-             title = paste(title_prefix, "Effect Sizes (η²): \nCategorical Variables vs PCs"),
-             is.corr = FALSE)
-  }, error = function(e) {
-    plot.new()
-    title(paste(title_prefix, "Effect Sizes (η²): \nCategorical Variables vs PCs"))
-    text(0.5, 0.5, "No significant associations to display", cex = 1.2)
-    message("Warning: Unable to create effect size plot - ", e$message)
-  })
+  # Create and save continuous variables heatmap
+  if (nrow(cont_df) > 0) {
+    cont_heatmap <- create_heatmap(
+      cont_df,
+      paste(title_prefix, "Pearson Correlations: Continuous Variables vs PCs"),
+      "Correlation"
+    )
+    
+    ggsave(
+      file.path(output_folder, paste0(title_prefix, "_continuous_heatmap.pdf")),
+      cont_heatmap,
+      width = 10,
+      height = 8
+    )
+    
+    print(cont_heatmap)
+  } else {
+    message("No continuous variable associations to plot")
+  }
+  
+  # Create and save categorical variables heatmap
+  if (nrow(cat_df) > 0) {
+    cat_heatmap <- create_heatmap(
+      cat_df,
+      paste(title_prefix, "Effect Sizes (η²): Categorical Variables vs PCs"),
+      "Effect Size (η²)"
+    )
+    
+    ggsave(
+      file.path(output_folder, paste0(title_prefix, "_categorical_heatmap.pdf")),
+      cat_heatmap,
+      width = 10,
+      height = 8
+    )
+    
+    print(cat_heatmap)
+  } else {
+    message("No categorical variable associations to plot")
+  }
   
   dev.off()
   
@@ -559,7 +598,12 @@ analyze_mds_results <- function(normalized_counts, phen, title_prefix = "") {
   
   message(paste("Association results saved to", output_csv))
   
-  return(results_df)
+  # Return both results dataframe and heatmaps
+  return(list(
+    results = results_df,
+    continuous_heatmap = if(nrow(cont_df) > 0) cont_heatmap else NULL,
+    categorical_heatmap = if(nrow(cat_df) > 0) cat_heatmap else NULL
+  ))
 }
 
 # 7. Read phenotype data
@@ -638,7 +682,7 @@ for (n in var) {
 }
 
 # 12. Create output directory if it doesn't exist
-dir.create("./reports/local_only/correlation_pca_trait", recursive = TRUE, showWarnings = FALSE)
+if(!file.exists("./reports/local_only/correlation_pca_trait")){dir.create("./reports/local_only/correlation_pca_trait", recursive = TRUE, showWarnings = FALSE)}
 
 # 13. Run MDS analysis and visualization for all samples
 message("Running MDS analysis for all samples...")
@@ -695,9 +739,3 @@ if(nrow(top_assoc_nasal) > 0) {
 } else {
   message("   - Nasal: No significant associations found")
 }
-
-message("3. Files generated:")
-message("   - MDS plots: Combined_mds_analysis.pdf, Bronchial_mds_analysis.pdf, Nasal_mds_analysis.pdf")
-message("   - Variance plots: Combined_variance_explained.pdf, Bronchial_variance_explained.pdf, Nasal_variance_explained.pdf")
-message("   - Association plots: Combined_association_plots.pdf, Bronchial_association_plots.pdf, Nasal_association_plots.pdf")
-message("   - CSV results: MDS_associations.csv, MDS_associations_bronchial.csv, MDS_associations_nasal.csv")
