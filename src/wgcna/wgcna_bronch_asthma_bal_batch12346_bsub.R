@@ -105,7 +105,7 @@ spt <- pickSoftThreshold(expression.data)
 
 # Plot Scale Independence
 png(file.path(output_folder,"bronch_spt.png"), width = 800, height = 600)
-par(mar = c(1, 1, 1, 1))
+par(mar = c(2,2,2,2))
 plot(
   spt$fitIndices[, 1],
   spt$fitIndices[, 2],
@@ -120,7 +120,7 @@ dev.off()
 
 # Plot Mean Connectivity
 png(file.path(output_folder,"bronch_spt_vs_connectivity.png"), width = 800, height = 600)
-par(mar = c(1, 1, 1, 1))
+par(mar = c(2,2,2,2))
 plot(
   spt$fitIndices[, 1],
   spt$fitIndices[, 5],
