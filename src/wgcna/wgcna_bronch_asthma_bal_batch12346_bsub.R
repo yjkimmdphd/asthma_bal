@@ -292,6 +292,9 @@ top_kWithin_by_module <- connectivity_allClusters %>%
 head(top_kWithin_by_module)
 
 # load DEG results
+project_base <- "."
+resources_dir <- file.path(project_base, "resources", "processed_data")
+reports_dir <- file.path(project_base, "reports", "local_only")
 deg_dir <- file.path(reports_dir, "deg_bal_bronch~cell2025-01-03")
 deg_folder <- deg_dir
 file_names <- list.files(deg_folder)
