@@ -268,6 +268,8 @@ colnames(expression.data) %>% head
 
 # Check if rownames(connectivity_allClusters) match gene.module.table$genes
 
+gene.module.table<-data.frame(genes=colnames(expression.data),modules=mergedColors)
+
 matched <-
   match(rownames(connectivity_allClusters), gene.module.table$genes)
 # Update connectivity_allClusters$module with the corresponding module values
@@ -289,6 +291,16 @@ top_kWithin_by_module <- connectivity_allClusters %>%
 
 head(top_kWithin_by_module)
 
+# load DEG results
+deg_dir <- file.path(reports_dir, "deg_bal_bronch~cell2025-01-03")
+deg_folder <- deg_dir
+file_names <- list.files(deg_folder)
+# Load DEG results for BAL eos % > 1 
+deg_file_bal_eos_p_mt1 <- file_names[grep("deg_bronch_res_sig_16_", file_names)]
+deg_results_bal_eos_p_mt1 <- read.csv(file.path(deg_folder, deg_file_bal_eos_p_mt1), row.names = 1)
+deg_abs_lfc<-rownames(deg_results_bal_eos_p_mt1%>%filter(abs(log2FoldChange)>=1))
+
+# check module and DEG overlap
 top_kWithin_by_module_deg_overlap <- top_kWithin_by_module %>%
   
   filter(gene %in% deg_abs_lfc)
