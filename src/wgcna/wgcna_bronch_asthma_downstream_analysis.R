@@ -1,133 +1,96 @@
 library(tidyverse)
 library(WGCNA)
 
-########################
-## Load Readcount Data ##
-########################
+#===============================================================================
+# Setup Project Paths
+#===============================================================================
+project_base <- "."
+resources_dir <- file.path(project_base, "resources", "processed_data")
+reports_dir <- file.path(project_base, "reports", "local_only")
+wgcna_dir <- file.path(reports_dir, "wgcna", "bronch")
+output_dir <- file.path(wgcna_dir, "output_2025-05-07") # to analyze wGNCA from january use 'output'
+deg_dir <- file.path(reports_dir, "deg_bal_bronch~cell2025-01-03")
+module_list_dir <- file.path(output_dir, "module-gene_list")
 
-# Load cell count table
-normalized_count_table_path <- "./resources/processed_data/normalized_gene_count/normalized_gene_count_bronch_vsd_batch-corrected.txt"
-if (file.exists(normalized_count_table_path)) {
-  counts <- read.table(normalized_count_table_path, 
-                       header = TRUE, 
-                       row.names = 1, 
-                       sep = "\t")
+# Ensure output directory exists
+if (!dir.exists(output_dir)) {
+  print("output_dir doesn't exist")
+  dir.create(output_dir, recursive = TRUE)
+}else{
+  print("output_dir exists")
 }
+
+#===============================================================================
+# Load Expression Data
+#===============================================================================
+normalized_count_path <- file.path(resources_dir, "normalized_gene_count", 
+                                   "normalized_gene_count_bronch_vsd_batch-corrected.txt")
+counts <- read.table(normalized_count_path, header = TRUE, row.names = 1, sep = "\t")
 genes <- rownames(counts)
 
-# Define the path for the output folder
-output_folder <- file.path("./reports/local_only/wgcna/bronch/output")
-
-# Check if the folder exists; if not, create it
-if (!dir.exists(output_folder)) {
-  dir.create(output_folder, recursive = TRUE) # recursive = TRUE ensures all intermediate directories are created
-}
-
-# Now the folder is guaranteed to exist, and the path is set
-output_folder
-
-###
-# 1. Create a new format for expression data
-###
+# Transform for expression analysis
 expression <- as.data.frame(t(counts))
 colnames(expression) <- genes
 
-# Check if genes/samples are good
+# Check data quality and remove outliers
 gsg <- goodSamplesGenes(expression)
-
-###
-# 2. Remove outlier genes (and samples if necessary)
-###
-
 if (!gsg$allOK) {
-  if (sum(!gsg$goodGenes) > 0) {
-    printFlush(
-      paste("Removing genes:", 
-            paste(names(expression)[!gsg$goodGenes], collapse = ", "))
-    )
-  }
-  
-  if (sum(!gsg$goodSamples) > 0) {
-    printFlush(
-      paste("Removing samples:", 
-            paste(rownames(expression)[!gsg$goodSamples], collapse = ", "))
-    )
-  }
-  
   expression <- expression[gsg$goodSamples, gsg$goodGenes]
 }
-###
-# 3. Identify outlier samples using a dendrogram
-###
+
+# Identify outlier samples using a dendrogram
 sampleTree <- hclust(dist(expression), method = "average")
-
-# png(file.path(output_folder,"sampleTree_nasal.png"), width = 800, height = 600)
-# par(cex = 0.6)
-# par(mar = c(0, 4, 2, 0))
-# plot(
-#   sampleTree,
-#   main = "Sample clustering to detect outliers",
-#   sub = "",
-#   xlab = "",
-#   cex.lab = 1.5,
-#   cex.axis = 1.5,
-#   cex.main = 2
-# )
-# abline(h = 160, col = "red")
-# dev.off()
-
-# Remove outliers
 cut.sampleTree <- cutreeStatic(sampleTree, cutHeight = 160, minSize = 7)
 expression.data <- expression[cut.sampleTree == 1, ]
 
-###
-# 4. load merged colors
-### 
+#===============================================================================
+# Load Previously Computed WGCNA Results
+#===============================================================================
+# Load merged colors
+mergedColors <- if(file.exists(file.path(output_dir, "mergedColors.txt"))) {
+  read.delim(file.path(output_dir, "mergedColors.txt"), sep = "\t", header = TRUE, row.names = 1)
+}
+colnames(mergedColors) <- "modules"
 
-mergedColors<-if(file.exists(file.path(output_folder,"mergedColors.txt"))){read.delim(file.path(output_folder,"mergedColors.txt"), sep="\t",header=TRUE,row.names = 1)}
-colnames(mergedColors)<-"modules"
+# Load merged module eigengenes
+mergedMEs <- if(file.exists(file.path(output_dir, "mergedMEs.txt"))) {
+  read.delim(file.path(output_dir, "mergedMEs.txt"), sep = "\t", header = TRUE, row.names = 1)
+}
 
-mergedMEs<-if(file.exists(file.path(output_folder,"mergedMEs.txt"))){read.delim(file.path(output_folder,"mergedMEs.txt"), sep="\t",header=TRUE, row.names=1)}
-
-
-# -----------------------------------------------------------------------------
-# Load phenotype data
-# the phenotype table
-# "scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_2024-12-26.csv" had
-# a serious defect in which the ACT score was row-shifted, and erroneously had
-# incorrect association between Eos % and ACT score
-# file changed to 2025-02-14
-# -----------------------------------------------------------------------------
-phen_path <- file.path(
-  "./resources/processed_data",
-  "scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_2025-02-14.csv"
-)
+#===============================================================================
+# Load and Process Phenotype Data
+#===============================================================================
+phen_path <- file.path(resources_dir, "scaled_phenotype_studyID_asthmaPhenotype_batch_cellCount_2025-02-14.csv")
 phen <- read.csv(phen_path)
 
-# load data for sampling date differences 
-sampling_date_diff<-"./resources/processed_data/sampling_dates/swab-bal-cbc_differences_in_days.txt"
-sampling_date_diff<-if(file.exists(sampling_date_diff)){read.table(sampling_date_diff,row.names = NULL,header = TRUE)}else{print("sampling date data doesn't exist")}
-sampling_date_diff<-sampling_date_diff%>%filter(Comparison=="blood_bal")
-colnames(sampling_date_diff)[1:3]<-c("ID","sampling_date_comp","sampling_date_diff_days")
+# Load sampling date differences
+sampling_date_path <- file.path(resources_dir, "sampling_dates", "swab-bal-cbc_differences_in_days.txt")
+if (file.exists(sampling_date_path)) {
+  sampling_date_diff <- read.table(sampling_date_path, row.names = NULL, header = TRUE) %>%
+    filter(Comparison == "blood_bal") 
+  
+  colnames(sampling_date_diff)<-c("ID","Comparison","Difference")
+  
+  # Join with phenotype data
+  phen <- left_join(phen, sampling_date_diff, by = "ID")
+}
 
-# left join sampling date data and phenotype data 
-phen<-left_join(phen,sampling_date_diff,by="ID")
-
-phen$Batch<-factor(phen$Batch,levels=unique(phen$Batch))
-
-phen_bronch<-phen[grepl("^B",phen$SampleID),]
-phen_input<-phen_bronch
+# Process phenotype data
+phen$Batch <- factor(phen$Batch, levels = unique(phen$Batch))
+phen_bronch <- phen[grepl("^B", phen$SampleID), ]
+phen_input <- phen_bronch
 phen_input$SampleID <- gsub("-", ".", phen_input$SampleID)
 
-# Create continuous and categorical variables based on various thresholds
-## Log-transformed/scaled/centered
+#===============================================================================
+# Create Categorical Variables Based on Thresholds
+#===============================================================================
+# Define variable groups
 source.cell.log <- c(
   "BAL_eos_ct_log", "BAL_eos_p_log", "BAL_neut_ct_log", "BAL_neut_p_log",
-  "BAL_wbc_log",    "blood_eos_log", "blood_eos_p_log", "blood_neut_log",
+  "BAL_wbc_log", "blood_eos_log", "blood_eos_p_log", "blood_neut_log",
   "blood_neut_p_log", "blood_wbc_log"
 )
 
-## Categorical variables to test (BAL)
 var_dichot_bal <- c(
   "bal_AEC_more_0", "bal_AEC_more_1", "bal_AEC_more_3", "bal_AEC_more_5",
   "bal_Eos_p_more_0", "bal_Eos_p_more_1", "bal_Eos_p_more_3",
@@ -135,721 +98,558 @@ var_dichot_bal <- c(
   "bal_neut_p_more_0", "bal_neut_p_more_2", "bal_neut_p_more_5"
 )
 
-## Categorical variables to test (Blood)
 var_dichot_blood <- c(
-  "bld_AEC_more_0",   "bld_AEC_more_100",
+  "bld_AEC_more_0", "bld_AEC_more_100",
   "bld_AEC_more_300", "bld_AEC_more_500"
 )
 
+# Create threshold variables more efficiently
+threshold_variables <- list(
+  BAL_eos_ct = list(prefix = "bal_AEC_more_", thresholds = c(0, 1, 1.2, 3, 5)),
+  BAL_eos_p = list(prefix = "bal_Eos_p_more_", thresholds = c(0, 1, 3)),
+  BAL_neut_ct = list(prefix = "bal_ANC_more_", thresholds = c(0, 5, 13)),
+  BAL_neut_p = list(prefix = "bal_neut_p_more_", thresholds = c(0, 2, 5)),
+  blood_eos = list(prefix = "bld_AEC_more_", thresholds = c(0, 100, 300, 500))
+)
+
+for (var_name in names(threshold_variables)) {
+  var_info <- threshold_variables[[var_name]]
+  for (threshold in var_info$thresholds) {
+    new_var_name <- paste0(var_info$prefix, threshold)
+    phen_input[[new_var_name]] <- as.numeric(phen_input[[var_name]] > threshold)
+  }
+}
+
+# Convert to factors
 phen_input <- phen_input %>%
-  mutate(
-    bal_AEC_more_0   = as.numeric(BAL_eos_ct > 0),
-    bal_AEC_more_1   = as.numeric(BAL_eos_ct > 1),
-    bal_AEC_more_1.2 = as.numeric(BAL_eos_ct > 1.2),
-    bal_AEC_more_3   = as.numeric(BAL_eos_ct > 3),
-    bal_AEC_more_5   = as.numeric(BAL_eos_ct > 5),
-    
-    bal_Eos_p_more_0 = as.numeric(BAL_eos_p > 0),
-    bal_Eos_p_more_1 = as.numeric(BAL_eos_p > 1),
-    bal_Eos_p_more_3 = as.numeric(BAL_eos_p > 3),
-    
-    bal_ANC_more_0   = as.numeric(BAL_neut_ct > 0),
-    bal_ANC_more_5   = as.numeric(BAL_neut_ct > 5),
-    bal_ANC_more_13  = as.numeric(BAL_neut_ct > 13),
-    
-    bal_neut_p_more_0 = as.numeric(BAL_neut_p > 0),
-    bal_neut_p_more_2 = as.numeric(BAL_neut_p > 2),
-    bal_neut_p_more_5 = as.numeric(BAL_neut_p > 5),
-    
-    bld_AEC_more_0   = as.numeric(blood_eos > 0),
-    bld_AEC_more_100 = as.numeric(blood_eos > 100),
-    bld_AEC_more_300 = as.numeric(blood_eos > 300),
-    bld_AEC_more_500 = as.numeric(blood_eos > 500)
-  ) %>%
-  mutate(across(c(var_dichot_bal,var_dichot_blood), ~ factor(., levels = c(0, 1))))
-
+  mutate(across(c(var_dichot_bal, var_dichot_blood), ~ factor(., levels = c(0, 1))))
 
 #===============================================================================
-# Identify Cell-Count Variables
+# Prepare Cell Count Variables for Analysis
 #===============================================================================
-
-# Combine continuous (log counts) and categorical variables
+# Combine variables to test
 var_to_test <- c(source.cell.log, var_dichot_bal, var_dichot_blood)
 
-# identify blood cell count phenotype variables
-var_to_test_bld<-var_to_test[c(grep("blood",var_to_test),grep("bld",var_to_test))]
+# Filter for blood-related variables
+var_to_test_bld <- var_to_test[c(grep("blood", var_to_test), grep("bld", var_to_test))]
 
 # Identify samples with CBC data and sampling date difference < 1 year
 cbc_sampleID <- phen_input %>%
-  filter(!is.na(vars(var_to_test_bld)), abs(sampling_date_diff_days) < 365) %>%
+  # Check if any of the blood variables are NA
+  filter(if_all(all_of(var_to_test_bld), ~!is.na(.)), 
+         abs(Difference) < 365) %>%
   pull(SampleID)
 
-# subset alltraits for variables pertaining to BAL phenotype
-alltraits<-phen_input[phen_input$SampleID%in%rownames(mergedMEs),]
-rownames(alltraits)<-alltraits$SampleID
+#===============================================================================
+# Prepare Trait Data for BAL and Blood Analysis
+#===============================================================================
+# For BAL phenotype
+alltraits <- phen_input[phen_input$SampleID %in% rownames(mergedMEs), ]
+rownames(alltraits) <- alltraits$SampleID
 
-alltraits<-alltraits[,c("FEV1_percent","BAL_eos_ct_log", "BAL_eos_p_log", "BAL_neut_ct_log", "BAL_neut_p_log",
-                        "BAL_wbc_log", var_dichot_bal)] # only select FEV1 predicted % and cell counts in the phenotype data
-good<-!(sapply(alltraits[,-1],is.na)%>%rowSums()>0) # remove rows with at least one NA in cell count phenotype
-datTraits_bal<-alltraits[good,]
+bal_vars <- c("FEV1_percent", "BAL_eos_ct_log", "BAL_eos_p_log", 
+              "BAL_neut_ct_log", "BAL_neut_p_log", "BAL_wbc_log", var_dichot_bal)
+alltraits_bal <- alltraits[, bal_vars]
+good_bal <- !rowSums(is.na(alltraits_bal[, -1])) > 0
+datTraits_bal <- alltraits_bal[good_bal, ]
 
-# subset alltraits for variables pertaining to blood phenotype
-alltraits<-phen_input[phen_input$SampleID%in%rownames(mergedMEs),]
-alltraits<-alltraits[alltraits$SampleID%in%cbc_sampleID,]
-rownames(alltraits)<-alltraits$SampleID
+# For blood phenotype
+alltraits_bld <- phen_input %>%
+  filter(SampleID %in% rownames(mergedMEs), 
+         SampleID %in% cbc_sampleID) %>%
+  select(SampleID, FEV1_percent, all_of(var_to_test_bld))
+rownames(alltraits_bld) <- alltraits_bld$SampleID
+alltraits_bld <- alltraits_bld[, -1]  # Remove SampleID column
+good_bld <- !rowSums(is.na(alltraits_bld[, -1])) > 0
+datTraits_bld <- alltraits_bld[good_bld, ]
 
-alltraits_bld<-alltraits[,c("FEV1_percent",var_to_test_bld)] # only select FEV1 and cell counts in the phenotype data
-good_bld<-!(sapply(alltraits_bld[,-1],is.na)%>%rowSums()>0) # remove rows with at least one NA in cell count phenotype
-datTraits_bld<-alltraits_bld[good_bld,]
-
-###
-# 5. Module-Trait associations
-###
-
-gene.module.table<-data.frame(genes=colnames(expression.data),modules=mergedColors$modules)
-
-# ==================
-# quantify the association between the expression profile and FEV1 percent and
-# BAL cell count phenotypes (previously was for ACT score, which had erroneous
-# artifacts )
-# ==================
-# calculates the correlation of the trait with previously identified module eigengenes. 
-# This pairwise correlation is known as the eigengene gene significance
-expression.data_bal<-expression.data[rownames(expression.data)%in%rownames(datTraits_bal),]
-mergedMEs_bal<-mergedMEs[rownames(mergedMEs)%in%rownames(datTraits_bal),]
-nSamples_bal = nrow(expression.data_bal)
-module.trait.correlation_bal = cor(mergedMEs_bal, datTraits_bal, use = "p") #p for pearson correlation coefficient 
-module.trait.Pvalue_bal = corPvalueStudent(module.trait.correlation_bal, nSamples_bal) #calculate the p-value associated with the correlation
-
-# Will display correlations and their p-values
-textMatrix_bal = paste(signif(module.trait.correlation_bal, 2), "\n(",
-                   signif(module.trait.Pvalue_bal, 1), ")", sep = "");
-dim(textMatrix_bal) = dim(module.trait.correlation_bal)
-
-# Display the correlation values within a heatmap plot
-png(file.path(output_folder, paste("module-trait-correlation_bal",Sys.Date(),".png"), width = 1200, height = 1200))
-
-par(mar = c(12, 12, 8, 8))  # Adjust margins
-plot(1, type = "n", axes = FALSE, xlab = "", ylab = "")  # Empty plot to set margins
-
-labeledHeatmap(
-  Matrix = module.trait.correlation_bal,
-  xLabels = names(datTraits_bal),
-  yLabels = names(mergedMEs_bal),
-  ySymbols = names(mergedMEs_bal),
-  colorLabels = FALSE,
-  colors = blueWhiteRed(50),
-  textMatrix = textMatrix_bal,
-  setStdMargins = FALSE,  # Prevents resetting margins
-  cex.text = 1.1,
-  zlim = c(-1, 1),
-  main = "Module-trait correlation"
+#===============================================================================
+# Create Gene-Module Table
+#===============================================================================
+gene.module.table <- data.frame(
+  genes = colnames(expression.data),
+  modules = mergedColors$modules
 )
 
-dev.off()
+gene.module.table$modules<-factor(gene.module.table$modules,levels=unique(gene.module.table$modules))
+gmt_list<-split.data.frame(gene.module.table,gene.module.table$modules)
 
-# subset specific traits for main figure
-trait_subset<-c("FEV1_percent","BAL_eos_p_log","bal_Eos_p_more_1")
-fig_text_index<-which(colnames(module.trait.correlation_bal)%in%trait_subset)
-# Display the correlation values within a heatmap plot
-png(file.path(output_folder, paste("module-trait-correlation_bal_subset",Sys.Date(),".png")), width = 400, height = 1200)
+gmt_list_folder<-file.path(output_dir,"gmt_list")
+if(!file.exists(gmt_list_folder)){
+  dir.create(gmt_list_folder)
+}else{
+  print("folder exists")
+}
 
-par(mar = c(10, 10, 4, 4))  # Adjust margins
-plot(1, type = "n", axes = FALSE, xlab = "", ylab = "")  # Empty plot to set margins
-
-labeledHeatmap(
-  Matrix = module.trait.correlation_bal[,trait_subset],
-  xLabels = names(datTraits_bal[,trait_subset]),
-  yLabels = names(mergedMEs_bal),
-  ySymbols = names(mergedMEs_bal),
-  colorLabels = FALSE,
-  colors = blueWhiteRed(50),
-  textMatrix = textMatrix_bal[,fig_text_index],
-  setStdMargins = FALSE,  # Prevents resetting margins
-  cex.text = 1.1,
-  zlim = c(-1, 1),
-  main = "Module-trait correlation"
-)
-
-dev.off()
-
-# ==================
-# quantify the association between the expression profile and FEV1 perc  and
-# blood cell count profile phenotypes (previously had erroneous ACT score)
-# ==================
-# calculates the correlation of the trait with previously identified module eigengenes. 
-# This pairwise correlation is known as the eigengene gene significance
-
-expression.data_bld<-expression.data[rownames(expression.data)%in%rownames(datTraits_bld),]
-mergedMEs_bld<-mergedMEs[rownames(mergedMEs)%in%rownames(datTraits_bld),]
-nSamples_bld = nrow(expression.data_bld)
-module.trait.correlation_bld = cor(mergedMEs_bld, datTraits_bld, use="p") #p for pearson correlation coefficient 
-module.trait.Pvalue_bld = corPvalueStudent(module.trait.correlation_bld, nSamples_bld) #calculate the p-value associated with the correlation
-
-# Will display correlations and their p-values
-textMatrix_bld = paste(signif(module.trait.correlation_bld, 2), "\n(",
-                   signif(module.trait.Pvalue_bld, 1), ")", sep = "");
-dim(textMatrix_bld) = dim(module.trait.correlation_bld)
-# Display the correlation values within a heatmap plot
-png(file.path(output_folder, paste("module-trait-correlation_bld",Sys.Date(),".png")), width = 1200, height = 1200)
-
-par(mar = c(12, 12, 8, 8))  # Adjust margins
-plot(1, type = "n", axes = FALSE, xlab = "", ylab = "")  # Empty plot to set margins
-
-labeledHeatmap(
-  Matrix = module.trait.correlation_bld,
-  xLabels = names(datTraits_bld),
-  yLabels = names(mergedMEs_bld),
-  ySymbols = names(mergedMEs_bld),
-  colorLabels = FALSE,
-  colors = blueWhiteRed(50),
-  textMatrix = textMatrix_bld,
-  setStdMargins = FALSE,  # Prevents resetting margins
-  cex.text = 1.1,
-  zlim = c(-1, 1),
-  main = "Module-trait correlation"
-)
-
-dev.off()
-# ---------------- 
-# while IL-4, IL-5, IL-13 expression is only detectable in immune cells (e.g.,
-# induced sputum), will try to compare their expression in BE samples
-# ----------------
-deg_folder<-file.path("./reports/local_only/deg_bal_bronch~cell2025-01-03")
-file_names<-list.files(deg_folder)
-deg_file_bal_eos_p_mt1<-file_names[grep("deg_bronch_res_sig_16_",file_names)]
-deg_results_bal_eos_p_mt1<-read.csv(file.path(file_path,deg_file_bal_eos_p_mt1),row.names = 1)
-
-# Extract the string after '~' and remove the '.csv' extension to name each list element
-extracted_strings <- sapply(deg_file_bal_eos_p_mt1, function(x) {
-  string_after_tilde <- trimws(strsplit(x, "~")[[1]][2])
-  string_without_csv <- sub("\\+ Batch_2025-01-03_.csv$", "", string_after_tilde)
-  return(string_without_csv)
+lapply(gmt_list,function(list){
+  write.table(unlist(as.character(list$genes)),
+              file.path(gmt_list_folder,
+                        paste(unique(list$modules),"module_gene_list.txt",sep="_")
+                        ),
+              col.names = FALSE,
+              row.names = FALSE,
+              sep = "\t"
+              )
 })
-names(deg_results_bal_eos_p_mt1)<-extracted_strings
-head(deg_results_bal_eos_p_mt1)
 
-rownames(deg_results_bal_eos_p_mt1)[c(grep("IL",rownames(deg_results_bal_eos_p_mt1)))] # their levels are too low, and likely was filtered out
 
-# ----------------
-# load deg results (all results FDR > 0) bronch ~ cell count, continuous
-# ----------------
+#===============================================================================
+# Module-Trait Correlations for BAL
+#===============================================================================
+# Helper function for module-trait correlation analysis
+calculate_module_trait_correlation <- function(mergedMEs_subset, datTraits_subset, output_prefix) {
+  nSamples = nrow(mergedMEs_subset)
+  correlation = cor(mergedMEs_subset, datTraits_subset, use = "p")
+  pvalue = corPvalueStudent(correlation, nSamples)
+  
+  # Format text matrix for heatmap
+  textMatrix = paste(signif(correlation, 2), "\n(",
+                     signif(pvalue, 1), ")", sep = "")
+  dim(textMatrix) = dim(correlation)
+  
+  # Create heatmap
+  png(file.path(output_dir, paste0("module-trait-correlation_", output_prefix, "_", Sys.Date(), ".png")), 
+      width = 1200, height = 1200)
+  
+  par(mar = c(12, 12, 8, 8))
+  plot(1, type = "n", axes = FALSE, xlab = "", ylab = "")
+  
+  labeledHeatmap(
+    Matrix = correlation,
+    xLabels = names(datTraits_subset),
+    yLabels = names(mergedMEs_subset),
+    ySymbols = names(mergedMEs_subset),
+    colorLabels = FALSE,
+    colors = blueWhiteRed(50),
+    textMatrix = textMatrix,
+    setStdMargins = FALSE,
+    cex.text = 1.1,
+    zlim = c(-1, 1),
+    main = "Module-trait correlation"
+  )
+  
+  dev.off()
+  
+  return(list(correlation = correlation, pvalue = pvalue, textMatrix = textMatrix))
+}
 
-deg_folder<-file.path("./reports/local_only/deg_bal_bronch~cell2025-01-03")
-file_names<-list.files(deg_folder)
-deg_file<-file_names[grep("deg_bronch_res_sig",file_names)]
-deg_results<-lapply(file.path(file_path,deg_file),function(d)read.csv(d,row.names = 1))
+# Filter data for BAL analysis
+expression.data_bal <- expression.data[rownames(expression.data) %in% rownames(datTraits_bal), ]
+mergedMEs_bal <- mergedMEs[rownames(mergedMEs) %in% rownames(datTraits_bal), ]
 
-# Extract the string after '~' and remove the '.csv' extension to name each list element
+# Calculate correlations for BAL
+bal_corr_results <- calculate_module_trait_correlation(mergedMEs_bal, datTraits_bal, "bal")
+
+# Create subset heatmap for main figure
+trait_subset <- c("FEV1_percent", "BAL_eos_p_log", "bal_Eos_p_more_1")
+fig_text_index <- which(colnames(bal_corr_results$correlation) %in% trait_subset)
+
+png(file.path(output_dir, paste0("module-trait-correlation_bal_subset_", Sys.Date(), ".png")), 
+    width = 400, height = 1200)
+
+par(mar = c(10, 10, 4, 4))
+plot(1, type = "n", axes = FALSE, xlab = "", ylab = "")
+
+labeledHeatmap(
+  Matrix = bal_corr_results$correlation[, trait_subset],
+  xLabels = names(datTraits_bal[, trait_subset]),
+  yLabels = names(mergedMEs_bal),
+  ySymbols = names(mergedMEs_bal),
+  colorLabels = FALSE,
+  colors = blueWhiteRed(50),
+  textMatrix = bal_corr_results$textMatrix[, fig_text_index],
+  setStdMargins = FALSE,
+  cex.text = 1.1,
+  # zlim = c(-1, 1),
+  main = "Module-trait correlation"
+)
+
+dev.off()
+
+#===============================================================================
+# Module-Trait Correlations for Blood
+#===============================================================================
+# Filter data for blood analysis
+expression.data_bld <- expression.data[rownames(expression.data) %in% rownames(datTraits_bld), ]
+mergedMEs_bld <- mergedMEs[rownames(mergedMEs) %in% rownames(datTraits_bld), ]
+
+# Calculate correlations for blood
+bld_corr_results <- calculate_module_trait_correlation(mergedMEs_bld, datTraits_bld, "bld")
+
+#===============================================================================
+# Load DEG Results
+#===============================================================================
+# Fix: Use deg_dir instead of file_path
+deg_folder <- deg_dir
+file_names <- list.files(deg_folder)
+
+# Load DEG results for BAL eos % > 1 
+deg_file_bal_eos_p_mt1 <- file_names[grep("deg_bronch_res_sig_16_", file_names)]
+deg_results_bal_eos_p_mt1 <- read.csv(file.path(deg_folder, deg_file_bal_eos_p_mt1), row.names = 1)
+
+# Load all DEG results
+deg_file <- file_names[grep("deg_bronch_res_sig", file_names)]
+deg_results <- lapply(file.path(deg_folder, deg_file), function(d) read.csv(d, row.names = 1))
+
+# Extract descriptive names from filenames
 extracted_strings <- sapply(deg_file, function(x) {
   string_after_tilde <- trimws(strsplit(x, "~")[[1]][2])
   string_without_csv <- sub("\\+ Batch_2025-01-03_.csv$", "", string_after_tilde)
   return(string_without_csv)
 })
-names(deg_results)<-extracted_strings
-lapply(deg_results,head)
+names(deg_results) <- extracted_strings
 
-# ---------------- 
-# proportion of module gene that overlaps with bronch DEG
-# do it for for
-# blood Eos %, AEC, Neut %, ANC
-# ----------------
-# Filter BAL-related files
-input_deg_files <- deg_file[grep("bld|blood", deg_file, ignore.case = TRUE)]
-input_deg_files <- input_deg_files[grep("sig", input_deg_files)]
-
-# Read in DEG files
-deg_list <- lapply(input_deg_files, function(x) {
-  read.csv(file.path(deg_folder, x), row.names = 1)
-})
-names(deg_list) <- sub(".*~\\s*(.*?)\\s*\\+.*", "\\1", input_deg_files)
-
-
-# Extract significant genes with absolute log2FoldChange > 1
-deg_abs_lfc <- lapply(deg_list, function(df) {
-  filter(df, abs(log2FoldChange) > 1) %>% rownames()
-})
-
-# Define WGCNA module folder
-module_output_folder <- "./reports/local_only/wgcna/bronch/output/module-gene_list"
-wgcna_files <- list.files(module_output_folder, pattern = "\\.txt$", full.names = TRUE)
-
-# Read in module gene lists
-module_gene_list <- lapply(wgcna_files, function(file) {
-  read.table(file, header = TRUE, sep = "\t", row.names = 1) %>% unlist() %>% as.vector()
-})
-names(module_gene_list) <- sub("batch12346.txt", "", basename(wgcna_files))
-
-# Calculate overlap proportions and counts
-overlap_proportion <- overlap_sum <- vector("list", length(deg_list))
-names(overlap_proportion) <- names(overlap_sum) <- names(deg_list)
-
-for (i in seq_along(deg_list)) {
-  overlap_proportion[[i]] <- sapply(module_gene_list, function(genes) {
-    round(mean(genes %in% deg_abs_lfc[[i]]), 2)
+#===============================================================================
+# Helper Functions for Module-DEG Overlap Analysis
+#===============================================================================
+analyze_deg_module_overlap <- function(deg_pattern, gene_module_table, output_prefix) {
+  # Filter DEG files by pattern
+  input_deg_files <- deg_file[grep(deg_pattern, deg_file, ignore.case = TRUE)]
+  input_deg_files <- input_deg_files[grep("sig", input_deg_files)]
+  
+  # Read DEG files
+  deg_list <- lapply(input_deg_files, function(x) {
+    read.csv(file.path(deg_folder, x), row.names = 1)
   })
-  overlap_sum[[i]] <- sapply(module_gene_list, function(genes) {
-    sum(genes %in% deg_abs_lfc[[i]])
+  names(deg_list) <- sub(".*~\\s*(.*?)\\s*\\+.*", "\\1", input_deg_files)
+  
+  # Extract significant genes with |log2FC| > 1
+  deg_abs_lfc <- lapply(deg_list, function(df) {
+    filter(df, abs(log2FoldChange) > 1) %>% rownames()
   })
+  
+  # Read module gene lists
+  module_gene_list <-  split(gene_module_table$genes, gene_module_table$modules)
+
+  # Calculate overlap statistics
+  overlap_proportion <- overlap_sum <- vector("list", length(deg_list))
+  names(overlap_proportion) <- names(overlap_sum) <- names(deg_list)
+  
+  for (i in seq_along(deg_list)) {
+    overlap_proportion[[i]] <- sapply(module_gene_list, function(genes) {
+      round(mean(genes %in% deg_abs_lfc[[i]]), 2)
+    })
+    overlap_sum[[i]] <- sapply(module_gene_list, function(genes) {
+      sum(genes %in% deg_abs_lfc[[i]])
+    })
+  }
+  
+  # Merge results
+  merged_df <- do.call(rbind, lapply(names(overlap_proportion), function(name) {
+    data.frame(
+      Category = name,
+      Module = names(overlap_proportion[[name]]),
+      Proportion = overlap_proportion[[name]],
+      Count = overlap_sum[[name]],
+      stringsAsFactors = FALSE
+    )
+  }))
+  
+  # Save results
+  output_file <- file.path(output_dir, paste0("module-gene_", output_prefix, "-deg-gene_overlap_", Sys.Date(), ".txt"))
+  write.table(merged_df, output_file, sep = "\t", quote = FALSE, row.names = TRUE, col.names = NA)
+  
+  return(list(merged_df = merged_df, deg_abs_lfc = deg_abs_lfc, module_gene_list = module_gene_list))
 }
 
-# Merge overlap results into a dataframe
-merged_df <- do.call(rbind, lapply(names(overlap_proportion), function(name) {
-  data.frame(
-    Category = name,
-    Module = names(overlap_proportion[[name]]),
-    Proportion = overlap_proportion[[name]],
-    Count = overlap_sum[[name]],
-    stringsAsFactors = FALSE
-  )
-}))
+#===============================================================================
+# Analyze Blood DEG-Module Overlap
+#===============================================================================
+bld_overlap_results <- analyze_deg_module_overlap("bld|blood", gene.module.table, "bld")
 
-# Save results
-output_file <- file.path(output_folder, paste("module-gene_bld-deg-gene_overlap",Sys.Date(),".txt",sep=""))
-write.table(merged_df, output_file, sep = "\t", quote = FALSE, row.names = TRUE, col.names = NA)
+#===============================================================================
+# Analyze BAL DEG-Module Overlap
+#===============================================================================
+bal_overlap_results <- analyze_deg_module_overlap("bal|BAL", gene.module.table, "bal")
 
-# Print first few rows
-head(merged_df)
-# ----------------
-# bal Eos %, AEC, Neut %, ANC
-# ----------------
+#===============================================================================
+# Extract DEGs for BAL Eos % > 1
+#===============================================================================
+deg_bal_eos_p_mt1_up <- rownames(filter(deg_results$bal_Eos_p_more_1, log2FoldChange >= 1))
+deg_bal_eos_p_mt1_down <- rownames(filter(deg_results$bal_Eos_p_more_1, log2FoldChange <= -1))
+module_gene_list_interest <- bal_overlap_results$module_gene_list$darkslateblue # darkslate blue 
 
-# Filter BAL-related files
-input_deg_files <- deg_file[grep("bal|BAL", deg_file, ignore.case = TRUE)]
-input_deg_files <- input_deg_files[grep("sig", input_deg_files)]
+# Find overlap with darkslateblue module
+overlap_darkslateblue_up <- module_gene_list_interest[module_gene_list_interest %in% deg_bal_eos_p_mt1_up]
+overlap_darkslateblue_down <- module_gene_list_interest[module_gene_list_interest %in% deg_bal_eos_p_mt1_down]
 
-# Read in DEG files
-deg_list <- lapply(input_deg_files, function(x) {
-  read.csv(file.path(deg_folder, x), row.names = 1)
-})
-names(deg_list) <- sub(".*~\\s*(.*?)\\s*\\+.*", "\\1", input_deg_files)
+#===============================================================================
+# Calculate Module Membership and Gene Significance
+#===============================================================================
+# Extract module names
+modNames <- substring(names(mergedMEs), 3)
 
+# Calculate gene-module membership
+nSamples <- nrow(expression.data)
+geneModuleMembership <- as.data.frame(WGCNA::cor(expression.data, mergedMEs, use = "p"))
+MMPvalue <- as.data.frame(corPvalueStudent(as.matrix(geneModuleMembership), nSamples))
+names(geneModuleMembership) <- paste("MM", modNames, sep = "")
+names(MMPvalue) <- paste("p.MM", modNames, sep = "")
 
-# Extract significant genes with absolute log2FoldChange > 1
-deg_abs_lfc <- lapply(deg_list, function(df) {
-  filter(df, abs(log2FoldChange) > 1) %>% rownames()
-})
+#===============================================================================
+# Gene Significance for BAL Eos % > 1
+#===============================================================================
+# Create trait vector
+phen_of_interest <- as.data.frame(datTraits_bal$bal_Eos_p_more_1)
 
-# Define WGCNA module folder
-module_output_folder <- "./reports/local_only/wgcna/bronch/output/module-gene_list"
-wgcna_files <- list.files(module_output_folder, pattern = "\\.txt$", full.names = TRUE)
+# Calculate gene-trait significance
+geneTraitSignificance <- as.data.frame(WGCNA::cor(expression.data_bal, phen_of_interest, use = "p"))
+GSPvalue <- as.data.frame(corPvalueStudent(as.matrix(geneTraitSignificance), nSamples))
+names(geneTraitSignificance) <- paste("GS.", names(phen_of_interest), sep = "")
+names(GSPvalue) <- paste("p.GS.", names(phen_of_interest), sep = "")
 
-# Read in module gene lists
-module_gene_list <- lapply(wgcna_files, function(file) {
-  read.table(file, header = TRUE, sep = "\t", row.names = 1) %>% unlist() %>% as.vector()
-})
-names(module_gene_list) <- sub("batch12346.txt", "", basename(wgcna_files))
-
-# Calculate overlap proportions and counts
-overlap_proportion <- overlap_sum <- vector("list", length(deg_list))
-names(overlap_proportion) <- names(overlap_sum) <- names(deg_list)
-
-for (i in seq_along(deg_list)) {
-  overlap_proportion[[i]] <- sapply(module_gene_list, function(genes) {
-    round(mean(genes %in% deg_abs_lfc[[i]]), 2)
-  })
-  overlap_sum[[i]] <- sapply(module_gene_list, function(genes) {
-    sum(genes %in% deg_abs_lfc[[i]])
-  })
+#===============================================================================
+# Function for Module Membership vs Gene Significance Plots
+#===============================================================================
+create_membership_plot <- function(geneModuleMembership, mergedColors, modNames, 
+                                   geneTraitSignificance, trait_name,
+                                   deg_up, deg_down, output_file, 
+                                   subset_modules = NULL) {
+  
+  # Determine which modules to plot
+  modules_to_plot <- if (!is.null(subset_modules)) subset_modules else modNames
+  
+  # Calculate grid dimensions
+  n_modules <- length(modules_to_plot)
+  n_cols <- min(4, n_modules)
+  n_rows <- ceiling(n_modules / n_cols)
+  
+  # Create plot
+  png(output_file, width = 1200, height = 1200)
+  par(mar = c(4, 4, 4, 4), mfrow = c(n_rows, n_cols))
+  
+  for (mod in modules_to_plot) {
+    column <- match(mod, modNames)
+    moduleGenes <- mergedColors == mod
+    
+    # Set point colors
+    module_color <- rep(mod, sum(moduleGenes))
+    if (mod == "ivory") module_color <- rep("grey", sum(moduleGenes))
+    
+    # Highlight DEGs
+    gene_names <- rownames(geneModuleMembership)[moduleGenes]
+    is_up_deg <- gene_names %in% deg_up
+    is_down_deg <- gene_names %in% deg_down
+    module_color[is_up_deg] <- "green"
+    module_color[is_down_deg] <- "red"
+    
+    # Set point sizes
+    point_sizes <- rep(2, sum(moduleGenes))
+    point_sizes[is_up_deg | is_down_deg] <- 3
+    
+    # Create scatterplot
+    verboseScatterplot(
+      abs(geneModuleMembership[moduleGenes, column]),
+      abs(geneTraitSignificance[moduleGenes, 1]),
+      xlab = paste("Module Membership in", mod, "module"),
+      ylab = paste("Gene significance for", trait_name),
+      main = paste("Module membership vs. gene significance\n"),
+      cex.main = 1.2, cex.lab = 1.2, cex.axis = 1.2,
+      col = module_color, cex = point_sizes
+    )
+  }
+  
+  dev.off()
+  cat("Plot saved to:", output_file, "\n")
 }
 
-# Merge overlap results into a dataframe
-merged_df <- do.call(rbind, lapply(names(overlap_proportion), function(name) {
-  data.frame(
-    Category = name,
-    Module = names(overlap_proportion[[name]]),
-    Proportion = overlap_proportion[[name]],
-    Count = overlap_sum[[name]],
-    stringsAsFactors = FALSE
-  )
-}))
+#===============================================================================
+# Create Full Module Membership Plot
+#===============================================================================
+create_membership_plot(
+  geneModuleMembership = geneModuleMembership,
+  mergedColors = mergedColors,
+  modNames = modNames,
+  geneTraitSignificance = geneTraitSignificance,
+  trait_name = "eos mt1",
+  deg_up = deg_bal_eos_p_mt1_up,
+  deg_down = deg_bal_eos_p_mt1_down,
+  output_file = file.path(output_dir, "Module_membership_vs._gene_significance_eos-p_mt1.png")
+)
 
-# Save results
-output_file <- file.path(output_folder, paste("module-gene_bal-deg-gene_overlap",Sys.Date(),".txt",sep=""))
-write.table(merged_df, output_file, sep = "\t", quote = FALSE, row.names = TRUE, col.names = NA)
+#===============================================================================
+# Create Subset Module Membership Plot
+#===============================================================================
+# Find modules significantly correlated with trait
+modNames_subset <- sub("ME", "", names(which(bal_corr_results$pvalue[, "bal_Eos_p_more_1"] < 0.05)))
 
-# Print first few rows
-head(merged_df)
+create_membership_plot(
+  geneModuleMembership = geneModuleMembership,
+  mergedColors = mergedColors,
+  modNames = modNames,
+  geneTraitSignificance = geneTraitSignificance,
+  trait_name = "eos mt1",
+  deg_up = deg_bal_eos_p_mt1_up,
+  deg_down = deg_bal_eos_p_mt1_down,
+  output_file = file.path(output_dir, "Module_membership_vs._gene_significance_eos-p_mt1_subset_modules.png"),
+  subset_modules = modNames_subset
+)
 
-# ----------------
-# subset bal Eos % > 1 vs <=1 DEG that overlap with ivory module genes
-# ----------------
-deg_bal_eos_p_mt1_up<- rownames(filter(deg_list$bal_Eos_p_more_1,log2FoldChange>=1))
-deg_bal_eos_p_mt1_down<- rownames(filter(deg_list$bal_Eos_p_more_1,log2FoldChange<=-1))
-module_gene_list_ivory<-module_gene_list$ivory
-
-deg_abs_lfc_bal$bal_Eos_p_more_1
-
-
-overlap_ivory_up<-module_gene_list_ivory[module_gene_list_ivory%in%deg_bal_eos_p_mt1_up]
-overlap_ivory_down<-module_gene_list_ivory[module_gene_list_ivory%in%deg_bal_eos_p_mt1_down]
-
-view(overlap_ivory_down)
-
-### 
-# 6. Target gene identification
-### 
-
-# Whole Network connectivity - a measure for how well the node is connected throughout the entire system
-# Intramodular connectivity - a measure for how well the node is connected within its assigned module. Also an indicator for how well that node belongs to its module. This is also known as module membership.
-
-modNames = substring(names(mergedMEs), 3) #extract module names
-
-#Calculate the module membership and the associated p-values
-if(nrow(expression.data)==nrow(mergedMEs)){nSamples<-nrow(expression.data)}else(print("# samples in expression data and mergedMEs do not match"))
-geneModuleMembership = as.data.frame(WGCNA::cor(expression.data, mergedMEs, use = "p"))
-MMPvalue = as.data.frame(corPvalueStudent(as.matrix(geneModuleMembership), nSamples))
-names(geneModuleMembership) = paste("MM", modNames, sep="")
-names(MMPvalue) = paste("p.MM", modNames, sep="")
-
-# ----------------
-# for BAL Eos % > 1 vs <=1
-# ----------------
-
-# Define variable weight containing the weight column of datTrait
-phen_of_interest<-as.data.frame(datTraits_bal$bal_Eos_p_more_1)
-
-#Calculate the gene significance and associated p-values
-geneTraitSignificance = as.data.frame(WGCNA::cor(expression.data_bal, phen_of_interest, use = "p"))
-GSPvalue = as.data.frame(corPvalueStudent(as.matrix(geneTraitSignificance), nSamples))
-names(geneTraitSignificance) = paste("GS.", names(phen_of_interest), sep="")
-names(GSPvalue) = paste("p.GS.", names(phen_of_interest), sep="")
-head(GSPvalue)
-
-# Define the output file path
-output_file <- file.path(output_folder, "Module_membership_vs._gene_significance_eos-p_mt1.png")
-
-# Open PNG device with appropriate dimensions
-png(output_file, width = 1200, height = 1200)
-
-# Set graphical parameters for a multi-panel plot
-par(mar = c(4,4,4,4), mfrow = c(6,4))
-
-# Loop through each module and plot
-for(mod in modNames){
-  module = mod
-  column = match(module, modNames)
-  moduleGenes = mergedColors == module
-  
-  # Default color is module color, but "ivory" should be "grey"
-  module_color <- rep(mod, length(geneModuleMembership[moduleGenes, column]))
-  module_color[module == "ivory"] <- "grey"
-  
-  # Identify DEGs
-  deg_indices_up <- rownames(geneModuleMembership)[moduleGenes] %in% deg_bal_eos_p_mt1_up
-  deg_indices_down <- rownames(geneModuleMembership)[moduleGenes] %in% deg_bal_eos_p_mt1_down
-  module_color[deg_indices_up] <- "red"
-  module_color[deg_indices_down] <- "cyan"
-  
-  # Set size for DEGs: larger than others
-  point_sizes <- rep(2, length(moduleGenes))  # Default size
-  point_sizes[deg_indices_up] <- 3  # Make DEGs larger
-  point_sizes[deg_indices_down] <- 3  # Make DEGs larger
-  
-  # Plot the scatterplot
-  verboseScatterplot(abs(geneModuleMembership[moduleGenes, column]),
-                     abs(geneTraitSignificance[moduleGenes, 1]),
-                     xlab = paste("Module Membership in", module, "module"),
-                     ylab = "Gene significance for eos mt1",
-                     main = paste("Module membership vs. gene significance\n"),
-                     cex.main = 1.2, cex.lab = 1.2, cex.axis = 1.2, 
-                     col = module_color, cex = point_sizes)  # Adjusted dot sizes
-}
-
-# Close the PNG device to save the file
-dev.off()
-
-# Print confirmation
-cat("Plot saved successfully to:", output_file, "\n")
-
-
-# ---------------------
-# subsetted modules 
-# ---------------------
-
-# Define the output file path
-output_file <- file.path(output_folder, "Module_membership_vs._gene_significance_eos-p_mt1_subset_modules.png")
-
-# subset modules with significant correlation to traits
-modNames_subset<-sub("ME","",names(which(module.trait.Pvalue_bal[,"bal_Eos_p_more_1"]<0.05)))
-print(modNames_subset)
-
-# suset genemodulemembership matrix that matches with the modNames_subset
-geneModuleMembership_subset<-geneModuleMembership[,which(sub("MM","",colnames(geneModuleMembership))%in%modNames_subset)]
-
-# Open PNG device with appropriate dimensions
-png(output_file, width = 800, height = 800)
-
-# Set graphical parameters for a multi-panel plot
-par(mar = c(4,4,4,4), mfrow = c(3,3))
-
-# Loop through each module and plot
-for(mod in modNames_subset){
-  module = mod
-  column = match(module, modNames_subset)
-  moduleGenes = mergedColors == module
-  
-  # Default color is module color, but "ivory" should be "grey"
-  module_color <- rep(mod, length(geneModuleMembership_subset[moduleGenes, column]))
-  module_color[module == "ivory"] <- "grey"
-  
-  # Identify DEGs
-  deg_indices_up <- rownames(geneModuleMembership_subset)[moduleGenes] %in% deg_bal_eos_p_mt1_up
-  deg_indices_down <- rownames(geneModuleMembership_subset)[moduleGenes] %in% deg_bal_eos_p_mt1_down
-  module_color[deg_indices_up] <- "red"
-  module_color[deg_indices_down] <- "cyan"
-  
-  # Set size for DEGs: larger than others
-  point_sizes <- rep(2, length(moduleGenes))  # Default size
-  point_sizes[deg_indices_up] <- 3  # Make DEGs larger
-  point_sizes[deg_indices_down] <- 3  # Make DEGs larger
-  
-  # Plot the scatterplot
-  verboseScatterplot(abs(geneModuleMembership_subset[moduleGenes, column]),
-                     abs(geneTraitSignificance[moduleGenes, 1]),
-                     xlab = paste("Module Membership in", module, "module"),
-                     ylab = "Gene significance for eos mt1",
-                     main = paste("Module membership vs. gene significance\n"),
-                     cex.main = 1.2, cex.lab = 1.2, cex.axis = 1.2, 
-                     col = module_color, cex = point_sizes)  # Adjusted dot sizes
-}
-
-# Close the PNG device to save the file
-dev.off()
-
-# Print confirmation
-cat("Plot saved successfully to:", output_file, "\n")
-
-
-
-## 
-# 7. fisher's exact test
-## 
-
-# 1. Predefine a target set of genes
-## 1.1 Define the folder and check that it exists
-deg_folder <- file.path("./reports/local_only", "deg_bal_bronch~cell2025-01-03")
-
-if (!dir.exists(deg_folder)) {
-  stop("Folder doesn't exist: ", deg_folder)
-} else {
-  deg_file <- list.files(deg_folder, pattern = "\\.csv$")
-  print(deg_file)  # Optional: inspect the CSV files found in deg_folder
-}
+#===============================================================================
+# Fisher's Exact Test for Module-DEG Enrichment
+#===============================================================================
+# Load DEGs
 deg <- read.csv(
   file.path(deg_folder, "deg_bronch_res_sig_16_~ bal_Eos_p_more_1 + Batch_2025-01-03_.csv"),
   row.names = 1
 )
-## 1.2 Create a vector of all assessed genes
+
+# Load all assessed genes
 all_assessed_genes <- read.csv(
   file.path(deg_folder, "deg_bronch_res_all_16_~ bal_Eos_p_more_1 + Batch_2025-01-03_.csv"),
   row.names = 1
 ) %>% rownames()
 
-## 1.3 Filter DEGs by absolute log2 fold-change > 1
+# Filter DEGs by absolute log2FC > 1
 deg_abs_lfc <- deg %>%
-  dplyr::filter(abs(log2FoldChange) >= 1) %>%
+  filter(abs(log2FoldChange) >= 1) %>%
   rownames()
 
-## 1.4 Define WGCNA folder and locate module files
-module_output_folder <- file.path("./reports/local_only/wgcna/bronch/output/module-gene_list")
+# Load module gene lists
+m_gene_list <-split(gene.module.table$genes, gene.module.table$modules)
 
-wgcna_folder <- module_output_folder  
 
-module_list <- list.files(wgcna_folder, pattern = "\\.txt$")
-modules_files <- file.path(wgcna_folder, module_list)
-
-## 1.5 Read modules into a list and name each element
-m_gene_list <- lapply(modules_files, function(x){read.table(x,header = TRUE, col.names = "genes",row.names = 1, sep = "\t")})
-names(m_gene_list) <- sub("batch12346\\.txt", "", module_list) # Remove "batch12346.txt" from file names for cleaner naming
-
-# 2. Define the "universe" of genes
+# Define universe of genes
 all_genes <- union(unique(unlist(m_gene_list)), unique(deg_abs_lfc))
-N <- length(all_genes)  # total number of genes in the universe
+N <- length(all_genes)  # Total genes in universe
+d <- length(deg_abs_lfc)  # Size of target set
 
-# 3. Prepare a data frame to store results
+# Initialize results dataframe
 fisher_results_df <- data.frame(
-  gene_set       = character(),
-  size_of_set    = numeric(),
+  gene_set = character(),
+  size_of_set = numeric(),
   size_of_target = numeric(),
-  overlap        = numeric(),
-  p_value        = numeric(),
+  overlap = numeric(),
+  fold_enrichment = numeric(),
+  p_value = numeric(),
   stringsAsFactors = FALSE
 )
 
-# 5. Calculate the size of the target set
-d <- length(deg_abs_lfc)
-
-# 6. Loop over each gene set in m_gene_list
+# Perform Fisher's exact test for each module
 for (i in seq_along(m_gene_list)) {
   current_set <- unlist(m_gene_list[[i]])
-  set_name    <- names(m_gene_list)[i]  # name of the gene set
+  set_name <- names(m_gene_list)[i]
   
-  # Size of this gene set (A)
-  k <- length(current_set)
+  k <- length(current_set)  # Size of gene set
+  overlap <- length(intersect(current_set, deg_abs_lfc))  # Overlap
   
-  # Overlap with the target set (B)
-  overlap <- length(intersect(current_set, deg_abs_lfc))
-  
-  # 2x2 contingency table for Fisher's exact test:
-  #            in_target   not_in_target
-  # in_set A        i          (k - i)
-  # not_in_set A   (d - i)     N - k - (d - i)
+  # Create contingency table
   table_2x2 <- matrix(
-    c(overlap,
-      k - overlap,
-      d - overlap,
-      N - k - (d - overlap)),
-    nrow  = 2,
-    byrow = TRUE
+    c(overlap, k - overlap, d - overlap, N - k - (d - overlap)),
+    nrow = 2, byrow = TRUE
   )
   
-  # Fisher's exact test for over-representation
+  # Fisher's exact test
   fisher_res <- fisher.test(table_2x2, alternative = "greater")
   
   # Calculate fold enrichment
-  # fold_enrichment = overlap / ((k * d) / N)
-  if ((k * d) == 0) {
-    fold_enrichment <- NA  # If one of the sets is empty
-  } else {
-    fold_enrichment <- overlap / ((k * d) / N)
-  }
+  fold_enrichment <- if ((k * d) == 0) NA else overlap / ((k * d) / N)
   
-  # Append results to results_df
+  # Store results
   fisher_results_df <- rbind(
     fisher_results_df,
     data.frame(
-      gene_set        = set_name,
-      size_of_set     = k,
-      size_of_target  = d,
-      overlap         = overlap,
+      gene_set = set_name,
+      size_of_set = k,
+      size_of_target = d,
+      overlap = overlap,
       fold_enrichment = round(fold_enrichment, 2),
-      p_value         = round(fisher_res$p.value, 40),
+      p_value = fisher_res$p.value,
       stringsAsFactors = FALSE
     )
   )
 }
 
-# 7. Correct for multiple testing (fdr)
+# Adjust p-values and sort results
 fisher_results_df$padj_fdr <- p.adjust(fisher_results_df$p_value, method = "fdr")
-
-# 8. Sort by adjusted p-value and inspect top results
 fisher_results_df <- fisher_results_df[order(fisher_results_df$padj_fdr), ]
-print(fisher_results_df)
 
-write.table(fisher_results_df, file.path(output_folder,"wgcna_bronch_deg_overlap_fishers-exact_enrichment.txt"), row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE)
+# Save results
+write.table(
+  fisher_results_df,
+  file.path(output_dir, "wgcna_bronch_deg_overlap_fishers-exact_enrichment.txt"),
+  row.names = FALSE, col.names = TRUE, sep = "\t", quote = FALSE
+)
 
-###
-# 8. Network Visualization of Eigengenes
-### 
+#===============================================================================
+# Network Visualization of Eigengenes
+#===============================================================================
+# Create subset for visualization
+datTraits_bal_subset <- datTraits_bal %>% filter(FEV1_percent > 0)
 
-# Isolate blood_eos_log from the clinical traits
-datTraits_bal_subset<-datTraits_bal%>%filter(FEV1_percent>0)
+# Create trait dataframes
+bal_eos_mt1 <- as.data.frame(datTraits_bal_subset$bal_Eos_p_more_1)
+bal_fev1_perc <- as.data.frame(datTraits_bal_subset$FEV1_percent)
+names(bal_eos_mt1) <- "eos_mt1"
+names(bal_fev1_perc) <- "fev1_p"
 
-bal_eos_mt1=as.data.frame(datTraits_bal_subset$bal_Eos_p_more_1);
-bal_fev1_perc=as.data.frame(datTraits_bal_subset$FEV1_percent); # previously was ACT. changed to FEV1
+# Combine eigengenes with traits
+mergedMEs_subset <- mergedMEs[rownames(mergedMEs) %in% rownames(datTraits_bal_subset), ]
+MET <- orderMEs(cbind(mergedMEs_subset, bal_eos_mt1, bal_fev1_perc))
 
-names(bal_eos_mt1) = "eos_mt1"
-names(bal_fev1_perc) = "fev1_p"
-
-# Add the BAL_eos_ct_log to existing module eigengenes
-mergedMEs<-mergedMEs[rownames(mergedMEs)%in%rownames(datTraits_bal_subset),]
-MET = orderMEs(cbind(mergedMEs, bal_eos_mt1, bal_fev1_perc ))
-# Plot the relationships among the eigengenes and the trait
+# Create network plots
 par(cex = 0.9)
-plotEigengeneNetworks(MET, "", marDendro = c(0,4,1,2), marHeatmap = c(5,4,1,2), cex.lab = 0.8, xLabelsAngle
-                      = 90)
+plotEigengeneNetworks(
+  MET, "", marDendro = c(0, 4, 1, 2), 
+  marHeatmap = c(5, 4, 1, 2), cex.lab = 0.8, 
+  xLabelsAngle = 90
+)
 
-# Plot the dendrogram
+# Plot dendrogram only
+png(file.path(output_dir, paste0("eigengene_dendrogram_", Sys.Date(), ".png")), 
+    width = 1000, height = 800)
 par(cex = 1.0)
-plotEigengeneNetworks(MET, "Eigengene dendrogram", marDendro = c(0,4,2,0),
-                      plotHeatmaps = FALSE)
+plotEigengeneNetworks(
+  MET, "Eigengene dendrogram", 
+  marDendro = c(0, 4, 2, 0),
+  plotHeatmaps = FALSE
+)
+dev.off()
 
-# Plot the heatmap matrix (note: this plot will overwrite the dendrogram plot)
-par(cex = 1.0, mar = c(1,1,1,1))
-plotEigengeneNetworks(MET, "Eigengene adjacency heatmap", marHeatmap = c(10,10,2,2),
-                      plotDendrograms = FALSE, xLabelsAngle = 90)
+# Plot heatmap only
+png(file.path(output_dir, paste0("eigengene_heatmap_", Sys.Date(), ".png")), 
+    width = 1000, height = 800)
+par(cex = 1.0, mar = c(1, 1, 1, 1))
+plotEigengeneNetworks(
+  MET, "Eigengene adjacency heatmap", 
+  marHeatmap = c(10, 10, 2, 2),
+  plotDendrograms = FALSE, 
+  xLabelsAngle = 90
+)
+dev.off()
 
-#####
-# 9. choose hub genes
-#####
-
-# Adjacency matrix
-softPower <- 4 # decided previously in the original analysis
+#===============================================================================
+# Hub Gene Identification
+#===============================================================================
+# Calculate adjacency matrix
+softPower <- 4  # Determined previously
 adjacency <- adjacency(expression.data_bal, power = softPower)
 
-HubGenes <- chooseTopHubInEachModule(expression.data_bal, mergedColors, power = 4, type= "signed")
+# Identify hub genes
+HubGenes <- chooseTopHubInEachModule(expression.data_bal, mergedColors, power = 4, type = "signed")
+hubgene_table<-data.frame(Module=names(HubGenes),gene=HubGenes,hubgene="Hub_gene")
 
+# Calculate connectivity
 connectivity_allClusters <- intramodularConnectivity(adjacency, mergedColors$modules, scaleByMax = FALSE)
 
-colnames(expression.data_bal)%>%head
-
-# Check if rownames(connectivity_allClusters) match gene.module.table$genes
+# Add module and gene information
 matched <- match(rownames(connectivity_allClusters), gene.module.table$genes)
-
-# Update connectivity_allClusters$module with the corresponding module values
 connectivity_allClusters$module <- gene.module.table$modules[matched]
 connectivity_allClusters$gene <- gene.module.table$genes[matched]
 
+# Find top connected genes in each module
 top_kWithin_by_module <- connectivity_allClusters %>%
   group_by(module) %>%
   slice_max(order_by = kWithin, n = 20) %>%
   ungroup() %>%
   arrange(module, desc(kWithin))
 
-head(top_kWithin_by_module)
-
+# Find overlap with DEGs
 top_kWithin_by_module_deg_overlap <- top_kWithin_by_module %>%
-  filter(gene %in% deg_abs_lfc)
+  filter(gene %in% deg_abs_lfc)%>%
+  arrange(module, desc(kWithin))
 
-head(top_kWithin_by_module_deg_overlap)
-
-
-write.table(
-  top_kWithin_by_module_deg_overlap,
-  file = file.path(
-    output_folder,
-    paste("top_kWithin_by_module_deg_overlap", Sys.Date(), ".txt", sep = "")
-  ),
-  sep = "\t",
-  row.names = TRUE,
-  col.names = NA
-)
-
-#####
-# 10. Find Eigen genes of significant ivory module hub genes
-#####
-
-# Load cell count table
-normalized_count_table_path <- "./resources/processed_data/normalized_gene_count/normalized_gene_count_bronch_vsd_batch-corrected.txt"
-if (file.exists(normalized_count_table_path)) {
-  counts <- read.table(normalized_count_table_path, 
-                       header = TRUE, 
-                       row.names = 1, 
-                       sep = "\t")
-}
-genes <- rownames(counts)
-
-counts_select<-counts[genes%in%c("CDH26", "POSTN","FETUB","CST1","CLCA1", "SERPINB10","SERPINB2"),]
-
-calculate_eigengene <- function(gene_expression_matrix) {
-  # Perform PCA
-  pca_result <- prcomp(t(gene_expression_matrix), center = TRUE, scale. = TRUE)
-  
-  # Extract the first principal component (PC1) as the eigengene levels
-  eigengene_levels <- pca_result$x[, 1]
-  
-  # Return as a data frame
-  return(data.frame(SampleID = colnames(gene_expression_matrix), Eigengene_Level = eigengene_levels))
-}
-
-# Compute eigengene levels
-eigengene_df <- calculate_eigengene(counts_select)
-
-# Create SampleID by extracting the first 4 letters, removing 'B', and converting to numeric
-ids <- eigengene_df$SampleID
-processed_ids <- as.numeric(gsub("B", "", substr(ids, 1, 4)))
-eigengene_df$ID<-processed_ids
-eigengene_df<-eigengene_df%>%select(ID,everything())
-
-write.table(eigengene_df,"./reports/local_only/wgcna/bronch/output/eigengene_df_t2.txt",row.names = FALSE,col.names = TRUE,sep="\t")
+# Save results
+write.table(hubgene_table,file.path(output_dir,"hubgene_table.txt"), sep="\t",row.names = FALSE)
+write.table(top_kWithin_by_module,file.path(output_dir,"top_kWithin_by_module.txt"), sep="\t",row.names = FALSE)
+write.table(top_kWithin_by_module_deg_overlap,file.path(output_dir,"top_kWithin_by_module_deg_overlap.txt"), sep="\t",row.names = FALSE)
