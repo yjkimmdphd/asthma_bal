@@ -125,7 +125,7 @@ normalizeCounts_batch_removed <- function(input_df, var1="comp2", var2="Batch", 
   
   # prefilter low count genes
   smallestGroupSize <- min(apply(table(coldata),1,sum)) 
-  keep <- rowSums(counts(dds) >= 10) >= smallestGroupSize
+  keep <- rowSums(counts(dds) >= 5) >= smallestGroupSize
   dds <- dds[keep,]
   
   vsd <- vst(dds, blind=FALSE) 
