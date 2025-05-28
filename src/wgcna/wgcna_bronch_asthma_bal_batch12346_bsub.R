@@ -133,7 +133,7 @@ text(spt$fitIndices[, 1], spt$fitIndices[, 5], labels = spt$fitIndices[, 1], col
 dev.off()
 
 # Adjacency matrix
-softPower <- 6
+softPower <- 4
 adjacency <- adjacency(expression.data, power = softPower)
 
 ###
