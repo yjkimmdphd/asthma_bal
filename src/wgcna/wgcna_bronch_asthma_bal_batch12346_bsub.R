@@ -8,7 +8,7 @@ library(DESeq2)
 library(WGCNA)
 
 ########################
-## Load Readcount Data ##
+## Load Readcount Data #
 ########################
 
 # Load cell count table
