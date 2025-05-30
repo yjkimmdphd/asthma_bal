@@ -36,7 +36,7 @@ counts<-if(file.exists(countdata)){read.delim(countdata, check.names = FALSE)}
 genes<-counts[,"SampleID"]
 
 # count normalization without batch correction
-normalizeCounts <- function(input_df, var1="comp2", var2="Batch", formula) {
+normalizeCounts <- function(input_df, var1, var2, formula, n=10) {
   
   phen_input <- input_df
   
@@ -58,7 +58,7 @@ normalizeCounts <- function(input_df, var1="comp2", var2="Batch", formula) {
   
   # prefilter low count genes
   smallestGroupSize <- min(apply(table(coldata),1,sum)) 
-  keep <- rowSums(counts(dds) >= 5) >= smallestGroupSize
+  keep <- rowSums(counts(dds) >= n) >= smallestGroupSize
   dds <- dds[keep,]
   
   vsd <- vst(dds, blind=FALSE) 
@@ -103,7 +103,7 @@ normalizeCounts <- function(input_df, var1="comp2", var2="Batch", formula) {
 }
 
 ### vsd with batch effect removed, count normalization without batch correction
-normalizeCounts_batch_removed <- function(input_df, var1="comp2", var2="Batch", formula) {
+normalizeCounts_batch_removed <- function(input_df, var1, var2, formula, n=10) {
   
   phen_input <- input_df
   
@@ -125,14 +125,14 @@ normalizeCounts_batch_removed <- function(input_df, var1="comp2", var2="Batch", 
   
   # prefilter low count genes
   smallestGroupSize <- min(apply(table(coldata),1,sum)) 
-  keep <- rowSums(counts(dds) >= 5) >= smallestGroupSize
+  keep <- rowSums(counts(dds) >= n) >= smallestGroupSize
   dds <- dds[keep,]
   
   vsd <- vst(dds, blind=FALSE) 
   
   library(limma)
   mat <- assay(vsd)
-  mm <- model.matrix(~comp2, colData(vsd))
+  mm <- model.matrix(as.formula(paste("~",var1)), colData(vsd))
   mat <- limma::removeBatchEffect(mat, batch=vsd$Batch, design=mm)
   assay(vsd) <- mat
   meanSdPlot(assay(vsd))
@@ -173,21 +173,21 @@ normalizeCounts_batch_removed <- function(input_df, var1="comp2", var2="Batch", 
   return(normalized_counts)
 }
 
-normalized_bronch_count<-normalizeCounts(phen_bronch,"comp2","Batch", "~ comp2 + Batch")
-normalized_nasal_count<-normalizeCounts(phen_nasal,"comp2","Batch", "~ comp2 + Batch")
+normalized_bronch_count<-normalizeCounts(phen_bronch,"comp2","Batch", "~ comp2 + Batch", n=10)
+normalized_nasal_count<-normalizeCounts(phen_nasal,"comp2","Batch", "~ comp2 + Batch", n=10)
 
-normalized_bronch_count_batch_removed<-normalizeCounts_batch_removed(phen_bronch,"comp2","Batch", "~ comp2 + Batch")
-normalized_nasal_count_batch_removed<-normalizeCounts_batch_removed(phen_nasal,"comp2","Batch", "~ comp2 + Batch")
+normalized_bronch_count_batch_removed<-normalizeCounts_batch_removed(phen_bronch,"comp2","Batch", "~ comp2 + Batch", n=10)
+normalized_nasal_count_batch_removed<-normalizeCounts_batch_removed(phen_nasal,"comp2","Batch", "~ comp2 + Batch", n=10)
 
 ### will only export vsd with batch effect removal
 
 # -----------------------------------------------------------------------------
 # 3) export normalized bronchial gene count table
 # -----------------------------------------------------------------------------
-
+output_dir<-file.path("./resources/processed_data/normalized_gene_count/")
 write.table(
   normalized_bronch_count,
-  "./resources/processed_data/normalized_gene_count/normalized_gene_count_bronch_vsd_no-batch-corrected.txt",
+  file.path(output_dir,paste("normalized_gene_count_bronch_vsd_no-batch-corrected",Sys.Date(),".txt",sep="")),
   sep = "\t",
   row.names = TRUE, 
   col.names = NA
@@ -196,7 +196,7 @@ write.table(
 
 write.table(
   normalized_bronch_count_batch_removed,
-  "./resources/processed_data/normalized_gene_count/normalized_gene_count_bronch_vsd_batch-corrected.txt",
+  file.path(output_dir,paste("normalized_gene_count_bronch_vsd_batch-corrected",Sys.Date(),".txt",sep="")),
   sep = "\t",
   row.names = TRUE, 
   col.names = NA
@@ -211,7 +211,7 @@ write.table(
 
 write.table(
   normalized_nasal_count,
-  "./resources/processed_data/normalized_gene_count/normalized_gene_count_nasal_vsd_no-batch-corrected.txt",
+  file.path(output_dir,paste("normalized_gene_count_nasal_vsd_no-batch-corrected",Sys.Date(),".txt",sep="")),
   sep = "\t",
   row.names = TRUE, 
   col.names = NA
@@ -220,7 +220,7 @@ write.table(
 
 write.table(
   normalized_nasal_count_batch_removed,
-  "./resources/processed_data/normalized_gene_count/normalized_gene_count_nasal_vsd_batch-corrected.txt",
+  file.path(output_dir,paste("normalized_gene_count_nasal_vsd_batch-corrected",Sys.Date(),".txt",sep="")),
   sep = "\t",
   row.names = TRUE, 
   col.names = NA
