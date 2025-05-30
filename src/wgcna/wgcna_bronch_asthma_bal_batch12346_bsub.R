@@ -12,7 +12,7 @@ library(WGCNA)
 ########################
 
 # Load cell count table
-normalized_count_table_path <- "./resources/processed_data/normalized_gene_count/normalized_gene_count_bronch_vsd_batch-corrected.txt"
+normalized_count_table_path <- "./resources/processed_data/normalized_gene_count/normalized_gene_count_bronch_vsd_batch-corrected2025-05-30.txt"
 if (file.exists(normalized_count_table_path)) {
   counts <- read.table(normalized_count_table_path, 
                        header = TRUE, 
