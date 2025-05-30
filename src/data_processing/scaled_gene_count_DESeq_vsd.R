@@ -179,6 +179,10 @@ normalized_nasal_count<-normalizeCounts(phen_nasal,"comp2","Batch", "~ comp2 + B
 normalized_bronch_count_batch_removed<-normalizeCounts_batch_removed(phen_bronch,"comp2","Batch", "~ comp2 + Batch", n=10)
 normalized_nasal_count_batch_removed<-normalizeCounts_batch_removed(phen_nasal,"comp2","Batch", "~ comp2 + Batch", n=10)
 
+normalized_bronch_count_batch_removed<-normalizeCounts_batch_removed(phen_bronch,"comp2","Batch", "~ comp2 + Batch", n=6)
+normalized_nasal_count_batch_removed<-normalizeCounts_batch_removed(phen_nasal,"comp2","Batch", "~ comp2 + Batch", n=6)
+
+
 ### will only export vsd with batch effect removal
 
 # -----------------------------------------------------------------------------
