@@ -378,11 +378,11 @@ bal_overlap_results <- analyze_deg_module_overlap("bal|BAL", gene.module.table, 
 #===============================================================================
 deg_bal_eos_p_mt1_up <- rownames(filter(deg_results$bal_Eos_p_more_1, log2FoldChange >= 1))
 deg_bal_eos_p_mt1_down <- rownames(filter(deg_results$bal_Eos_p_more_1, log2FoldChange <= -1))
-module_gene_list_interest <- bal_overlap_results$module_gene_list$darkslateblue # darkslate blue 
+module_gene_list_interest <- bal_overlap_results$module_gene_list$darkgrey # darkgrey 
 
 # Find overlap with darkslateblue module
-overlap_darkslateblue_up <- module_gene_list_interest[module_gene_list_interest %in% deg_bal_eos_p_mt1_up]
-overlap_darkslateblue_down <- module_gene_list_interest[module_gene_list_interest %in% deg_bal_eos_p_mt1_down]
+overlap_darkgrey_up <- module_gene_list_interest[module_gene_list_interest %in% deg_bal_eos_p_mt1_up]
+overlap_darkgrey_down <- module_gene_list_interest[module_gene_list_interest %in% deg_bal_eos_p_mt1_down]
 
 #===============================================================================
 # Calculate Module Membership and Gene Significance
