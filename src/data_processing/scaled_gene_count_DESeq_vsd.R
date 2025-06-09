@@ -296,7 +296,7 @@ write_parameter_file <- function(params, filename) {
 # Write parameter files for the normalized count data
 write_parameter_file(
   normalization_params,
-  file.path(output_dir, paste("normalization_parameters_bronch_", Sys.Date(), ".txt", sep=""))
+  file.path(output_dir, paste("normalization_parameters_", Sys.Date(), ".txt", sep=""))
 )
 
 # Export nasal data (if needed)
