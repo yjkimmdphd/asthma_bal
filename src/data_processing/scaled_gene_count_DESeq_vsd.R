@@ -293,7 +293,7 @@ write_parameter_file <- function(params, filename) {
 }
 
 
-# Write parameter files for bronchial data
+# Write parameter files for the normalized count data
 write_parameter_file(
   normalization_params,
   file.path(output_dir, paste("normalization_parameters_bronch_", Sys.Date(), ".txt", sep=""))
@@ -314,11 +314,5 @@ write.table(
   sep = "\t",
   row.names = TRUE, 
   col.names = NA
-)
-
-# Write parameter files for nasal data
-write_parameter_file(
-  normalization_params,
-  file.path(output_dir, paste("normalization_parameters_nasal_", Sys.Date(), ".txt", sep=""))
 )
 
