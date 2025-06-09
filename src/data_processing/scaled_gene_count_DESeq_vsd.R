@@ -173,15 +173,45 @@ normalizeCounts_batch_removed <- function(input_df, var1, var2, formula, n=10) {
   return(normalized_counts)
 }
 
-normalized_bronch_count<-normalizeCounts(phen_bronch,"comp2","Batch", "~ comp2 + Batch", n=10)
-normalized_nasal_count<-normalizeCounts(phen_nasal,"comp2","Batch", "~ comp2 + Batch", n=10)
+# Define parameters for normalization
+normalization_params <- list(
+  date_generated = Sys.Date(),
+  time_generated = Sys.time(),
+  r_version = R.version.string,
+  function_used_no_batch = "normalizeCounts",
+  function_used_batch_corrected = "normalizeCounts_batch_removed",
+  phenotype_data_bronch = "phen_bronch",
+  phenotype_data_nasal = "phen_nasal",
+  comparison_variable = "comp2",
+  batch_variable = "Batch", 
+  design_formula = "~ comp2 + Batch",
+  n_parameter = 10,
+  transformation_method = "vsd",
+  batch_correction_applied = c("no", "yes")
+)
 
-normalized_bronch_count_batch_removed<-normalizeCounts_batch_removed(phen_bronch,"comp2","Batch", "~ comp2 + Batch", n=10)
-normalized_nasal_count_batch_removed<-normalizeCounts_batch_removed(phen_nasal,"comp2","Batch", "~ comp2 + Batch", n=10)
+normalized_bronch_count<-normalizeCounts(get(normalization_params$phenotype_data_bronch), # select phenotype table
+                                         normalization_params$comparison_variable, # select comp variables to use 
+                                         normalization_params$batch_variable, # select batch variables to use 
+                                         normalization_params$design_formula, # define the design formula 
+                                         normalization_params$n_parameter) # select low count filter n 
 
-normalized_bronch_count_batch_removed<-normalizeCounts_batch_removed(phen_bronch,"comp2","Batch", "~ comp2 + Batch", n=6)
-normalized_nasal_count_batch_removed<-normalizeCounts_batch_removed(phen_nasal,"comp2","Batch", "~ comp2 + Batch", n=6)
+normalized_nasal_count<-normalizeCounts(get(normalization_params$phenotype_data_nasal), # select phenotype table
+                                        normalization_params$comparison_variable, # select comp variables to use 
+                                        normalization_params$batch_variable, # select batch variables to use 
+                                        normalization_params$design_formula, # define the design formula 
+                                        normalization_params$n_parameter) # select low count filter n 
 
+normalized_bronch_count_batch_removed<-normalizeCounts_batch_removed(get(normalization_params$phenotype_data_bronch), # select phenotype table
+                                                                     normalization_params$comparison_variable, # select comp variables to use 
+                                                                     normalization_params$batch_variable, # select batch variables to use 
+                                                                     normalization_params$design_formula, # define the design formula 
+                                                                     normalization_params$n_parameter) # select low count filter n 
+normalized_nasal_count_batch_removed<-normalizeCounts_batch_removed(get(normalization_params$phenotype_data_nasal), # select phenotype table
+                                                                    normalization_params$comparison_variable, # select comp variables to use 
+                                                                    normalization_params$batch_variable, # select batch variables to use 
+                                                                    normalization_params$design_formula, # define the design formula 
+                                                                    normalization_params$n_parameter) # select low count filter n 
 
 ### will only export vsd with batch effect removal
 
@@ -191,7 +221,7 @@ normalized_nasal_count_batch_removed<-normalizeCounts_batch_removed(phen_nasal,"
 output_dir<-file.path("./resources/processed_data/normalized_gene_count/")
 write.table(
   normalized_bronch_count,
-  file.path(output_dir,paste("normalized_gene_count_bronch_vsd_no-batch-corrected",Sys.Date(),".txt",sep="")),
+  file.path(output_dir,paste("normalized_gene_count_bronch_vsd_no-batch-corrected_",Sys.Date(),".txt",sep="")),
   sep = "\t",
   row.names = TRUE, 
   col.names = NA
@@ -200,7 +230,7 @@ write.table(
 
 write.table(
   normalized_bronch_count_batch_removed,
-  file.path(output_dir,paste("normalized_gene_count_bronch_vsd_batch-corrected",Sys.Date(),".txt",sep="")),
+  file.path(output_dir,paste("normalized_gene_count_bronch_vsd_batch-corrected_",Sys.Date(),".txt",sep="")),
   sep = "\t",
   row.names = TRUE, 
   col.names = NA
@@ -215,7 +245,7 @@ write.table(
 
 write.table(
   normalized_nasal_count,
-  file.path(output_dir,paste("normalized_gene_count_nasal_vsd_no-batch-corrected",Sys.Date(),".txt",sep="")),
+  file.path(output_dir,paste("normalized_gene_count_nasal_vsd_no-batch-corrected_",Sys.Date(),".txt",sep="")),
   sep = "\t",
   row.names = TRUE, 
   col.names = NA
@@ -224,9 +254,71 @@ write.table(
 
 write.table(
   normalized_nasal_count_batch_removed,
-  file.path(output_dir,paste("normalized_gene_count_nasal_vsd_batch-corrected",Sys.Date(),".txt",sep="")),
+  file.path(output_dir,paste("normalized_gene_count_nasal_vsd_batch-corrected_",Sys.Date(),".txt",sep="")),
   sep = "\t",
   row.names = TRUE, 
   col.names = NA
+)
+
+
+# -----------------------------------------------------------------------------
+# 5) export parameter files for the normalized counts
+# -----------------------------------------------------------------------------
+
+
+# review parameters for documentation
+print(normalization_params)
+
+# Function to write parameter file
+write_parameter_file <- function(params, filename) {
+  cat("NORMALIZATION PARAMETERS\n", file = filename)
+  cat("========================\n\n", file = filename, append = TRUE)
+  
+  for (param_name in names(params)) {
+    if (length(params[[param_name]]) > 1) {
+      cat(sprintf("%s: %s\n", param_name, paste(params[[param_name]], collapse = ", ")), 
+          file = filename, append = TRUE)
+    } else {
+      cat(sprintf("%s: %s\n", param_name, params[[param_name]]), 
+          file = filename, append = TRUE)
+    }
+  }
+  
+  cat("\nFILE DESCRIPTION\n", file = filename, append = TRUE)
+  cat("================\n", file = filename, append = TRUE)
+  cat("This file documents the parameters used for gene count normalization.\n", file = filename, append = TRUE)
+  cat("Two versions were generated:\n", file = filename, append = TRUE)
+  cat("1. Without batch correction (normalizeCounts function)\n", file = filename, append = TRUE)
+  cat("2. With batch correction (normalizeCounts_batch_removed function)\n", file = filename, append = TRUE)
+}
+
+
+# Write parameter files for bronchial data
+write_parameter_file(
+  normalization_params,
+  file.path(output_dir, paste("normalization_parameters_bronch_", Sys.Date(), ".txt", sep=""))
+)
+
+# Export nasal data (if needed)
+write.table(
+  normalized_nasal_count,
+  file.path(output_dir, paste("normalized_gene_count_nasal_vsd_no-batch-corrected_", Sys.Date(), ".txt", sep="")),
+  sep = "\t",
+  row.names = TRUE, 
+  col.names = NA
+)
+
+write.table(
+  normalized_nasal_count_batch_removed,
+  file.path(output_dir, paste("normalized_gene_count_nasal_vsd_batch-corrected_", Sys.Date(), ".txt", sep="")),
+  sep = "\t",
+  row.names = TRUE, 
+  col.names = NA
+)
+
+# Write parameter files for nasal data
+write_parameter_file(
+  normalization_params,
+  file.path(output_dir, paste("normalization_parameters_nasal_", Sys.Date(), ".txt", sep=""))
 )
 
