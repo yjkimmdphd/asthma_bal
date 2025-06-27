@@ -20,7 +20,7 @@ normalized_count_table_path_2 <- "./resources/processed_data/normalized_gene_cou
 normalized_count_table_path<-normalized_count_table_path_2
 
 if (file.exists(file.path(normalized_count_table_path,"normalized_gene_count_bronch_vsd_batch-corrected.txt"))) {
-  gene_counts <- read.table(normalized_count_table_path, 
+  gene_counts <- read.table(file.path(normalized_count_table_path,"normalized_gene_count_bronch_vsd_batch-corrected.txt"), 
                        header = TRUE, 
                        row.names = 1, 
                        sep = "\t")
