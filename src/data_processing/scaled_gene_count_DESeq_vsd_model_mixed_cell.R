@@ -198,9 +198,9 @@ normalization_params <- list(
   function_used_batch_corrected = "normalizeCounts_batch_removed",
   phenotype_data_bronch = "phen_bronch",
   phenotype_data_nasal = "phen_nasal",
-  comparison_variable = "comp2",
+  comparison_variable = "comp1",
   batch_variable = "Batch", 
-  design_formula = "~ comp2 + Batch",
+  design_formula = "~ comp1 + Batch",
   n_parameter = 10,
   transformation_method = "vsd",
   batch_correction_applied = c("no", "yes")
