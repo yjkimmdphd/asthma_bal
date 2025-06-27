@@ -38,7 +38,7 @@ options(allowParallel = TRUE)
 enableWGCNAThreads()
 
 # Define the path for the output folder
-output_folder <- file.path("./reports/local_only/wgcna/bronch/output",Sys.Date())
+output_folder <- file.path("./reports/local_only/wgcna/bronch/output/comp1",Sys.Date())
 
 # Check if the folder exists; if not, create it
 if (!dir.exists(output_folder)) {
