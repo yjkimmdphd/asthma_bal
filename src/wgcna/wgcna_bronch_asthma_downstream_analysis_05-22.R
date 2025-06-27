@@ -8,7 +8,7 @@ project_base <- "."
 resources_dir <- file.path(project_base, "resources", "processed_data")
 reports_dir <- file.path(project_base, "reports", "local_only")
 wgcna_dir <- file.path(reports_dir, "wgcna", "bronch")
-output_dir <- file.path(wgcna_dir, "output_2025-05-22") # to analyze wGNCA from january use 'output'
+output_dir <- file.path(wgcna_dir, "output_2025-01-18") # to analyze wGNCA from january use 'output'
 deg_dir <- file.path(reports_dir, "deg_bal_bronch~cell2025-01-03")
 module_list_dir <- file.path(output_dir, "module-gene_list")
 
@@ -24,7 +24,7 @@ if (!dir.exists(output_dir)) {
 # Load Expression Data
 #===============================================================================
 normalized_count_path <- file.path(resources_dir, "normalized_gene_count", 
-                                   "normalized_gene_count_bronch_vsd_batch-corrected.txt")
+                                   "normalized_gene_count_bronch_vsd_batch-corrected_2025-05-30.txt")
 counts <- read.table(normalized_count_path, header = TRUE, row.names = 1, sep = "\t")
 genes <- rownames(counts)
 

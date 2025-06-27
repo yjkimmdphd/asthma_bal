@@ -6,7 +6,7 @@ project_base <- "."
 resources_dir <- file.path(project_base, "resources", "processed_data")
 reports_dir <- file.path(project_base, "reports", "local_only")
 wgcna_dir <- file.path(reports_dir, "wgcna", "bronch")
-output_dir <- file.path(wgcna_dir, "output_2025-05-07") # to analyze wGNCA from january use 'output'
+output_dir <- file.path(wgcna_dir, "output_2025-01-18") # to analyze WGNCA
 
 #=============
 # load relevant data
@@ -21,11 +21,12 @@ head(wgcna_nodes)
 
 # load list of modules of interest and hubgenes, and intra/inter modular connectivity information 
 top_kwithin<-read.table(file.path(output_dir,"top_kWithin_by_module.txt"),header = TRUE)
+head(top_kwithin)
 top_kwithin <- top_kwithin %>%
   group_by(module) %>%
   mutate(hubgene = kWithin == max(kWithin)) %>%
-  ungroup()
-top_kwithin <- top_kwithin %>% rename(Gene = gene)
+  ungroup() %>% 
+  dplyr::rename(Gene = "gene")
 
 top_kwithin_deg<-read.table(file.path(output_dir,"top_kWithin_by_module_deg_overlap.txt"),header = TRUE)
 modules_interest<-unique(top_kwithin_deg$module)
