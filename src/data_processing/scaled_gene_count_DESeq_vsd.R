@@ -1,5 +1,21 @@
 # --------------------------------------------------------------------
 # generation of scaled gene counts from RNAseq experiment of Batch 1-6
+# uses the following parameters:
+# normalization_params <- list(
+#   date_generated = Sys.Date(),
+#   time_generated = Sys.time(),
+#   r_version = R.version.string,
+#   function_used_no_batch = "normalizeCounts",
+#   function_used_batch_corrected = "normalizeCounts_batch_removed",
+#   phenotype_data_bronch = "phen_bronch",
+#   phenotype_data_nasal = "phen_nasal",
+#   comparison_variable = "comp2",
+#   batch_variable = "Batch", 
+#   design_formula = "~ comp2 + Batch",
+#   n_parameter = 10,
+#   transformation_method = "vsd",
+#   batch_correction_applied = c("no", "yes")
+# )
 # --------------------------------------------------------------------
 
 library(tidyverse)
