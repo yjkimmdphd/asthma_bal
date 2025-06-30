@@ -1,24 +1,36 @@
 ---
-title: "Asthma BAL project"
+title: "Transcriptomic Analysis of Inflammatory Heterogeneity in Asthma BAL Samples"
 output: html_notebook
 ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  dpi = 600,
+  dev = "png",
+  dev.args = list(type = "cairo"),
+  warning = FALSE,
+  message = FALSE,
+  fig.width = 7.09,
+  fig.height = 7.09
+)
+```
+
 # Data Quality Control and Cleanup Procedures
 
 ## Overview of Data Integrity Issues
 
-During the data integration process, several systematic issues were identified that required standardized cleanup procedures to ensure analytical validity. These issues spanned multiple data types including cell count calculations, sample identification, and temporal data accuracy. 
-The updated information was incorporated into the file "./resources/processed_data/Nasal_Biomarkers_BAL_2025-02-01.csv". 
+During the data integration process, several systematic issues were identified that required standardized cleanup procedures to ensure analytical validity. These issues spanned multiple data types including cell count calculations, sample identification, and temporal data accuracy. The updated information was incorporated into the file `./resources/processed_data/Nasal_Biomarkers_BAL_2025-02-01.csv`.
 
 ## BAL Cell Count Calculations
 
 ### Standardized Calculation Methods
+
 All BAL absolute eosinophil counts (AEC) and absolute neutrophil counts (ANC) were systematically calculated using:
 
 **Formula**: `Absolute Count = (Total Nucleated Cells) × (Cell Type Percentage / 100)`
-
 **Units**: All cell counts expressed as cells/μL
 
-```{r bal-cell-calculations}
+```{r bal-cell-calculations, eval=FALSE}
 # Calculate BAL absolute eosinophil and neutrophil counts
 phenotype <- phenotype %>%
   mutate(
@@ -28,6 +40,7 @@ phenotype <- phenotype %>%
 ```
 
 ### Quality Control for Cell Count Data
+
 - **Cross-validation**: Percentage calculations verified against manual differential counts
 - **Range validation**: Identified and flagged physiologically implausible values
 - **Missing data handling**: Systematic approach for samples with incomplete differential counts
@@ -49,8 +62,8 @@ phenotype <- phenotype %>%
 **BAL/CBC Date Mismatches:**
 Multiple participants had incorrect dates in the primary database that were corrected using secondary validation sources:
 
-| Study ID | Sample Type | Original Date | Corrected Date | Source_of_Original_Date |
-|----------|-------------|---------------|----------------|-------------|
+| Study ID | Sample Type | Original Date | Corrected Date | Source |
+|----------|-------------|---------------|----------------|---------|
 | 2 | CBC | 7/10/2015 | 5/13/2015 | BiomarkersOfAsthmaSt_DATA_LABELS_2024-03-06 |
 | 9 | CBC | 7/10/2015 | 4/11/2017 | BiomarkersOfAsthmaSt_DATA_LABELS_2024-03-06 |
 | 39 | CBC | 10/23/2015 | 2/6/2014 | BiomarkersOfAsthmaSt_DATA_LABELS_2024-03-06 |
@@ -66,6 +79,7 @@ Multiple participants had incorrect dates in the primary database that were corr
 ## Missing Data Documentation
 
 ### ACT Score Completeness
+
 **Missing ACT Scores:**
 - Subject 238 (Bria Rosario, 10/9/12)
 - Subject 324 (Josiah Loney, 1/31/12)
@@ -76,17 +90,15 @@ Multiple participants had incorrect dates in the primary database that were corr
 
 **Technical Limitations Affecting Cell Counts:**
 
-| Subject ID | BAL lab results report description | Resolution |
-|------------|-------------------|------------|
+| Subject ID | BAL Lab Results Report Description | Resolution |
+|------------|-----------------------------------|------------|
 | 332 | Many degenerated cells present, unable to perform differential | Excluded from differential count analyses |
 | 334 | BAL differential available | BAL count updated in the phenotype data file |
 | 366 | Manual differential not performed due to cell degeneration | Excluded from differential count analyses |
 | 368 | Many degenerated cells, differential unreliable, many eosinophils noted | Qualitative notation preserved, quantitative analysis excluded |
 | 373 | BAL differential available, though some cell degeneration noted | BAL count updated in the phenotype data file |
 
-- **Primary source**: EPIC patient chart
-
-
+**Primary source**: EPIC patient chart
 
 # Data Processing
 
@@ -96,23 +108,15 @@ The phenotype data preparation involved integrating biomarker measurements, batc
 
 ### Data Integration and Feature Engineering
 
-We combined processed nasal biomarker file with the BAL phenotype file. Key transformations included:
+We combined processed nasal biomarker files with the BAL phenotype file. Key transformations included:
 
-- **BAL Cell Count Calculation**: Absolute eosinophil and neutrophil counts were calculated from BAL white blood cell counts and respective percentages:
-  - `BAL_eos_ct = BAL_eos_p / 100 × BAL_wbc`
-  - `BAL_neut_ct = BAL_neut_p / 100 × BAL_wbc`
-
-- **Eosinophil Phenotype Classification**: Samples were classified based on BAL eosinophil percentage with a 1% threshold:
-  - High eosinophil (>1% BAL eosinophils)
-  - Low eosinophil (≤1% BAL eosinophils)
-
-- **Log Transformation**: All cell count and biomarker variables underwent log10 transformation with a small constant (0.001) to handle zero values and achieve normal distribution.
-
-- **Data Standardization**: Log-transformed variables were centered and scaled (z-score normalization) to enable comparison across different measurement scales.
-
+- **BAL Cell Count Calculation**: Absolute eosinophil and neutrophil counts were calculated from BAL white blood cell counts and respective percentages
+- **Eosinophil Phenotype Classification**: Samples were classified based on BAL eosinophil percentage with a 1% threshold
+- **Log Transformation**: All cell count and biomarker variables underwent log10 transformation with a small constant (0.001) to handle zero values and achieve normal distribution
+- **Data Standardization**: Log-transformed variables were centered and scaled (z-score normalization) to enable comparison across different measurement scales
 
 ```{r data-processing, eval=FALSE}
-# This code is run separately in src/data_processing/
+# Run phenotype data processing
 source("src/data_processing/making_phenotype_dataframe_with_batch_asthma_phenotype_cell_count.R")
 ```
 
@@ -126,18 +130,19 @@ The normalization process included several key steps:
 
 1. **Sample Filtering**: Samples were filtered based on BAL cell count availability (BAL_eos_p ≥ 0 and BAL_neut_p ≥ 0)
 
-2. **Inflammatory Phenotype Classification**: two models were trialed. 
-2-1. 'comp1': inflammatory phenotypes based on BAL eosinophil and neutrophil percentages:
-   - **Paucicellular**: ≤1% eosinophils and ≤4% neutrophils
-   - **Eosinophilic**: >1% eosinophils and ≤4% neutrophils  
-   - **Neutrophilic**: ≤1% eosinophils and >4% neutrophils
-   - **Mixed**: >1% eosinophils and >4% neutrophils
-2-2. 'comp2': inflammatory phenotypes based on BAL eosinophil percentages only:
-   - **Eosinophilic**: >1% eosinophils and ≤1% eosinophils  
+2. **Inflammatory Phenotype Classification**: Two models were trialed:
+   - **Comp1**: Four inflammatory phenotypes based on BAL eosinophil and neutrophil percentages:
+     - Paucicellular: ≤1% eosinophils and ≤4% neutrophils
+     - Eosinophilic: >1% eosinophils and ≤4% neutrophils  
+     - Neutrophilic: ≤1% eosinophils and >4% neutrophils
+     - Mixed: >1% eosinophils and >4% neutrophils
+   - **Comp2**: Binary inflammatory phenotypes based on BAL eosinophil percentages only:
+     - High eosinophils: >1% eosinophils
+     - Low eosinophils: ≤1% eosinophils
 
 3. **Low Count Gene Filtering**: Genes with fewer than 10 counts in the smallest group size were removed to improve statistical power
 
-4. **Variance Stabilizing Transformation**: VST was applied using DESeq2 with a design formula. The count normalization that was used for  `~ comp2 + Batch` to account for both biological groups and technical batch effects
+4. **Variance Stabilizing Transformation**: VST was applied using DESeq2 with design formula `~ comp2 + Batch` to account for both biological groups and technical batch effects
 
 ### Batch Effect Correction
 
@@ -146,10 +151,8 @@ Two versions of normalized data were generated:
 - **Without batch correction**: Preserving natural batch-to-batch variation
 - **With batch correction**: Using limma's `removeBatchEffect()` function to remove technical batch variation while preserving biological group differences
 
-The batch correction was applied using the model matrix `~ comp2` to ensure that biological differences between high and low eosinophil groups were preserved during batch effect removal.
-
 ```{r gene-normalization, eval=FALSE}
-# This code is run separately in src/data_processing/
+# Run gene expression normalization
 source("src/data_processing/scaled_gene_count_DESeq_vsd.R")
 ```
 
@@ -173,7 +176,6 @@ The data processing pipeline generates several key output files:
 - **Parameter documentation**: `normalization_parameters_[DATE].txt`
 
 These processed datasets serve as the foundation for all subsequent differential expression analyses and biological interpretation.
-
 
 # Phenotype Characterization
 
@@ -205,7 +207,7 @@ library(vsn)
 
 Clinical and demographic characteristics were summarized for the entire cohort and stratified by BAL eosinophil levels (>1% threshold). Key variables included demographics, asthma control measures, exacerbation history, medication usage, and airway inflammatory profiles.
 
-```{r phenotype-summary}
+```{r phenotype-summary, eval=FALSE}
 # Generate comprehensive phenotype summary
 source("src/data_vis_exploration/phenotype_summary.R")
 ```
@@ -221,7 +223,7 @@ source("src/data_vis_exploration/phenotype_summary.R")
 
 We performed comprehensive concordance analysis between BAL and peripheral blood eosinophil measurements to evaluate the relationship between systemic and airway eosinophilia.
 
-```{r eosinophil-concordance, fig.width=7.09, fig.height=7.09, dpi=600}
+```{r eosinophil-concordance, eval=FALSE}
 # Run comprehensive concordance analysis
 source("src/data_vis_exploration/concordance_bal_eos_blood_eos.R")
 ```
@@ -239,19 +241,13 @@ The analysis included bidirectional assessment of predictive performance:
 1. **BAL → Blood**: Using BAL eosinophil percentage to predict high blood eosinophils
 2. **Blood → BAL**: Using blood eosinophil count to predict high BAL eosinophils
 
-```{r roc-analysis, fig.width=7.09, fig.height=7.09, dpi=600}
-# ROC curves and optimal cutoff determination will be generated
-# within the concordance analysis script
-```
-
 ### Inter-Cell Count Correlation Analysis
 
 Extended correlation analysis examined relationships between multiple inflammatory cell populations in both BAL and blood compartments.
 
-```{r inter-cell-correlation, fig.width=7.09, fig.height=7.09, dpi=600}
+```{r inter-cell-correlation, eval=FALSE}
 # Run inter-cellular correlation analysis
-# The analysis was limited to samples for which the time differences between blood and BAL sampling were < 30 days:
-
+# Analysis limited to samples with time differences between blood and BAL sampling < 30 days
 source("src/data_vis_exploration/correlation_inter_cell-count.R")
 ```
 
@@ -271,14 +267,13 @@ Systematic analysis of medication effects on both BAL and blood eosinophil level
 
 Statistical comparisons used t-tests for continuous variables and chi-square/Fisher's exact tests for categorical variables.
 
-
 ## Gene Expression Pattern Analysis
 
 ### Multi-dimensional Scaling (MDS) Analysis
 
 We performed MDS analysis to identify the primary sources of variation in gene expression and their associations with clinical phenotypes.
 
-```{r mds-analysis, fig.width=7.09, fig.height=7.09, dpi=600}
+```{r mds-analysis, eval=FALSE}
 # Comprehensive MDS analysis with phenotype associations
 source("src/data_vis_exploration/mds-nasal-bronchial_rnaseq_corr-with-phenotype.R")
 ```
@@ -305,7 +300,7 @@ For each MDS component, we calculated:
 - **Multiple testing correction**: False discovery rate (FDR) adjustment
 - **Significance threshold**: Adjusted p-value < 0.05
 
-based on the results, the batch effect was attributed with the most variability. Based on the results of MDS analysis, the most sensibile model to use in DEG analysis was DEG ~ cell count + Batch 
+Based on the results, batch effect was attributed with the most variability. The most sensible model to use in DEG analysis was `DEG ~ cell count + Batch`.
 
 # Differential Expression Gene Analysis
 
@@ -313,7 +308,7 @@ based on the results, the batch effect was attributed with the most variability.
 
 We performed comprehensive differential expression analysis to identify genes associated with airway and systemic inflammatory cell populations in asthma. The analysis employed DESeq2 methodology with systematic evaluation of multiple inflammatory markers and thresholds.
 
-```{r deg-setup}
+```{r deg-setup, include=FALSE}
 library(tidyverse)
 library(DESeq2)
 ```
@@ -328,7 +323,7 @@ The differential expression analysis focused on **bronchial RNA-seq samples** to
 - **Complete cell count data**: Samples with available BAL eosinophil and neutrophil measurements (BAL_eos_p ≥ 0 and BAL_neut_p ≥ 0)
 - **Quality control passed**: Samples meeting RNA-seq quality metrics from batch 1-6 processing
 
-```{r load-deg-functions}
+```{r load-deg-functions, eval=FALSE}
 # Load custom DEG analysis functions
 source("./src/function/deg_custom_functions_v2.R")
 ```
@@ -344,15 +339,15 @@ We systematically evaluated associations between gene expression and inflammator
 **Categorical Variables (Dichotomous thresholds):**
 
 *BAL Eosinophil Thresholds:*
-- \>0, \>1, \>3 cells/μL (absolute count)
-- \>0%, \>1%, \>3% (percentage)
+- >0, >1, >3 cells/μL (absolute count)
+- >0%, >1%, >3% (percentage)
 
 *BAL Neutrophil Thresholds:*
-- \>0, \>5, \>13 cells/μL (absolute count)  
-- \>0%, \>2%, \>5% (percentage)
+- >0, >5, >13 cells/μL (absolute count)  
+- >0%, >2%, >5% (percentage)
 
 *Blood Eosinophil Thresholds:*
-- \>0, \>100, \>300, \>500 cells/μL (absolute count)
+- >0, >100, >300, >500 cells/μL (absolute count)
 
 ### Statistical Model Design
 
@@ -366,7 +361,7 @@ We systematically evaluated associations between gene expression and inflammator
 - **Batch correction**: Technical variation adjustment across sequencing batches
 - **Sample size**: Variable per analysis based on complete data availability
 
-```{r deg-analysis}
+```{r deg-analysis, eval=FALSE}
 # Run comprehensive DEG analysis
 source("src/differential_expression/BAL_bronch~cell_cont_dich_batch12346_deg_analysis.R")
 ```
@@ -374,11 +369,13 @@ source("src/differential_expression/BAL_bronch~cell_cont_dich_batch12346_deg_ana
 ## Quality Control and Filtering
 
 ### Gene Filtering Criteria
+
 - **Minimum expression threshold**: Genes with ≥10 total counts across all samples
 - **Missing data handling**: Complete case analysis for each inflammatory marker
 - **Batch effect correction**: Incorporated as covariate in all models
 
 ### Sample Size by Analysis
+
 Sample sizes varied by inflammatory marker due to missing data patterns:
 - **Complete BAL cell count data**: n = 70 bronchial samples
 - **Complete blood cell count data**: n = varies by marker
@@ -387,24 +384,22 @@ Sample sizes varied by inflammatory marker due to missing data patterns:
 ## Statistical Analysis Parameters
 
 ### DESeq2 Implementation
+
 - **Normalization**: Variance stabilizing transformation (VST) for visualization
 - **Dispersion estimation**: Gene-wise dispersion with sharing across genes
 - **Statistical testing**: Wald test for coefficient significance
 - **Multiple testing correction**: Benjamini-Hochberg false discovery rate (FDR)
 
 ### Significance Thresholds
+
 - **Adjusted p-value**: FDR < 0.05
 - **Effect size**: No minimum fold-change threshold applied initially
 - **Expression filtering**: Genes with mean normalized counts < 10 excluded
 
-```{r deg-results-summary, fig.width=7.09, fig.height=7.09, dpi=600}
-# Generate summary tables and visualizations
-# These are created within the DEG analysis script
-```
-
 ## Results Organization and Output
 
 ### File Structure
+
 Results are systematically organized with comprehensive documentation:
 
 **Significant Results (FDR < 0.05):**
@@ -417,7 +412,6 @@ Results are systematically organized with comprehensive documentation:
 - Includes non-significant results for effect size evaluation
 
 **Summary Tables:**
-
 - **Input summary**: Sample sizes, filtering criteria, design formulas
 - **Results summary**: Number of significant DEGs per analysis
 - **Analysis metadata**: Batch information, analysis parameters
@@ -428,7 +422,7 @@ Results are systematically organized with comprehensive documentation:
 
 Following differential expression analysis, we created comprehensive visualizations to interpret gene expression patterns and their biological significance. The visualization pipeline included volcano plots for individual gene identification and Gene Ontology (GO) enrichment analysis for pathway-level interpretation.
 
-```{r viz-setup}
+```{r viz-setup, include=FALSE}
 library(tidyverse)
 library(EnhancedVolcano)
 library(pheatmap)
@@ -450,7 +444,7 @@ library(grid)
 - **Downregulated genes** (FDR < 0.05, log₂FC < -1): Magenta  
 - **Non-significant genes**: Grey
 
-```{r volcano-plots, fig.width=7.09, fig.height=7.09, dpi=600}
+```{r volcano-plots, eval=FALSE}
 # Generate comprehensive volcano plots for all inflammatory markers
 source("src/visualization/BAL_asthma-bronch~cell-cont_dich_volcano_GO.R")
 ```
@@ -470,7 +464,7 @@ For samples with BAL eosinophils >1%, key upregulated genes included:
 
 ### Pathway Analysis Methodology
 
-GO analysis was performed on https://davidbioinformatics.nih.gov/ using the DEG results 
+GO analysis was performed on https://davidbioinformatics.nih.gov/ using the DEG results.
 
 **Enrichment Testing:**
 - **Background**: All genes expressed in bronchial samples
@@ -483,3 +477,244 @@ GO analysis was performed on https://davidbioinformatics.nih.gov/ using the DEG 
 - **Display limit**: Top 10 enriched terms per direction
 - **Color coding**: Fold enrichment intensity with -log₁₀(FDR) scale
 
+# Weighted Gene Co-expression Network Analysis (WGCNA)
+
+## Overview of Network Analysis Strategy
+
+We performed Weighted Gene Co-expression Network Analysis (WGCNA) to identify gene modules (clusters of co-expressed genes) and investigate their relationships with inflammatory phenotypes in asthma.
+
+## Analytical Framework
+
+### Network Construction Strategy
+
+**Two normalization gene count tables used for complementary analyses:**
+
+1. **Comp1 (Mixed Cell Analysis)**: Network constructed using normalization optimized for 4-group inflammatory classification (paucicellular, eosinophilic, neutrophilic, mixed)
+2. **Comp2 (Eosinophil High/Low)**: Network constructed using normalization optimized for binary eosinophil classification (high vs. low)
+
+**Note**: The poster/abstract for AAAAI 2024 used Comp1, which was done accidentally. Upon retrospective review, Comp1 and Comp2 lead to similar conclusions in terms of network structure. However, some genes identified as high connectivity genes in Comp1 WGCNA were not included in Comp2 WGCNA results. For instance, AHSG gene is in WGCNA result based on Comp1 but not in Comp2. This is relevant because the GO analysis is slightly different depending on whether AHSG is included or not.
+
+**Input Data:**
+- **Sample Type**: Bronchial RNA-seq samples only
+- **Normalization**: Batch-corrected variance stabilizing transformation (VST)
+- **Gene Filtering**: Retained genes passing expression and variance thresholds
+
+```{r wgcna-analysis, eval=FALSE}
+# Run WGCNA analysis for both inflammatory phenotype frameworks
+source("src/network_analysis/wgcna_bronch_asthma_bal_batch12346_bsub_model-eos-mixed-cell.R")
+source("src/network_analysis/wgcna_bronch_asthma_bal_batch12346_bsub_model-eos-high-low.R")
+```
+
+## Network Construction Pipeline
+
+### 1. Data Quality Control and Outlier Removal
+
+**Sample Quality Assessment:**
+- **Good samples and genes**: Systematic identification using WGCNA quality metrics
+- **Outlier detection**: Hierarchical clustering with distance-based sample tree
+- **Outlier threshold**: Height cutoff of 160 for sample tree clustering
+- **Minimum cluster size**: 7 samples to maintain statistical power
+
+### 2. Soft-Thresholding Power Selection
+
+**Scale-Free Topology Criteria:**
+- **Target R²**: >0.8 for scale-free topology fit
+- **Power range tested**: 1-20
+- **Selection strategy**: Lowest power meeting R² threshold
+- **Fallback criterion**: Power with maximum R² if threshold not met
+
+### 3. Network Construction and Module Detection
+
+**Topological Overlap Matrix (TOM):**
+- **Similarity measure**: TOM similarity to identify gene modules
+- **Clustering method**: Average linkage hierarchical clustering
+- **Module detection**: Dynamic tree cutting algorithm
+
+**Module Detection Parameters:**
+- **Deep split**: Level 2 for intermediate sensitivity
+- **Minimum module size**: 30 genes to ensure statistical robustness
+- **Distance metric**: TOM dissimilarity (1 - TOM)
+
+### 4. Module Merging and Refinement
+
+**Module Merging:**
+- **Similarity threshold**: Merge modules with >75% correlation (height < 0.25)
+- **Eigengene calculation**: First principal component representing module expression
+- **Quality control**: Verification of merged module coherence
+
+## Hub Gene Identification and Connectivity Analysis
+
+### Intramodular Connectivity
+
+**Hub Gene Selection:**
+- **Connectivity measure**: Intramodular connectivity (kWithin)
+- **Top genes per module**: 20 highest connectivity genes
+- **Hub gene identification**: Single gene with highest connectivity per module
+
+### Integration with Differential Expression Results
+
+**DEG-Module Overlap Analysis:**
+- **DEG criteria**: |log₂FC| ≥ 1 from BAL eosinophil >1% analysis
+- **Overlap assessment**: Hub genes intersecting with significant DEGs
+- **Network validation**: Confirmation that differentially expressed genes cluster into coherent modules
+
+## Network Export and Downstream Analysis
+
+### Network File Generation
+
+**Edge List Creation:**
+- **Adjacency threshold**: >0.1 to focus on strong connections
+- **Self-loop removal**: Eliminated diagonal elements
+- **Duplicate filtering**: Retained unique gene-gene connections
+- **Weight preservation**: Maintained adjacency values as edge weights
+
+**Node Attribute Files:**
+- **Gene identifiers**: Systematic gene symbols
+- **Module assignments**: Color-coded module membership
+- **Connectivity measures**: Total and intramodular connectivity values
+
+# WGCNA Downstream Analysis and Biological Interpretation
+
+## Overview of Network-Phenotype Integration
+
+Following network construction, we performed comprehensive downstream analyses to integrate gene co-expression modules with clinical phenotypes and differential expression results. This systems-level approach identifies biologically meaningful gene networks and their associations with inflammatory markers in asthma.
+
+## Module-Trait Correlation Analysis
+
+### Systematic Phenotype Association Testing
+
+```{r module-trait-correlations, eval=FALSE}
+# Run comprehensive module-trait correlation analysis
+source("src/network_analysis/wgcna_bronch_asthma_bal_downstream_analysis_model-eos-mixed-cell.R")
+source("src/network_analysis/wgcna_bronch_asthma_bal_downstream_analysis_model-eos-high-low.R")
+```
+
+### Statistical Methodology
+
+**Correlation Analysis:**
+- **Pearson correlations**: Between module eigengenes and continuous traits
+- **Point-biserial correlations**: Between module eigengenes and binary categorical traits
+- **Student's t-test p-values**: Statistical significance testing adjusted for sample size
+
+**Visualization Approach:**
+- **Heatmaps**: Color-coded correlation matrices with embedded p-values
+- **Significance threshold**: P < 0.05 for individual module-trait associations
+- **Effect size consideration**: Correlation strength indicated by color intensity
+
+### Data Quality and Temporal Filtering
+
+**BAL Analysis Criteria:**
+- Complete BAL cell count data availability
+- No missing values for inflammatory markers of interest
+
+**Blood Analysis Criteria:**
+- Complete blood cell count (CBC) data availability
+- **Temporal filtering**: Blood sampling within 365 days of BAL collection
+- Cross-reference with sampling date analysis for quality control
+
+## Module-DEG Overlap and Enrichment Analysis
+
+### Integration with Differential Expression Results
+
+We systematically evaluated the overlap between co-expression modules and differentially expressed genes to validate network biological relevance.
+
+**Overlap Analysis Strategy:**
+- **DEG criteria**: |log₂FC| ≥ 1 and FDR < 0.05 from previous differential expression analysis
+- **Module composition**: Genes within each identified co-expression module
+- **Enrichment testing**: Fisher's exact test for module enrichment in DEG sets
+
+### Fisher's Exact Test for Module Enrichment
+
+**Statistical Framework:**
+- **Null hypothesis**: Random distribution of DEGs across modules
+- **Alternative hypothesis**: Specific modules enriched for DEGs (one-tailed test)
+- **Multiple testing correction**: FDR adjustment across all modules tested
+- **Effect size measure**: Fold enrichment relative to expected overlap
+
+Where enrichment p-value tests whether observed overlap exceeds random expectation.
+
+## Gene Significance and Module Membership Analysis
+
+### Hub Gene Identification and Connectivity
+
+**Intramodular Connectivity Analysis:**
+- **Hub genes**: Highest connected genes within each module (top 20 per module)
+- **Connectivity measures**: kWithin (intramodular) and kTotal (total network connectivity)
+- **Biological significance**: Hub genes often represent key regulatory nodes
+
+### Module Membership vs. Gene Significance Plots
+
+**Dual Criteria Assessment:**
+- **Module membership (MM)**: Correlation between individual gene expression and module eigengene
+- **Gene significance (GS)**: Correlation between individual gene expression and trait of interest
+- **Optimal genes**: High MM and high GS (upper right quadrant of scatter plots)
+
+**Visual Enhancement:**
+- **DEG highlighting**: Upregulated DEGs (green), downregulated DEGs (red)
+- **Point sizing**: Larger points for DEGs to emphasize biological relevance
+- **Module-specific plots**: Individual analysis for each co-expression module
+
+## Eigengene Network Visualization
+
+### Inter-Module Relationship Analysis
+
+We constructed networks of module eigengenes to understand higher-order relationships between co-expression modules.
+
+## Cross-Platform Validation
+
+### Comparative Analysis Between Normalization Strategies
+
+**Dual Network Comparison:**
+- **Comp1**: Network optimized for 4-group inflammatory classification
+- **Comp2**: Network optimized for binary eosinophil classification
+
+**Validation Criteria:**
+- **Module stability**: Similar gene composition across normalization approaches
+- **Trait associations**: Consistent module-phenotype correlations
+- **DEG enrichment**: Reproducible module enrichment patterns
+
+## Gene Set Export and Functional Analysis Preparation
+
+### Module Gene List Generation
+
+**Output Files:**
+- **GMT format**: Gene lists for each module for pathway analysis
+- **Functional annotation input**: Formatted for GO/KEGG enrichment testing
+- **Network files**: Edge lists and node attributes for network visualization software
+
+# Gene Set Enrichment Analysis (GSEA)
+
+## GSEA Experimental Design
+
+### Sample Classification Strategies
+
+We implemented two complementary classification approaches to capture different aspects of inflammatory heterogeneity. CLS files are located under `./asthma_bal/resources/processed_data/gsea` folder.
+
+**1. Binary Eosinophil Classification:**
+- **High eosinophils**: BAL eosinophil percentage >1%
+- **Low eosinophils**: BAL eosinophil percentage ≤1%
+- **Rationale**: Clinically relevant threshold for eosinophilic asthma classification
+
+**2. Four-Group Inflammatory Phenotypes:**
+- **Paucicellular**: ≤1% eosinophils and ≤4% neutrophils
+- **Neutrophilic**: ≤1% eosinophils and >4% neutrophils
+- **Eosinophilic**: >1% eosinophils and ≤4% neutrophils
+- **Mixed granulocytic**: >1% eosinophils and >4% neutrophils
+
+### Tissue-Specific Analysis
+
+**Bronchial Samples (n=70):**
+Lower airway inflammation profiles representing the primary site of asthma pathology.
+
+**Nasal Samples (n=59):**
+Upper airway inflammation profiles for comparison and validation of systemic Type 2 responses.
+
+### Sample Classification Files
+
+**Bronchial Sample Classification:**
+
+*Binary Classification (BAL Eos >1%):*
+- Sample assignments preserved in: `gsea_bronchial_eos-p_mt1.cls`
+
+*Four-Group Classification:*
+- Sample assignments preserved in: `gsea_bronchial
